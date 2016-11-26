@@ -38,8 +38,8 @@ void draw_trail(int i, int w) {
 	int x, y;
 	for (j = 0; j < w; j++) {
 		k = (trail[i].top + TLEN - j) % TLEN;
-		x = XBOX + 1 + trail[i].x[k];
-		y = WIN_HEIGHT - FLEV - trail[i].y[k];
+		x = WORLD_BOX_X1 + trail[i].x[k];
+		y = WORLD_BOX_Y2 - trail[i].y[k];
 		putpixel(screen_buff, x, y, TCOL);
 	}
 }
@@ -47,16 +47,16 @@ void draw_trail(int i, int w) {
 void handle_bounce(int i) {
 	int left, right, top, bottom;
 
-	left = (missile[i].x <= XBOX + missile[i].r);
-	right = (missile[i].x >= RBOX - missile[i].r);
-	top = (missile[i].y <= YBOX + missile[i].r);
-	bottom = (missile[i].y >= BBOX - missile[i].r);
+	left = (missile[i].x <= missile[i].r);
+	right = (missile[i].x >= WORLD_BOX_WIDTH - missile[i].r);
+	top = (missile[i].y >= WORLD_BOX_EIGHT - missile[i].r);
+	bottom = (missile[i].y <= missile[i].r);
 	// printf("%d %d %d %d.\n", left, right, top, bottom);
 
-	if (left) missile[i].x = XBOX + missile[i].r;
-	if (right) missile[i].x = RBOX - missile[i].r;
-	if (top) missile[i].y = YBOX + missile[i].r;
-	if (bottom) missile[i].y = BBOX - missile[i].r;
+	if (left) missile[i].x = missile[i].r;
+	if (right) missile[i].x = WORLD_BOX_WIDTH - missile[i].r;
+	if (top) missile[i].y = WORLD_BOX_EIGHT - missile[i].r;
+	if (bottom) missile[i].y = missile[i].r;
 
 	if (left || right) missile[i].alpha = PI - missile[i].alpha;
 	if (top || bottom) missile[i].alpha = - missile[i].alpha;
@@ -64,9 +64,9 @@ void handle_bounce(int i) {
 
 void init_missile(int i) {
 	missile[i].c = 2 + i % 14; // color in [2,15]
-	missile[i].r = FL;
-	missile[i].x = frand(15, RBOX - 15);
-	missile[i].y = frand(15, BBOX - 15);
+	missile[i].r = ML;
+	missile[i].x = frand(0, WORLD_BOX_WIDTH);
+	missile[i].y = frand(0, WORLD_BOX_EIGHT);
 	missile[i].v = frand(VMIN, VMAX);
 	missile[i].alpha = frand(0, 2 * PI);
 	/*printf("Init missile %d: x=%f y=%f v=%d a=%f.\n",
@@ -84,17 +84,17 @@ void draw_missile(int i) {
 	ca = cos(missile[i].alpha);
 	sa = sin(missile[i].alpha);
 
-	p1x = missile[i].x + FL * ca; // nose point
-	p1y = missile[i].y + FL * sa;
-	p2x = missile[i].x - FW * sa; // left wing
-	p2y = missile[i].y + FW * ca;
-	p3x = missile[i].x + FW * sa; // right wing
-	p3y = missile[i].y - FW * ca;
+	p1x = missile[i].x + ML * ca; // nose point
+	p1y = missile[i].y + ML * sa;
+	p2x = missile[i].x - MW * sa; // left wing
+	p2y = missile[i].y + MW * ca;
+	p3x = missile[i].x + MW * sa; // right wing
+	p3y = missile[i].y - MW * ca;
 
 	triangle(screen_buff,
-	         p1x + XCEN, WIN_HEIGHT - YCEN - p1y, // nose point
-	         p2x + XCEN, WIN_HEIGHT - YCEN - p2y, // left wing
-	         p3x + XCEN, WIN_HEIGHT - YCEN - p3y, // right wing
+	         WORLD_BOX_X1 + p1x, WORLD_BOX_Y2 - p1y, // nose point
+	         WORLD_BOX_X1 + p2x, WORLD_BOX_Y2 - p2y, // left wing
+	         WORLD_BOX_X1 + p3x, WORLD_BOX_Y2 - p3y, // right wing
 	         missile[i].c);
 }
 
@@ -131,7 +131,8 @@ void *display(void* arg) {
 	set_period(a);
 	while (!sigterm_tasks) {
 		clear_to_color(screen_buff, GND);
-		rectfill(screen_buff, XBOX + 1, YBOX + 1, RBOX - 1, BBOX - 1, BKG);
+		rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
+		rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
 
 		for (i = 0; i < naf; i++) {
 			draw_missile(i);

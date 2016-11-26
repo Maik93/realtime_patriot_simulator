@@ -5,10 +5,10 @@
 // BOX DIMENSIONS
 //-----------------------------------------------------
 #define MARGIN			5
-#define MENU_BOX_WIDTH	585
+#define MENU_BOX_WIDTH	600
 #define MENU_BOX_EIGHT	185
-// #define WORLD_BOX_WIDTH	600
-// #define WORLD_BOX_EIGHT	200
+#define WORLD_BOX_WIDTH	600
+#define WORLD_BOX_EIGHT	400
 //-----------------------------------------------------
 #define MENU_BOX_X1		MARGIN
 #define MENU_BOX_Y1		MARGIN
@@ -19,14 +19,6 @@
 #define WORLD_BOX_X2		MENU_BOX_X2
 #define WORLD_BOX_Y2		WIN_HEIGHT - MARGIN
 //-----------------------------------------------------
-#define XBOX	5				// left box X coordinate
-#define YBOX	5				// upper box Y coordinate
-#define RBOX	795				// right box X coordinate
-#define BBOX	595				// bottom box Y coordinate
-#define LBOX	RBOX - XBOX -1	// X length of the missile box (RBOX - XBOX -1)
-#define HBOX	BBOX - YBOX - 1	// Y height of the missile box
-#define FLEV	5				// floor Y level (in world)
-//-----------------------------------------------------
 // TASK CONSTANTS
 //-----------------------------------------------------
 #define PER		20	// task period in ms
@@ -35,10 +27,10 @@
 //-----------------------------------------------------
 // MISSILE CONSTANTS
 //-----------------------------------------------------
-#define FL		15				// length of the missile
-#define FW		6				// width of the missile
-#define XCEN	FL/3			// x center for the missile arrow
-#define YCEN	FW/2			// y center for the missile arrow
+#define ML		15				// length of the missile
+#define MW		6				// width of the missile
+// #define XCEN	0			// x center for the missile arrow
+// #define YCEN	0			// y center for the missile arrow
 // #define RMIN	5				// min radius
 // #define RMAX	10				// man radius
 #define G0		9.8				// acceleration of gravity
@@ -49,10 +41,10 @@
 #define PI		3.14
 #define AMIN	0				// min initial hor. speed
 #define AMAX	2*PI			// max initial hor. speed
-#define DELTA_A	10*PI/180		// max alpha variation per step (rad)
+#define DELTA_A	0*PI/180		// max alpha variation per step (rad)
 #define DELTA_V	20				// max vel variation per step (m/s)
 // #define DUMP	.9				// dumping coefficient
-#define TSCALE	10				// time scale factor
+#define TSCALE	2				// time scale factor
 #define TLEN	30				// circular buffer length
 //-----------------------------------------------------
 #define TCOL	GREEN			// trail color
