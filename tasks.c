@@ -63,14 +63,15 @@ void handle_bounce(int i) {
 }
 
 void init_missile(int i) {
-	missile[i].c = 2 + i % 14; // color in [2,15]
+	missile[i].c = RED;
 	missile[i].r = ML;
 	missile[i].x = frand(0, WORLD_BOX_WIDTH);
-	missile[i].y = frand(0, WORLD_BOX_EIGHT);
+	missile[i].y = frand(WORLD_BOX_EIGHT - 100, WORLD_BOX_EIGHT);
 	missile[i].v = frand(VMIN, VMAX);
-	missile[i].alpha = frand(0, 2 * PI);
-	/*printf("Init missile %d: x=%f y=%f v=%d a=%f.\n",
-	       i, missile[i].x, missile[i].y, (int)missile[i].v, missile[i].a);*/
+	missile[i].alpha = frand(DA_MIN, DA_MAX);
+	missile[i].alpha_dot = 0;
+	/*printf("Init missile %d: x=%f y=%f v=%d alpha=%f.\n",
+	       i, missile[i].x, missile[i].y, (int)missile[i].v, missile[i].alpha);*/
 }
 
 /**
@@ -100,7 +101,7 @@ void draw_missile(int i) {
 
 void *missiletask(void* arg) {
 	int i; // task index
-	float dt, da, dv;
+	float dt, da_dot, dv;
 	i = get_task_index(arg);
 
 	init_missile(i);
@@ -108,10 +109,10 @@ void *missiletask(void* arg) {
 
 	set_period(i);
 	while (!sigterm_tasks) {
-		da = frand(-DELTA_A, DELTA_A);
-		// dv = frand(-DELTA_V, DELTA_V);
+		da_dot = frand(-DA_DOT, DA_DOT);
 
-		missile[i].alpha += da;
+		missile[i].alpha_dot += da_dot;
+		missile[i].alpha += missile[i].alpha_dot * dt;
 		missile[i].v += dv;
 		missile[i].x += missile[i].v * cos(missile[i].alpha) * dt;
 		missile[i].y += missile[i].v * sin(missile[i].alpha) * dt;
@@ -133,6 +134,8 @@ void *display(void* arg) {
 		clear_to_color(screen_buff, GND);
 		rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
 		rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
+		/*arc(screen_buff,
+		    WORLD_BOX_X2 + 95, WORLD_BOX_Y2, itofix(45 * 256 / 360), itofix(160 * 256 / 360), 50, BKG);*/
 
 		for (i = 0; i < naf; i++) {
 			draw_missile(i);

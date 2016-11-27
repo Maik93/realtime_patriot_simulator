@@ -41,10 +41,11 @@
 #define PI		3.14
 #define AMIN	0				// min initial hor. speed
 #define AMAX	2*PI			// max initial hor. speed
-#define DELTA_A	0*PI/180		// max alpha variation per step (rad)
-#define DELTA_V	20				// max vel variation per step (m/s)
+#define DA_MIN	-PI/2 - PI/6	// min alpha variation per step (rad)
+#define DA_MAX	-PI/2 + PI/6	// max alpha variation per step (rad)
+#define DA_DOT	1*PI/180		// max alpha_dot variation per step (rad/s)
 // #define DUMP	.9				// dumping coefficient
-#define TSCALE	2				// time scale factor
+#define TSCALE	5				// time scale factor
 #define TLEN	30				// circular buffer length
 //-----------------------------------------------------
 #define TCOL	GREEN			// trail color
@@ -60,6 +61,7 @@ struct missile {		// missile structure
 	float y;		// y coordinate (m)
 	float v;		// velocity (m/s)
 	float alpha;	// orientation angle (rads)
+	float alpha_dot;
 };
 struct cbuf {		// circular buffer structure
 	int top;		// index of the current element
