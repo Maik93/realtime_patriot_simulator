@@ -4,16 +4,16 @@
 //-----------------------------------------------------
 // BOX DIMENSIONS
 //-----------------------------------------------------
-#define MARGIN			5
-#define MENU_BOX_WIDTH	600
-#define MENU_BOX_EIGHT	185
-#define WORLD_BOX_WIDTH	600
-#define WORLD_BOX_EIGHT	400
+#define MARGIN				5
+#define MENU_BOX_WIDTH		600
+#define MENU_BOX_HEIGHT		185
+#define WORLD_BOX_WIDTH		600
+#define WORLD_BOX_HEIGHT	400
 //-----------------------------------------------------
-#define MENU_BOX_X1		MARGIN
-#define MENU_BOX_Y1		MARGIN
-#define MENU_BOX_X2		MARGIN + MENU_BOX_WIDTH
-#define MENU_BOX_Y2		MARGIN + MENU_BOX_EIGHT
+#define MENU_BOX_X1			MARGIN
+#define MENU_BOX_Y1			MARGIN
+#define MENU_BOX_X2			MARGIN + MENU_BOX_WIDTH
+#define MENU_BOX_Y2			MARGIN + MENU_BOX_HEIGHT
 #define WORLD_BOX_X1		MENU_BOX_X1
 #define WORLD_BOX_Y1		MENU_BOX_Y2 + MARGIN
 #define WORLD_BOX_X2		MENU_BOX_X2
@@ -27,24 +27,27 @@
 //-----------------------------------------------------
 // MISSILE CONSTANTS
 //-----------------------------------------------------
-#define ML		15				// length of the missile
-#define MW		6				// width of the missile
-// #define XCEN	0			// x center for the missile arrow
-// #define YCEN	0			// y center for the missile arrow
+#define ML		15				// length and width of the missile
+#define MW		6
+#define VMINL	15				// min and max initial hor. speed for missiles coming from left (m/s)
+#define VMAXL	40
+#define VMINT	5				// min and max initial hor. speed for missiles coming from top (m/s)
+#define VMAXT	10
+#define AMINL	-PI/4			// min and max initial alpha for missiles coming from left (rad)
+#define AMAXL	0
+#define AMINT	-PI/2 - PI/4	// min and max initial alpha for missiles coming from top (rad)
+#define AMAXT	-PI/2 + PI/4
+#define XMINT	ML				// min and max horizontal position for top spawn (world coord.)
+#define XMAXT	WORLD_BOX_WIDTH - 200
+#define YMINL	WORLD_BOX_HEIGHT - 100	// min and max vertical position for left spawn (world coord.)
+#define YMAXL	WORLD_BOX_HEIGHT - ML
+// #define DA_DOT	1*PI/180	// max alpha_dot variation per step (rad/s)
+// #define XCEN	0				// x center for the missile arrow
+// #define YCEN	0				// y center for the missile arrow
 // #define RMIN	5				// min radius
 // #define RMAX	10				// man radius
-#define G0		9.8				// acceleration of gravity
 // #define HMAX	WIN_HEIGHT - YBOX -RMAX -10 // max initial height
 // #define HMIN	HMAX - 150		// min initial height
-#define VMIN	10				// min initial hor. speed
-#define VMAX	20				// max initial hor. speed
-#define PI		3.14
-#define AMIN	0				// min initial hor. speed
-#define AMAX	2*PI			// max initial hor. speed
-#define DA_MIN	-PI/2 - PI/6	// min alpha variation per step (rad)
-#define DA_MAX	-PI/2 + PI/6	// max alpha variation per step (rad)
-#define DA_DOT	1*PI/180		// max alpha_dot variation per step (rad/s)
-// #define DUMP	.9				// dumping coefficient
 #define TSCALE	5				// time scale factor
 #define TLEN	30				// circular buffer length
 //-----------------------------------------------------
@@ -59,9 +62,11 @@ struct missile {		// missile structure
 	float r;		// radius of its hitbox (m)
 	float x;		// x coordinate (m)
 	float y;		// y coordinate (m)
-	float v;		// velocity (m/s)
+	float vx;		// x velocity (m/s)
+	float vy;		// y velocity (m/s)
 	float alpha;	// orientation angle (rads)
-	float alpha_dot;
+	// float alpha_dot;
+	int destroied;	// flag for collisions ecc
 };
 struct cbuf {		// circular buffer structure
 	int top;		// index of the current element
@@ -74,7 +79,7 @@ struct cbuf {		// circular buffer structure
 // void store_trail(int i);
 // void draw_trail(int i, int w);
 // void draw_missile(int i);
-// void handle_bounce(int i);
+// void handle_corners(int i);
 // void init_missile(int i);
 // void *missiletask(void* arg);
 //-----------------------------------------------------

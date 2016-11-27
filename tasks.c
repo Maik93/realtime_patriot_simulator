@@ -15,7 +15,7 @@ struct cbuf		trail[MAX_TASKS];	// trail buffer
 int naf = 0;	// number of active flies
 int tflag = 1;	// trail flag
 int tl = 15;	// actual trail length
-float g = G0;	// acceleration of gravity
+// float g = G0;	// acceleration of gravity
 
 /**
  * Store position of element i.
@@ -44,34 +44,87 @@ void draw_trail(int i, int w) {
 	}
 }
 
-void handle_bounce(int i) {
+void missile_vanish(int index) {
+	missile[index].destroied = 1;
+}
+
+void missile_explode(int index) {
+	missile_vanish(index);
+}
+
+void handle_corners(int i) {
 	int left, right, top, bottom;
 
-	left = (missile[i].x <= missile[i].r);
-	right = (missile[i].x >= WORLD_BOX_WIDTH - missile[i].r);
-	top = (missile[i].y >= WORLD_BOX_EIGHT - missile[i].r);
+	left = (missile[i].x < missile[i].r);
+	right = (missile[i].x > WORLD_BOX_WIDTH - missile[i].r);
+	top = (missile[i].y > WORLD_BOX_HEIGHT - missile[i].r);
 	bottom = (missile[i].y <= missile[i].r);
 	// printf("%d %d %d %d.\n", left, right, top, bottom);
 
-	if (left) missile[i].x = missile[i].r;
-	if (right) missile[i].x = WORLD_BOX_WIDTH - missile[i].r;
-	if (top) missile[i].y = WORLD_BOX_EIGHT - missile[i].r;
-	if (bottom) missile[i].y = missile[i].r;
-
-	if (left || right) missile[i].alpha = PI - missile[i].alpha;
-	if (top || bottom) missile[i].alpha = - missile[i].alpha;
+	if (left || right) missile_vanish(i);
+	if (bottom) missile_explode(i);
+	if (top) missile[i].y = WORLD_BOX_HEIGHT - missile[i].r;
 }
 
+/**
+ * A missile can spawn from top or left side, each one with 1/2 of probability.
+ */
 void init_missile(int i) {
+	float r, v;
+
+	r = frand(0, 2);
+	if (r < 1) { // left side
+		missile[i].x = ML;
+		missile[i].y = frand(YMINL, YMAXL);
+		missile[i].alpha = frand(AMINL, AMAXL);
+		v = frand(VMINL, VMAXL);
+	}
+	else { // top side
+		missile[i].x = frand(XMINT, XMAXT);
+		missile[i].y = WORLD_BOX_HEIGHT - ML;
+		missile[i].alpha = frand(AMINT, AMAXT);
+		v = frand(VMINT, VMAXT);
+	}
+
+	missile[i].vx = v * cos(missile[i].alpha);
+	missile[i].vy = v * sin(missile[i].alpha);
+	missile[i].destroied = 0;
 	missile[i].c = RED;
 	missile[i].r = ML;
-	missile[i].x = frand(0, WORLD_BOX_WIDTH);
-	missile[i].y = frand(WORLD_BOX_EIGHT - 100, WORLD_BOX_EIGHT);
-	missile[i].v = frand(VMIN, VMAX);
-	missile[i].alpha = frand(DA_MIN, DA_MAX);
-	missile[i].alpha_dot = 0;
-	/*printf("Init missile %d: x=%f y=%f v=%d alpha=%f.\n",
-	       i, missile[i].x, missile[i].y, (int)missile[i].v, missile[i].alpha);*/
+}
+
+void *missiletask(void* arg) {
+	int i; // task index
+	float dt, dv; //, da_dot;
+	i = get_task_index(arg);
+
+	init_missile(i);
+	dt = TSCALE * (float)get_task_period(i) / 1000;
+
+	set_period(i);
+	while (!sigterm_tasks && !missile[i].destroied) {
+		// while (0) {
+		// da_dot = frand(-DA_DOT, DA_DOT);
+
+		missile[i].vy -= G0 * dt;
+		missile[i].y += missile[i].vy * dt - G0 * dt * dt / 2;
+		missile[i].x += missile[i].vx * dt;
+		missile[i].alpha = atan2(missile[i].vy, missile[i].vx);
+
+		// old, without gravity
+		/*int vx, vy;
+		missile[i].alpha_dot += da_dot;
+		missile[i].alpha += missile[i].alpha_dot * dt;
+		vx = missile[i].v * cos(missile[i].alpha);
+		vy = missile[i].v * sin(missile[i].alpha);
+		missile[i].x += vx * dt;
+		missile[i].y += vy * dt;*/
+
+		handle_corners(i);
+		store_trail(i);
+
+		wait_for_period(i);
+	}
 }
 
 /**
@@ -99,31 +152,6 @@ void draw_missile(int i) {
 	         missile[i].c);
 }
 
-void *missiletask(void* arg) {
-	int i; // task index
-	float dt, da_dot, dv;
-	i = get_task_index(arg);
-
-	init_missile(i);
-	dt = TSCALE * (float)get_task_period(i) / 1000;
-
-	set_period(i);
-	while (!sigterm_tasks) {
-		da_dot = frand(-DA_DOT, DA_DOT);
-
-		missile[i].alpha_dot += da_dot;
-		missile[i].alpha += missile[i].alpha_dot * dt;
-		missile[i].v += dv;
-		missile[i].x += missile[i].v * cos(missile[i].alpha) * dt;
-		missile[i].y += missile[i].v * sin(missile[i].alpha) * dt;
-
-		handle_bounce(i);
-		store_trail(i);
-
-		wait_for_period(i);
-	}
-}
-
 void *display(void* arg) {
 	int i, a;
 	char str[20];
@@ -133,13 +161,23 @@ void *display(void* arg) {
 	while (!sigterm_tasks) {
 		clear_to_color(screen_buff, GND);
 		rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
+
+		// world margins
 		rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
+		rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, GREEN);
+		line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, RED); // top missile spawn
+		// questo disegna a caso
+		line(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2 - YMINL,
+		     WORLD_BOX_X1, WORLD_BOX_Y2 - YMAXL, RED); // left missile spawn
+
 		/*arc(screen_buff,
 		    WORLD_BOX_X2 + 95, WORLD_BOX_Y2, itofix(45 * 256 / 360), itofix(160 * 256 / 360), 50, BKG);*/
 
 		for (i = 0; i < naf; i++) {
-			draw_missile(i);
-			if (tflag) draw_trail(i, tl);
+			if (!missile[i].destroied) {
+				draw_missile(i);
+				if (tflag) draw_trail(i, tl);
+			}
 		}
 
 		if (naf == MAX_TASKS) {
@@ -163,11 +201,11 @@ void *interp(void* arg) {
 		scan = listen_scancode();
 		if (scan != 0) printf("Readed keyscan: %d\n", (int)scan);
 		switch (scan) {
-		case 3: // C key
+		/*case 3: // C key
 			for (int j = 0; j < naf; ++j)
 				printf("Logging missile %d: x=%f y=%f v=%d va=%f.\n",
 				       j, missile[j].x, missile[j].y, (int)missile[j].v, missile[j].alpha);
-			break;
+			break;*/
 		case 24: // X key
 			tflag = !tflag;
 			printf("tflag setted to %d\n", tflag);
