@@ -30,7 +30,7 @@
 #define ML		15				// length and width of the missile
 #define MW		6
 #define VMINL	15				// min and max initial hor. speed for missiles coming from left (m/s)
-#define VMAXL	40
+#define VMAXL	60
 #define VMINT	5				// min and max initial hor. speed for missiles coming from top (m/s)
 #define VMAXT	10
 #define AMINL	-PI/4			// min and max initial alpha for missiles coming from left (rad)

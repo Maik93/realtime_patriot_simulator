@@ -12,7 +12,6 @@
 struct missile	missile[MAX_TASKS];	// missile buffer
 struct cbuf		trail[MAX_TASKS];	// trail buffer
 
-int naf = 0;	// number of active flies
 int tflag = 1;	// trail flag
 int tl = 15;	// actual trail length
 // float g = G0;	// acceleration of gravity
@@ -28,6 +27,15 @@ void store_trail(int i) {
 	trail[i].x[k] = missile[i].x;
 	trail[i].y[k] = missile[i].y;
 	trail[i].top = k;
+}
+
+void clear_trail(int i) {
+	int j;
+	for (j = 0; j < TLEN; j++) {
+		trail[i].x[j] = 0;
+		trail[i].y[j] = 0;
+	}
+	trail[i].top=0;
 }
 
 /**
@@ -125,6 +133,8 @@ void *missiletask(void* arg) {
 
 		wait_for_period(i);
 	}
+	tp[i].index = -1;
+	clear_trail(i);
 }
 
 /**
@@ -164,26 +174,31 @@ void *display(void* arg) {
 
 		// world margins
 		rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
-		rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, GREEN);
+		// rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, GREEN);
 		line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, RED); // top missile spawn
-		// questo disegna a caso
-		line(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2 - YMINL,
-		     WORLD_BOX_X1, WORLD_BOX_Y2 - YMAXL, RED); // left missile spawn
+		line(screen_buff, WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMINL),
+		     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), RED); // left missile spawn
 
-		/*arc(screen_buff,
-		    WORLD_BOX_X2 + 95, WORLD_BOX_Y2, itofix(45 * 256 / 360), itofix(160 * 256 / 360), 50, BKG);*/
+		// radar
+		arc(screen_buff,
+		    WORLD_BOX_X2 + 108, WORLD_BOX_Y2, deg2fix(45), deg2fix(160), 110, WHITE);
 
-		for (i = 0; i < naf; i++) {
-			if (!missile[i].destroied) {
+		for (i = 0; i < MAX_TASKS; i++) {
+			if (!missile[i].destroied && tp[i].index != -1) {
 				draw_missile(i);
 				if (tflag) draw_trail(i, tl);
 			}
 		}
 
-		if (naf == MAX_TASKS) {
-			sprintf(str, "MAX_TASKS reached");
-			textout_ex(screen_buff, font, str, WIN_WIDTH - 17 * CHAR_WIDTH - 20, WIN_HEIGHT - 20, RED, -1);
-		}
+		// this will hide a green dot in (0, 0) caused by trails
+		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);
+
+		// errore di segmentazione:
+		/*if (find_free_slot() == -1) {
+			sprintf(str, "Max number of task reached");
+			textout_ex(screen_buff, font, str,
+			           MENU_BOX_X1 + 20, MENU_BOX_Y2 - CHAR_HEIGHT - 20, RED, -1);
+		}*/
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
 
@@ -194,7 +209,7 @@ void *display(void* arg) {
 }
 
 void *interp(void* arg) {
-	int a, scan;
+	int a, scan, new_i;
 	a = get_task_index(arg);
 	set_period(a);
 	while (!sigterm_tasks) {
@@ -202,7 +217,7 @@ void *interp(void* arg) {
 		if (scan != 0) printf("Readed keyscan: %d\n", (int)scan);
 		switch (scan) {
 		/*case 3: // C key
-			for (int j = 0; j < naf; ++j)
+			for (int j = 0; j < active_missiles; ++j)
 				printf("Logging missile %d: x=%f y=%f v=%d va=%f.\n",
 				       j, missile[j].x, missile[j].y, (int)missile[j].v, missile[j].alpha);
 			break;*/
@@ -212,10 +227,9 @@ void *interp(void* arg) {
 			break;
 
 		case KEY_SPACE:
-			if (naf < MAX_TASKS) {
-				start_task(missiletask, PER, DREL, PRI, naf++);
-				// printf("Adding missile. Now they are %d.\n", naf);
-			}
+			new_i = find_free_slot();
+			if (new_i != -1)
+				start_task(missiletask, PER, DREL, PRI, new_i);
 			break;
 
 		case KEY_UP:

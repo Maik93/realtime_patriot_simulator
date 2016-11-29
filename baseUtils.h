@@ -68,6 +68,7 @@ extern BITMAP	*screen_buff;	// double buffer integration
 // BASE UTILITY FUNCTIONS
 //-----------------------------------------------------
 float frand(float xmi, float xma);
+fixed deg2fix(int degree);
 void time_copy(struct timespec *td, struct timespec ts);
 void time_add_ms(struct timespec *t, int ms);
 int time_cmp(struct timespec t1, struct timespec t2);
@@ -78,6 +79,7 @@ int time_cmp(struct timespec t1, struct timespec t2);
 void set_period(int index);
 void wait_for_period(int index);
 int deadline_miss(int index);
+int find_free_slot();
 int get_task_index(void *arg);
 int get_task_period(int index);
 pthread_t start_task(void *task_fun, int period, int deadline, int priority, int index);

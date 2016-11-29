@@ -43,6 +43,16 @@ float frand(float xmi, float xma) {
 }
 
 /**
+ * Returns fixed number corresponding an angle in degree.
+ */
+fixed deg2fix(int degree) {
+	while (degree >= 360) degree -= 360;
+	if (degree < 0)
+		return itofix((360 + degree) * 256 / 360);
+	return itofix(degree * 256 / 360);
+}
+
+/**
  * Copy a time value in other variable.
  * @param td destination time variable
  * @param ts source time variable
@@ -138,6 +148,20 @@ int deadline_miss(int index) {
 }
 
 /**
+ * Find out the first element of tp array with index equals to -1 (free slot),
+ 		and return its position. If none is found, return -1.
+ */
+int find_free_slot() {
+	int i = 0;
+	while (i < MAX_TASKS) {
+		if (tp[i].index == -1)
+			return i;
+		i++;
+	}
+	return -1;
+}
+
+/**
  * Create a new FIFO syncronous task with desired attributes and function.
  * @param  task_fun pointer to function that the task will execute
  * @param  period   repetition time, in milliseconds
@@ -174,11 +198,11 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
 void kill_all_task() {
 	int i;
 	sigterm_tasks = 1;
-	for (i = 0; i <= MAX_THREADS-1; i++) { // I don't kill interpreter task
+	for (i = 0; i <= MAX_THREADS - 1; i++) { // I don't kill interpreter task
 		if (tp[i].index != -1) {
 			pthread_join(tid[i], NULL);
-			printf("Task %d terminated.\tRunned %d times.\t%d deadline misses.\n",
-			       tp[i].index, tp[i].counts, tp[i].dmiss);
+			/*printf("Task %d terminated.\tRunned %d times.\t%d deadline misses.\n",
+			       tp[i].index, tp[i].counts, tp[i].dmiss);*/
 		}
 	}
 }
@@ -259,7 +283,7 @@ void activate_mouse() {
 void init(int enable_mouse) {
 	int i;
 
-	// Flagging all threads as closed
+	// Flagging all thread slots free
 	for (i = 0; i <= MAX_THREADS; i++)
 		tp[i].index = -1;
 
