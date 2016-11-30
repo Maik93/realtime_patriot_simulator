@@ -16,10 +16,10 @@ DEBUGFLAGS = -ggdb
 # OBJS are the object files to be linked
 #---------------------------------------------------
 OBJ1 = baseUtils
-OBJ2 = tasks
-# OBJ3 = tasks
-OBJS = $(MAIN).o $(OBJ1).o $(OBJ2).o
-# OBJS = $(MAIN).o $(OBJ1).o $(OBJ2).o $(OBJ3).o
+OBJ2 = common
+OBJ3 = missiles
+OBJ4 = radar
+OBJS = $(MAIN).o $(OBJ1).o $(OBJ2).o $(OBJ3).o $(OBJ4).o
 #---------------------------------------------------
 # LIBS are the external libraries to be used
 #---------------------------------------------------
@@ -37,6 +37,8 @@ $(OBJ2).o: $(OBJ2).c
 	$(CC) -c $(OBJ2).c $(DEBUGFLAGS)
 $(OBJ3).o: $(OBJ3).c
 	$(CC) -c $(OBJ3).c $(DEBUGFLAGS)
+$(OBJ4).o: $(OBJ4).c
+	$(CC) -c $(OBJ4).c $(DEBUGFLAGS)
 #---------------------------------------------------
 # Command that can be specified inline: make run
 #---------------------------------------------------

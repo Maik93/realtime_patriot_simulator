@@ -303,18 +303,3 @@ void init(int enable_mouse) {
 	// starts a task that refresh graphic at 25fps, lowest priority possible
 	// create_and_start_task(task_graphic_refresh, 40, 40, 1);
 }
-
-/**
- * Job with the only purpose to refresh screen,
- * 		transferring screen_buff in Allegro screen.
- */
-/*void *task_graphic_refresh(void *arg) {
-	int index;
-	index = get_task_index(arg);
-
-	set_period(index);
-	while (!sigterm_tasks) {
-		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
-		wait_for_period(index);
-	}
-}*/

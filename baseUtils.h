@@ -18,7 +18,8 @@
 #define BLACK	0
 #define WHITE	15
 #define GREEN	10
-#define GREY	8
+#define GREY		8
+#define BLU		9
 #define RED		4
 #define GND		19
 #define BKG		20				// background color box
@@ -33,8 +34,7 @@
 // OTHER CONSTANTS
 //-----------------------------------------------------
 #define PI		3.1415926535	// 10 digit after dot
-#define G0		9.8				// acceleration of gravity
-
+#define G0		9.8			// acceleration of gravity
 //-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------
