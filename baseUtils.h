@@ -29,7 +29,7 @@
 // TASKS CONSTANTS
 //-----------------------------------------------------
 #define MAX_TASKS	20			// max number of user tasks
-#define MAX_THREADS	MAX_TASKS+2	// max thread number (tasks + interp + graphic)
+#define MAX_THREADS	MAX_TASKS+3	// max thread number (tasks + interp + graphic + radar)
 //-----------------------------------------------------
 // OTHER CONSTANTS
 //-----------------------------------------------------

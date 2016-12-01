@@ -18,9 +18,15 @@ void draw_world() {
 	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), RED); // left missile spawn
 }
 
+void draw_radar() {
+	putpixel(screen_buff, RPOSX, RPOSY, BLU);
+	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, BLU);
+	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, BLU);
+}
+
 void *display(void* arg) {
 	int i, a;
-	char str[20];
+	char str[30];
 
 	a = get_task_index(arg);
 	set_period(a);
@@ -31,12 +37,9 @@ void *display(void* arg) {
 		rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
 
 		draw_world();
+		draw_radar();
 
-		putpixel(screen_buff, RPOSX, RPOSY, BLU);
-		arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, BLU);
-		arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, BLU);
-
-		// radar
+		// radar side
 		arc(screen_buff,
 		    WORLD_BOX_X2 + 108, WORLD_BOX_Y2, deg2fix(45), deg2fix(160), 110, WHITE);
 
@@ -50,12 +53,11 @@ void *display(void* arg) {
 		// this will hide a green dot in (0, 0) caused by trails
 		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);
 
-		// errore di segmentazione:
-		/*if (find_free_slot() == -1) {
+		if (find_free_slot() == -1) {
 			sprintf(str, "Max number of task reached");
 			textout_ex(screen_buff, font, str,
 			           MENU_BOX_X1 + 20, MENU_BOX_Y2 - CHAR_HEIGHT - 20, RED, -1);
-		}*/
+		}
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
 
@@ -86,7 +88,7 @@ void *interp(void* arg) {
 		case KEY_SPACE:
 			new_i = find_free_slot();
 			if (new_i != -1)
-				start_task(missiletask, PER, DREL, PRI, new_i);
+				start_task(missile_task, PER, DREL, PRI, new_i);
 			break;
 
 		case KEY_UP:

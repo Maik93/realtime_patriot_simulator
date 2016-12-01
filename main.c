@@ -5,6 +5,7 @@
 
 #include "baseUtils.h"
 #include "common.h"
+#include "radar.h"
 
 int main(int argc, char const *argv[]) {
 	pthread_t interp_id;
@@ -15,6 +16,7 @@ int main(int argc, char const *argv[]) {
 	// ptask_init(SCHED_FIFO);
 	start_task(display, 20, 20, 10, MAX_TASKS);
 	interp_id = start_task(interp, 40, 40, 10, MAX_TASKS + 1);
+	start_task(radar_task, 5, 5, 30, MAX_TASKS + 2);
 
 	pthread_join(interp_id, NULL);
 
