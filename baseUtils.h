@@ -22,19 +22,19 @@
 #define BLU		9
 #define RED		4
 #define GND		19
-#define BKG		20				// background color box
-// #define MCOL	14				// menu color
-// #define NCOL	7				// numbers color
+#define BKG		20		// background color box
+// #define MCOL	14		// menu color
+// #define NCOL	7		// numbers color
 //-----------------------------------------------------
 // TASKS CONSTANTS
 //-----------------------------------------------------
 #define MAX_TASKS	20			// max number of user tasks
-#define MAX_THREADS	MAX_TASKS+2	// max thread number (tasks + interp + graphic)
+#define MAX_THREADS	MAX_TASKS+3	// max thread number (tasks + interp + graphic + radar)
 //-----------------------------------------------------
 // OTHER CONSTANTS
 //-----------------------------------------------------
 #define PI		3.1415926535	// 10 digit after dot
-#define G0		9.8			// acceleration of gravity
+#define G0		9.8				// acceleration of gravity
 //-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------

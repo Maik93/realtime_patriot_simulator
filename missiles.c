@@ -14,7 +14,7 @@
 struct missile	missile[MAX_TASKS];	// missile buffer
 struct cbuf	trail[MAX_TASKS];	// trail buffer
 
-int tflag = 1;	// trail flag
+int tflag = 0;	// trail flag
 int tl = 15;	// actual trail length
 
 /**
