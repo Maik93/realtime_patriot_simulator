@@ -10,7 +10,8 @@
 #include "baseUtils.h"
 #include "common.h"
 
-struct scan radar[ARES];
+struct scan	radar[ARES];	// struct  of points detected
+int			current_i;		// actual index of radar array; for graphic porpuses
 
 void read_sensor(int degree) {
 	int x, y, c, d;
@@ -25,13 +26,9 @@ void read_sensor(int degree) {
 		d = d + RSTEP;
 	} while ((d <= RMAX) && (c == BKG || c == BLU));
 
-	// line(screen_buff, RPOSX, RPOSY, x, y, BLU);
-	radar[degree-RAMIN].x = x;
-	radar[degree-RAMIN].y = y;
-
-	// if (d <= RMAX) {
-	// 	printf("%d %d -> %d\n", x, y, c);
-	// }
+	// store absolute values (i.e. of the screen)
+	radar[degree - RAMIN].x = x;
+	radar[degree - RAMIN].y = y;
 }
 
 void *radar_task(void* arg) {
@@ -44,6 +41,7 @@ void *radar_task(void* arg) {
 	set_period(i);
 	while (!sigterm_tasks) {
 		read_sensor(angle);
+		current_i = angle - RAMIN;
 
 		angle++;
 		if (angle > RAMAX) {
@@ -53,20 +51,29 @@ void *radar_task(void* arg) {
 
 		wait_for_period(i);
 	}
-	tp[i].index = -1;
 }
 
-/**
- *
-void line_scan(int x0, int y0, int degree) {
-	int d;
-	float alpha;
+void draw_radar_display() {
+	int i;
+	int rx, ry, ax, ay; // relative and absolute positions of points
 
-	alpha = degree * PI / 180; // angle in rads
-	for (d = RMIN; d <= RMAX; d += RSTEP) {
-		x = x0 + d * cos(alpha);
-		y = y0 - d * sin(alpha);
-		radar[degree][d] = getpixel(screen, x, y);
+	// borders
+	arc(screen_buff, RDISPLAY_ORIGIN_X, RDISPLAY_ORIGIN_Y,
+	    deg2fix(RAMIN), deg2fix(RAMAX), RDISPLAY_RADIOUS, LBLU);
+	line(screen_buff, RDISPLAY_SL_X, RDISPLAY_SL_Y, RDISPLAY_LEFT_X, RDISPLAY_LEFT_Y, LBLU);
+	line(screen_buff, RDISPLAY_SR_X, RDISPLAY_SR_Y, RDISPLAY_RIGHT_X, RDISPLAY_RIGHT_Y, LBLU);
+	arc(screen_buff, RDISPLAY_ORIGIN_X, RDISPLAY_ORIGIN_Y,
+	    deg2fix(RAMIN), deg2fix(RAMAX), RDISPLAY_START_RAD, LBLU);
+
+	for (i = 0; i < ARES; i++) {
+		// convert from absolute position to radar's origin
+		rx = radar[i].x - RPOSX_W - WORLD_BOX_X1;
+		ry = WORLD_BOX_Y2 - RPOSY_W - radar[i].y;
+
+		// locate it in radar display, absolute referring system
+		ax = RDISPLAY_ORIGIN_X + round(rx * RSCALE);
+		ay = RDISPLAY_ORIGIN_Y - round(ry * RSCALE);
+
+		putpixel(screen_buff, ax, ay, GREEN);
 	}
 }
- */

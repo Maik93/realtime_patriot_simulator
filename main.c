@@ -15,8 +15,8 @@ int main(int argc, char const *argv[]) {
 	srand(time(NULL));	// initialize random generator
 	// ptask_init(SCHED_FIFO);
 	start_task(display, 20, 20, 10, MAX_TASKS);
-	interp_id = start_task(interp, 40, 40, 10, MAX_TASKS + 1);
-	start_task(radar_task, 5, 5, 30, MAX_TASKS + 2);
+	start_task(radar_task, 5/TSCALE, 5/TSCALE, 30, MAX_TASKS + 1);
+	interp_id = start_task(interp, 40, 40, 10, MAX_TASKS + 2);
 
 	pthread_join(interp_id, NULL);
 

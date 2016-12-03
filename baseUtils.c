@@ -201,8 +201,22 @@ void kill_all_task() {
 	for (i = 0; i <= MAX_THREADS - 1; i++) { // I don't kill interpreter task
 		if (tp[i].index != -1) {
 			pthread_join(tid[i], NULL);
-			/*printf("Task %d terminated.\tRunned %d times.\t%d deadline misses.\n",
-			       tp[i].index, tp[i].counts, tp[i].dmiss);*/
+
+			switch (i) {
+			case MAX_TASKS: // display
+				printf("Display task:\tRunned %d times.\t%d deadline misses.\n",
+				       tp[i].counts, tp[i].dmiss);
+				break;
+			case MAX_TASKS + 1: // radar
+				printf("Radar task:\tRunned %d times.\t%d deadline misses.\n",
+				       tp[i].counts, tp[i].dmiss);
+				break;
+			case MAX_TASKS + 2: // interp
+				printf("Interp task:\tRunned %d times.\t%d deadline misses.\n",
+				       tp[i].counts, tp[i].dmiss);
+				break;
+			default: break;
+			}
 		}
 	}
 }

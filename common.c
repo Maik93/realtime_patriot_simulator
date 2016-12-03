@@ -13,13 +13,14 @@
 
 void draw_world() {
 	rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
+	rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, LBLU);
 	line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, RED); // top missile spawn
 	line(screen_buff, WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMINL),
 	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), RED); // left missile spawn
 }
 
-void draw_radar() {
-	putpixel(screen_buff, RPOSX, RPOSY, BLU);
+void draw_radar_symbol() {
+	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 2, BLU);
 	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, BLU);
 	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, BLU);
 }
@@ -33,15 +34,12 @@ void *display(void* arg) {
 	while (!sigterm_tasks) {
 		clear_to_color(screen_buff, GND);
 
-		// menu
+		// top menu
 		rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
+		rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, LBLU);
 
 		draw_world();
-		draw_radar();
-
-		// radar side
-		/*arc(screen_buff,
-		    WORLD_BOX_X2 + 108, WORLD_BOX_Y2, deg2fix(45), deg2fix(160), 110, WHITE);*/
+		draw_radar_symbol();
 
 		// enemy missiles
 		for (i = 0; i < MAX_TASKS; i++) {
@@ -51,8 +49,13 @@ void *display(void* arg) {
 			}
 		}
 
-		for (int k = 0; k < ARES; ++k)
-			circle(screen_buff, radar[k].x, radar[k].y, 2, BLU);
+		// radar scans
+		for (int k = 0; k < ARES; ++k) {
+			// line(screen_buff, RPOSX, RPOSY, radar[k].x, radar[k].y, BLU);
+			circle(screen_buff, radar[k].x, radar[k].y, 1, BLU);
+		}
+
+		draw_radar_display();
 
 		// this will hide a green dot in (0, 0) caused by trails
 		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);
