@@ -11,9 +11,9 @@ int main(int argc, char const *argv[]) {
 	pthread_t interp_id;
 	int i;
 
-	init(0);	// without mouse integration
+	init(0);			// without mouse integration
 	srand(time(NULL));	// initialize random generator
-	// ptask_init(SCHED_FIFO);
+
 	start_task(display, 20, 20, 10, MAX_TASKS);
 	start_task(radar_task, 5/TSCALE, 5/TSCALE, 30, MAX_TASKS + 1);
 	interp_id = start_task(interp, 40, 40, 10, MAX_TASKS + 2);

@@ -13,6 +13,7 @@
 struct scan	radar[ARES];	// struct  of points detected
 int			current_i;		// actual index of radar array; for graphic porpuses
 
+// Makes a scan in direction imposed by the passed angle.
 void read_sensor(int degree) {
 	int x, y, c, d;
 	float alpha;
@@ -29,8 +30,17 @@ void read_sensor(int degree) {
 	// store absolute values (i.e. of the screen)
 	radar[degree - RAMIN].x = x;
 	radar[degree - RAMIN].y = y;
+	radar[degree - RAMIN].d = d;
 }
 
+void acquire_target(){
+	// check if not yet acquired, then proceed tracking
+}
+
+/**
+ * Task that makes radial line scans with origin (RPOSX, RPOSY),
+ * 		if something is deteched, a tracker is attached in that position.
+ */
 void *radar_task(void* arg) {
 	int angle, i = get_task_index(arg);
 	float dt;
@@ -43,6 +53,9 @@ void *radar_task(void* arg) {
 		read_sensor(angle);
 		current_i = angle - RAMIN;
 
+		if(radar[current_i].d < RMAX)
+			acquire_target();
+
 		angle++;
 		if (angle > RAMAX) {
 			// printf("*bip*\n");
@@ -53,6 +66,7 @@ void *radar_task(void* arg) {
 	}
 }
 
+// Draws output of the radar in top right of window's corner.
 void draw_radar_display() {
 	int i;
 	int rx, ry, ax, ay; // relative and absolute positions of points

@@ -11,6 +11,7 @@
 #include "missiles.h"
 #include "radar.h"
 
+// Draws word box.
 void draw_world() {
 	rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
 	rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, LBLU);
@@ -19,12 +20,14 @@ void draw_world() {
 	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), RED); // left missile spawn
 }
 
+// Draws a nice radar symbol.
 void draw_radar_symbol() {
 	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 2, BLU);
 	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, BLU);
 	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, BLU);
 }
 
+// Graphical task.
 void *display(void* arg) {
 	int i, a;
 	char str[30];
@@ -74,6 +77,7 @@ void *display(void* arg) {
 	}
 }
 
+// Keyboard interpeter task.
 void *interp(void* arg) {
 	int a, scan, new_i;
 	a = get_task_index(arg);

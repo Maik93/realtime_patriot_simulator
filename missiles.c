@@ -12,14 +12,12 @@
 #include "radar.h"
 
 struct missile	missile[MAX_TASKS];	// missile buffer
-struct cbuf	trail[MAX_TASKS];	// trail buffer
+struct cbuf		trail[MAX_TASKS];	// trail buffer
 
 int tflag = 0;	// trail flag
 int tl = 15;	// actual trail length
 
-/**
- * Store position of element i.
- */
+// Store position of element i.
 void store_trail(int i) {
 	int k;
 	if (i >= MAX_TASKS) return;
@@ -30,6 +28,7 @@ void store_trail(int i) {
 	trail[i].top = k;
 }
 
+// Clear trail stack.
 void clear_trail(int i) {
 	int j;
 	for (j = 0; j < TLEN; j++) {
@@ -39,9 +38,7 @@ void clear_trail(int i) {
 	trail[i].top=0;
 }
 
-/**
- * Draws trail of element i, for the length of w.
- */
+// Draws trail of element i, for the length of w.
 void draw_trail(int i, int w) {
 	int j, k;
 	int x, y;
@@ -53,14 +50,18 @@ void draw_trail(int i, int w) {
 	}
 }
 
+// Makes disappear a missile from graphics.
 void missile_vanish(int index) {
 	missile[index].destroied = 1;
 }
 
+// What to do when a missile explode.
 void missile_explode(int index) {
 	missile_vanish(index);
+	// TODO: add some explosions!
 }
 
+// A missile should vanish if outside top, left or right borders, explode if bottom.
 void handle_corners(int i) {
 	int left, right, top, bottom;
 
@@ -75,10 +76,7 @@ void handle_corners(int i) {
 	if (top) missile[i].y = WORLD_BOX_HEIGHT - missile[i].r;
 }
 
-/**
- * Draw missile i in graphic coordinates.
- * @param i [description]
- */
+// Draw missile i in graphic coordinates.
 void draw_missile(int i) {
 	float p1x, p1y, p2x, p2y, p3x, p3y; // world coord.
 	float ca, sa;
@@ -100,9 +98,7 @@ void draw_missile(int i) {
 	         missile[i].c);
 }
 
-/**
- * A missile can spawn from top or left side, each one with 1/2 of probability.
- */
+// A missile can spawn from top or left side, each one with 1/2 of probability.
 void init_missile(int i) {
 	float r, v;
 
@@ -127,6 +123,7 @@ void init_missile(int i) {
 	missile[i].r = ML;
 }
 
+// Brain of an enemy missile.
 void *missile_task(void* arg) {
 	int i; // task index
 	float dt, dv; //, da_dot;

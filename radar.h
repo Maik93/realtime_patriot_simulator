@@ -4,7 +4,7 @@
 //-----------------------------------------------------
 // SENSOR PARAMETERS
 //-----------------------------------------------------
-#define RPOSX_W	300		// x and y wolrd position of radar
+#define RPOSX_W	300					// x and y wolrd position of radar
 #define RPOSY_W	0
 #define RPOSX	WORLD_BOX_X1 + RPOSX_W	// ablsolute positions
 #define RPOSY	WORLD_BOX_Y2 - RPOSY_W
@@ -37,9 +37,10 @@
 //-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------
-struct scan {
-	int x;
+struct scan {	// point acquired by scanner, with relative distance
+	int x;		// position detected
 	int y;
+	int d;		// distance measured
 };
 
 extern struct scan radar[ARES];

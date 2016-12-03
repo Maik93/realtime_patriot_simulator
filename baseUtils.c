@@ -15,7 +15,7 @@
 //-----------------------------------------------------
 // PUBLIC VARIABLES
 //-----------------------------------------------------
-pthread_t		tid[MAX_THREADS];
+pthread_t			tid[MAX_THREADS];
 pthread_attr_t		att[MAX_THREADS];
 struct task_param	tp[MAX_THREADS];
 struct sched_param	sp;
@@ -23,28 +23,19 @@ struct sched_param	sp;
 int sigterm_tasks = 0;
 //-----------------------------------------------------
 BITMAP *screen_buff;
-//-----------------------------------------------------
-// PRIVATE VARIABLES
-//-----------------------------------------------------
-// static int n_active_tasks = 0;		// active task counter
-
 
 //-----------------------------------------------------
 // BASE UTILITY FUNCTIONS
 //-----------------------------------------------------
 
-/**
- * Returns a random float in [xmi, xma)
- */
+// Returns a random float in [xmi, xma)
 float frand(float xmi, float xma) {
 	float r;
 	r = rand() / (float)RAND_MAX; // rand in [0,1)
 	return xmi + (xma - xmi) * r;
 }
 
-/**
- * Returns fixed number corresponding an angle in degree.
- */
+// Returns fixed number corresponding an angle in degree.
 fixed deg2fix(int degree) {
 	while (degree >= 360) degree -= 360;
 	if (degree < 0)
@@ -273,9 +264,7 @@ void get_string(char *str, int x, int y, int c, int b) {
 	str[i] = '\0';
 }
 
-/**
- * Enable mouse integration, handled by hardware, with custom icon.
- */
+// Enable mouse integration, handled by hardware, with custom icon.
 void activate_mouse() {
 	BITMAP* mouse_bmp = load_bitmap("mouse.bmp", NULL);
 	install_mouse();
