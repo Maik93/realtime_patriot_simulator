@@ -1,6 +1,8 @@
 #ifndef RADAR_AND_TRACKERS_H
 #define RADAR_AND_TRACKERS_H
 
+#include "common.h"
+
 //-----------------------------------------------------
 // RADAR SENSOR PARAMETERS
 //-----------------------------------------------------
@@ -35,12 +37,12 @@
 #define RDISPLAY_SL_X		RDISPLAY_ORIGIN_X - 40	// where radar starts (left value)
 #define RDISPLAY_SL_Y		RDISPLAY_SR_Y
 //-----------------------------------------------------
-// TRACKER PARAMETERS
+// TRACKER PARAMETERS AND DISPLAY POSITIONS
 //-----------------------------------------------------
 #define TRACKER_RES			30		// dimension of square box acquisition
-// #define 
-// #define 
-// #define 
+#define TRACK_DSCALE		3		// scale for displays
+#define TRACK_D0_X			WORLD_BOX_X2 + 2 + TRACKER_RES*TRACK_DSCALE/2
+#define TRACK_D0_Y			WORLD_BOX_Y1 + TRACKER_RES*TRACK_DSCALE/2
 // #define 
 // #define 
 // #define 
@@ -59,6 +61,6 @@ struct scan {	// point acquired by scanner, with relative distance
 void *radar_task(void* arg);
 void draw_radar_display();
 void *tracker_task(void* arg);
-void tracker_display(int x0, int y0);
+void tracker_display(int tracker_i);
 
 #endif

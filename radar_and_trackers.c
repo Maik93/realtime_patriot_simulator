@@ -18,7 +18,7 @@ int			current_i;		// actual index of radar array; for graphic porpuses
 //-----------------------------------------------------
 // TRACKER VARIABLES
 //-----------------------------------------------------
-int image[TRACKER_RES][TRACKER_RES]; // global image buffer
+int tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
 int points_tracked[MAX_TRACKERS][2]; // list of all currently tracked points
 
 //-----------------------------------------------------
@@ -53,7 +53,8 @@ void lock_new_target() {
 	for (i = 0; i < MAX_TRACKERS; i++) {
 		// if inside a circular round of any points_tracked I'll consider it already monitored
 		if (abs(points_tracked[i][0] - radar[current_i].x) <= TRACKER_RES &&
-		        abs(points_tracked[i][1] - radar[current_i].y) <= TRACKER_RES)
+		        abs(points_tracked[i][1] - radar[current_i].y) <= TRACKER_RES &&
+		        tp[i + TRACKER_BASE_INDEX].index != -1)
 			return;
 	}
 
@@ -62,7 +63,7 @@ void lock_new_target() {
 	if (new_tracker_i != -1) {
 		points_tracked[new_tracker_i - TRACKER_BASE_INDEX][0] = radar[current_i].x;
 		points_tracked[new_tracker_i - TRACKER_BASE_INDEX][1] = radar[current_i].y;
-		
+
 		start_task(tracker_task, PER, DREL, PRI, new_tracker_i);
 	}
 }
@@ -145,14 +146,14 @@ void draw_radar_display() {
 //-----------------------------------------------------
 
 // Store pixels contained in a square centered in (x0, y0) and width TRACKER_RES.
-void get_image(int x0, int y0) {
+void get_image(int tracker_i, int x0, int y0) {
 	int i, j; // image matrix indexes
 	int x, y; // graphical coordinates
 	for (i = 0; i < TRACKER_RES; i++)
 		for (j = 0; j < TRACKER_RES; j++) {
 			x = x0 - TRACKER_RES / 2 + i;
 			y = y0 - TRACKER_RES / 2 + j;
-			image[i][j] = getpixel(screen, x, y);
+			tracker_view[tracker_i][i][j] = getpixel(screen, x, y);
 		}
 }
 
@@ -166,7 +167,7 @@ void *tracker_task(void* arg) {
 
 	set_period(task_i);
 	while (!sigterm_tasks) {
-		get_image(points_tracked[tracker_i][0], points_tracked[tracker_i][1]);
+		get_image(tracker_i, points_tracked[tracker_i][0], points_tracked[tracker_i][1]);
 
 		// now compute centroid, then refresh points_tracked
 
@@ -175,13 +176,23 @@ void *tracker_task(void* arg) {
 }
 
 // Shows what a tracker sees on right side of the screen.
-void tracker_display(int x0, int y0) {
+void tracker_display(int tracker_i) {
 	int i, j; // image matrix indexes
 	int x, y; // graphical coordinates
+
+	// background
+	rectfill(screen_buff, TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2,
+	         TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, BKG);
+
+	// draws what's seen by tracker, magnified by factor TRACK_DSCALE
 	for (i = 0; i < TRACKER_RES; i++)
 		for (j = 0; j < TRACKER_RES; j++) {
-			x = x0 - TRACKER_RES / 2 + i;
-			y = y0 - TRACKER_RES / 2 + j;
-			putpixel(screen_buff, x, y, image[i][j]);
+			x = TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2 + i * TRACK_DSCALE;
+			y = TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2 + j * TRACK_DSCALE;
+			putpixel(screen_buff, x, y, tracker_view[tracker_i][i][j]);
 		}
+
+	// border
+	rect(screen_buff, TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2,
+	         TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, LBLU);
 }

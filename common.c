@@ -71,8 +71,16 @@ void *graphic_task(void* arg) {
 			textout_ex(screen_buff, font, str,
 			           MENU_BOX_X1 + 20, MENU_BOX_Y2 - 2 * CHAR_HEIGHT - 20, RED, -1);
 		}
+
+		// tracker views on right side of the screen
+		for (i = TRACKER_BASE_INDEX; i < TRACKER_TOP_INDEX; i++)
+			if (tp[i].index != -1)
+				tracker_display(i - TRACKER_BASE_INDEX);
+
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
+
+		circlefill(screen_buff, 304, 256, 2, RED);
 
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
