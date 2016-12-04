@@ -9,7 +9,7 @@
 
 #include "baseUtils.h"
 #include "missiles.h"
-#include "radar.h"
+#include "radar_and_trackers.h"
 
 // Draws word box.
 void draw_world() {

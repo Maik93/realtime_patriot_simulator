@@ -1,5 +1,5 @@
-#ifndef RADAR_H
-#define RADAR_H
+#ifndef RADAR_AND_TRACKERS_H
+#define RADAR_AND_TRACKERS_H
 
 //-----------------------------------------------------
 // RADAR SENSOR PARAMETERS

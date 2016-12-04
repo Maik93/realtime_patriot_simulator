@@ -18,7 +18,7 @@ DEBUGFLAGS = -ggdb
 OBJ1 = baseUtils
 OBJ2 = common
 OBJ3 = missiles
-OBJ4 = radar
+OBJ4 = radar_and_trackers
 OBJS = $(MAIN).o $(OBJ1).o $(OBJ2).o $(OBJ3).o $(OBJ4).o
 #---------------------------------------------------
 # LIBS are the external libraries to be used

@@ -9,7 +9,7 @@
 
 #include "baseUtils.h"
 #include "common.h"
-#include "radar.h"
+// #include "radar_and_trackers.h"
 
 struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_ENEMY_MISSILES];	// trail buffer
