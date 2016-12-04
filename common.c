@@ -52,12 +52,6 @@ void *graphic_task(void* arg) {
 			}
 		}
 
-		// radar scans
-		/*for (int k = 0; k < ARES; ++k) {
-			// line(screen_buff, RPOSX, RPOSY, radar[k].x, radar[k].y, BLU);
-			circle(screen_buff, radar[k].x, radar[k].y, 1, BLU);
-		}*/
-
 		draw_radar_display();
 
 		// this will hide a green dot in (0, 0) caused by trails
@@ -81,6 +75,10 @@ void *graphic_task(void* arg) {
 			show_dmiss(a);*/
 
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
+
+		// if not already running, starts radar_task
+		if (tp[MAX_THREADS - 2].index == -1)
+			start_task(radar_task, 2, 2, 30, MAX_THREADS - 2);
 
 		wait_for_period(a);
 	}
