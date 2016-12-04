@@ -17,7 +17,7 @@
 #define AMAXL	0
 #define AMINT	-PI/2 - PI/4		// min and max initial alpha for missiles coming from top (rad)
 #define AMAXT	-PI/2 + PI/4
-#define XMINT	WORLD_BOX_X1 + ML	// min and max horizontal position for top spawn (world coord.)
+#define XMINT	WORLD_BOX_X1 + 100 + ML	// min and max horizontal position for top spawn (world coord.)
 #define XMAXT	WORLD_BOX_WIDTH - 200
 #define YMINL	WORLD_BOX_HEIGHT - 100	// min and max vertical position for left spawn (world coord.)
 #define YMAXL	WORLD_BOX_HEIGHT - ML
@@ -54,8 +54,8 @@ struct cbuf {		// circular buffer structure
 //-----------------------------------------------------
 // PUBLIC VARIABLES
 //-----------------------------------------------------
-extern struct missile	missile[MAX_TASKS];	// missile buffer
-extern struct cbuf		trail[MAX_TASKS];	// trail buffer
+extern struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
+extern struct cbuf		trail[MAX_ENEMY_MISSILES];		// trail buffer
 extern int		tflag;		// trail flag
 extern int		tl;			// actual trail length
 

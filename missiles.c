@@ -11,8 +11,8 @@
 #include "common.h"
 #include "radar.h"
 
-struct missile	missile[MAX_TASKS];	// missile buffer
-struct cbuf		trail[MAX_TASKS];	// trail buffer
+struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
+struct cbuf		trail[MAX_ENEMY_MISSILES];	// trail buffer
 
 int tflag = 0;	// trail flag
 int tl = 15;	// actual trail length
@@ -20,7 +20,7 @@ int tl = 15;	// actual trail length
 // Store position of element i.
 void store_trail(int i) {
 	int k;
-	if (i >= MAX_TASKS) return;
+	if (i >= MAX_ENEMY_MISSILES) return;
 	k = trail[i].top;
 	k = (k + 1) % TLEN;
 	trail[i].x[k] = missile[i].x;

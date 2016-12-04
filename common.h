@@ -26,7 +26,7 @@
 #define PRI		60	// task priority
 #define TSCALE	5	// time scale factor
 
-void *display(void* arg);
+void *graphic_task(void* arg);
 void *interp(void* arg);
 
 #endif

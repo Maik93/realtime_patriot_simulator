@@ -6,6 +6,20 @@
 #include <allegro.h>
 
 //-----------------------------------------------------
+// TASKS - Here's how is organized task_param array:
+// | .. 3x Enemy missiles .. | .. 1x Trackers .. | Graphic | Radar | Interpreter |
+// ^ -> ENEMY_MISSILES_BASE_INDEX
+//                           ^ -> TRACKER_BASE_INDEX
+//-----------------------------------------------------
+#define MAX_ENEMY_MISSILES	3
+#define MAX_TRACKERS		1
+#define MAX_THREADS			MAX_ENEMY_MISSILES + MAX_TRACKERS + 3
+//-----------------------------------------------------
+#define ENEMY_MISSILES_BASE_INDEX	0
+#define ENEMY_MISSILES_TOP_INDEX	ENEMY_MISSILES_BASE_INDEX + MAX_ENEMY_MISSILES
+#define TRACKER_BASE_INDEX			MAX_ENEMY_MISSILES
+#define TRACKER_TOP_INDEX			TRACKER_BASE_INDEX + MAX_TRACKERS
+//-----------------------------------------------------
 // GRAPHICS CONSTANTS
 //-----------------------------------------------------
 #define WIN_WIDTH	800	// width of graphic window
@@ -22,15 +36,10 @@
 #define BLU		9
 #define LBLU	54
 #define RED		4
-#define GND		19
-#define BKG		20		// background color box
+#define GND		19		// window's background color
+#define BKG		20		// world background color
 // #define MCOL	14		// menu color
 // #define NCOL	7		// numbers color
-//-----------------------------------------------------
-// TASKS CONSTANTS
-//-----------------------------------------------------
-#define MAX_TASKS	20			// max number of user tasks
-#define MAX_THREADS	MAX_TASKS+3	// max thread number (tasks + interp + graphic + radar)
 //-----------------------------------------------------
 // OTHER CONSTANTS
 //-----------------------------------------------------
@@ -80,7 +89,7 @@ int time_cmp(struct timespec t1, struct timespec t2);
 void set_period(int index);
 void wait_for_period(int index);
 int deadline_miss(int index);
-int find_free_slot();
+int find_free_slot(int min_index, int max_index);
 int get_task_index(void *arg);
 int get_task_period(int index);
 pthread_t start_task(void *task_fun, int period, int deadline, int priority, int index);

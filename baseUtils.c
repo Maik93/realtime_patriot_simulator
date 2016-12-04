@@ -142,9 +142,9 @@ int deadline_miss(int index) {
  * Find out the first element of tp array with index equals to -1 (free slot),
  		and return its position. If none is found, return -1.
  */
-int find_free_slot() {
-	int i = 0;
-	while (i < MAX_TASKS) {
+int find_free_slot(int min_index, int max_index) {
+	int i = min_index;
+	while (i < max_index) {
 		if (tp[i].index == -1)
 			return i;
 		i++;
@@ -189,20 +189,20 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
 void kill_all_task() {
 	int i;
 	sigterm_tasks = 1;
-	for (i = 0; i <= MAX_THREADS - 1; i++) { // I don't kill interpreter task
+	for (i = 0; i <= MAX_THREADS - 1; i++) { // Don't kill interpreter task
 		if (tp[i].index != -1) {
 			pthread_join(tid[i], NULL);
 
 			switch (i) {
-			case MAX_TASKS: // display
+			case MAX_THREADS - 3: // display
 				printf("Display task:\tRunned %d times.\t%d deadline misses.\n",
 				       tp[i].counts, tp[i].dmiss);
 				break;
-			case MAX_TASKS + 1: // radar
+			case MAX_THREADS - 2: // radar
 				printf("Radar task:\tRunned %d times.\t%d deadline misses.\n",
 				       tp[i].counts, tp[i].dmiss);
 				break;
-			case MAX_TASKS + 2: // interp
+			case MAX_THREADS - 1: // interp
 				printf("Interp task:\tRunned %d times.\t%d deadline misses.\n",
 				       tp[i].counts, tp[i].dmiss);
 				break;

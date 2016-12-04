@@ -2,7 +2,7 @@
 #define RADAR_H
 
 //-----------------------------------------------------
-// SENSOR PARAMETERS
+// RADAR SENSOR PARAMETERS
 //-----------------------------------------------------
 #define RPOSX_W	300					// x and y wolrd position of radar
 #define RPOSY_W	0
@@ -35,6 +35,17 @@
 #define RDISPLAY_SL_X		RDISPLAY_ORIGIN_X - 40	// where radar starts (left value)
 #define RDISPLAY_SL_Y		RDISPLAY_SR_Y
 //-----------------------------------------------------
+// TRACKER PARAMETERS
+//-----------------------------------------------------
+#define TRACKER_RES			30		// dimension of square box acquisition
+// #define 
+// #define 
+// #define 
+// #define 
+// #define 
+// #define 
+// #define 
+//-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------
 struct scan {	// point acquired by scanner, with relative distance
@@ -43,9 +54,11 @@ struct scan {	// point acquired by scanner, with relative distance
 	int d;		// distance measured
 };
 
-extern struct scan radar[ARES];
+// extern struct scan radar[ARES];
 
 void *radar_task(void* arg);
 void draw_radar_display();
+void *tracker_task(void* arg);
+void tracker_display(int x0, int y0);
 
 #endif

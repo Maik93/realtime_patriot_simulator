@@ -14,9 +14,16 @@ int main(int argc, char const *argv[]) {
 	init(0);			// without mouse integration
 	srand(time(NULL));	// initialize random generator
 
-	start_task(display, 20, 20, 10, MAX_TASKS);
-	start_task(radar_task, 5/TSCALE, 5/TSCALE, 30, MAX_TASKS + 1);
-	interp_id = start_task(interp, 40, 40, 10, MAX_TASKS + 2);
+	start_task(graphic_task, 20, 20, 10, MAX_THREADS - 3);
+
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	time_add_ms(&now, 10);
+	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &now, NULL);
+
+
+	start_task(radar_task, 2, 2, 30, MAX_THREADS - 2);
+	interp_id = start_task(interp, 40, 40, 10, MAX_THREADS - 1);
 
 	pthread_join(interp_id, NULL);
 

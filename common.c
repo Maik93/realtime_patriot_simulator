@@ -28,9 +28,9 @@ void draw_radar_symbol() {
 }
 
 // Graphical task.
-void *display(void* arg) {
+void *graphic_task(void* arg) {
 	int i, a;
-	char str[30];
+	char str[50];
 
 	a = get_task_index(arg);
 	set_period(a);
@@ -45,7 +45,7 @@ void *display(void* arg) {
 		draw_radar_symbol();
 
 		// enemy missiles
-		for (i = 0; i < MAX_TASKS; i++) {
+		for (i = 0; i < MAX_ENEMY_MISSILES; i++) {
 			if (!missile[i].destroied && tp[i].index != -1) {
 				draw_missile(i);
 				if (tflag) draw_trail(i, tl);
@@ -53,20 +53,29 @@ void *display(void* arg) {
 		}
 
 		// radar scans
-		for (int k = 0; k < ARES; ++k) {
+		/*for (int k = 0; k < ARES; ++k) {
 			// line(screen_buff, RPOSX, RPOSY, radar[k].x, radar[k].y, BLU);
 			circle(screen_buff, radar[k].x, radar[k].y, 1, BLU);
-		}
+		}*/
 
 		draw_radar_display();
 
 		// this will hide a green dot in (0, 0) caused by trails
 		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);
 
-		if (find_free_slot() == -1) {
-			sprintf(str, "Max number of task reached");
+		// check how many enemy missiles
+		if (find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX)
+		        == -1) {
+			sprintf(str, "Max number of enemy missiles reached");
 			textout_ex(screen_buff, font, str,
 			           MENU_BOX_X1 + 20, MENU_BOX_Y2 - CHAR_HEIGHT - 20, RED, -1);
+		}
+
+		// check how many trackers
+		if (find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX) == -1) {
+			sprintf(str, "Max number of trackers reached");
+			textout_ex(screen_buff, font, str,
+			           MENU_BOX_X1 + 20, MENU_BOX_Y2 - 2 * CHAR_HEIGHT - 20, RED, -1);
 		}
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
@@ -97,7 +106,7 @@ void *interp(void* arg) {
 			break;
 
 		case KEY_SPACE:
-			new_i = find_free_slot();
+			new_i = find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX);
 			if (new_i != -1)
 				start_task(missile_task, PER, DREL, PRI, new_i);
 			break;
