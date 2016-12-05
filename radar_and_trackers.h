@@ -41,12 +41,14 @@
 //-----------------------------------------------------
 #define TRACKER_RES			60		// dimension of square box acquisition
 #define TRACK_DSCALE		3/2		// scale for displays
-#define TRACK_D0_X			WORLD_BOX_X2 + 2 + TRACKER_RES*TRACK_DSCALE/2
+#define TRACK_D0_X			WORLD_BOX_X2 + 5 + TRACKER_RES*TRACK_DSCALE/2
 #define TRACK_D0_Y			WORLD_BOX_Y1 + TRACKER_RES*TRACK_DSCALE/2
-// #define 
-// #define 
-// #define 
-// #define 
+#define TRACK_D1_X			TRACK_D0_X + TRACKER_RES*TRACK_DSCALE + 4
+#define TRACK_D1_Y			TRACK_D0_Y
+#define TRACK_D2_X			TRACK_D0_X
+#define TRACK_D2_Y			TRACK_D0_Y + TRACKER_RES*TRACK_DSCALE + 4
+#define TRACK_D3_X			TRACK_D1_X
+#define TRACK_D3_Y			TRACK_D2_Y
 //-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------

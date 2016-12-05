@@ -80,6 +80,12 @@ void *graphic_task(void* arg) {
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
 
+		// dots to test scanner
+		// circlefill(screen_buff, 343, 319, 10, RED);
+		// circlefill(screen_buff, 338, 404, 10, GREEN);
+		// circlefill(screen_buff, 253, 319, 10, LBLU);
+		// circlefill(screen_buff, 190, 404, 10, WHITE);
+
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
 		// if not already running, starts radar_task

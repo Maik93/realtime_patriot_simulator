@@ -48,7 +48,7 @@ void read_sensor(int degree) {
 
 // Check if yet tracked, if not proceed spawning a new tracker_task.
 void lock_new_target() {
-	int i, new_tracker_i;
+	int i, new_task_i, new_tracker_i;
 
 	// check if not yet tracked
 	for (i = 0; i < MAX_TRACKERS; i++) {
@@ -60,12 +60,13 @@ void lock_new_target() {
 	}
 
 	// proceed locking tracker on current point, if there's not yet too many trackers
-	new_tracker_i = find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX);
-	if (new_tracker_i != -1) {
-		points_tracked[new_tracker_i - TRACKER_BASE_INDEX].x = radar[current_i].x;
-		points_tracked[new_tracker_i - TRACKER_BASE_INDEX].y = radar[current_i].y;
+	new_task_i = find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX);
+	if (new_task_i != -1) {
+		new_tracker_i = new_task_i - TRACKER_BASE_INDEX;
+		points_tracked[new_tracker_i].x = radar[current_i].x;
+		points_tracked[new_tracker_i].y = radar[current_i].y;
 
-		start_task(tracker_task, PER, DREL, PRI, new_tracker_i);
+		start_task(tracker_task, PER, DREL, PRI, new_task_i);
 	}
 }
 
@@ -168,8 +169,8 @@ void get_image(int tracker_i, int x0, int y0) {
 
 // Evaluate centroid of element seen by tracker_i, relative to the center of image.
 struct point compute_centroid(int tracker_i) {
-	struct point c_rel; // coord. of centroid
-	int n = 0; // number of points found for x and y
+	struct point c_rel;	// coord. of centroid
+	int n = 0;			// number of points found for x and y
 	int i, j;
 
 	c_rel.x = 0;
@@ -190,8 +191,8 @@ struct point compute_centroid(int tracker_i) {
 		c_rel.y /= n;
 	}
 	else {
+		// printf("Tracker deactivated.\n");
 		tracker_is_active[tracker_i] = 0;
-		printf("Tracker deactivated.\n");
 	}
 
 	return c_rel;
@@ -203,7 +204,8 @@ void *tracker_task(void* arg) {
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
 
-	printf("Start tracking (%d, %d)\n", points_tracked[tracker_i].x, points_tracked[tracker_i].y);
+	// printf("Start tracking (%d, %d)\n", points_tracked[tracker_i].x, points_tracked[tracker_i].y);
+	tracker_is_active[tracker_i] = 1;
 
 	set_period(task_i);
 	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
@@ -221,22 +223,44 @@ void *tracker_task(void* arg) {
 
 // Shows what a tracker sees on right side of the screen.
 void tracker_display(int tracker_i) {
-	int i, j; // image matrix indexes
-	int x, y; // graphical coordinates
+	int i, j;	// image matrix indexes
+	int x0, y0;	// center to draw display
+	int x, y;	// graphical coordinates
+
+	// find out where to draw this display
+	switch (tracker_i) {
+	case 0:
+		x0 = TRACK_D0_X;
+		y0 = TRACK_D0_Y;
+		break;
+	case 1:
+		x0 = TRACK_D1_X;
+		y0 = TRACK_D1_Y;
+		break;
+	case 2:
+		x0 = TRACK_D2_X;
+		y0 = TRACK_D2_Y;
+		break;
+	case 3:
+		x0 = TRACK_D3_X;
+		y0 = TRACK_D3_Y;
+		break;
+	default: return;
+	}
 
 	// background
-	rectfill(screen_buff, TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	         TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, BKG);
+	rectfill(screen_buff, x0 - TRACKER_RES * TRACK_DSCALE / 2, y0 - TRACKER_RES * TRACK_DSCALE / 2,
+	         x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, BKG);
 
 	// draws what's seen by tracker, magnified by factor TRACK_DSCALE
 	for (i = 0; i < TRACKER_RES; i++)
 		for (j = 0; j < TRACKER_RES; j++) {
-			x = TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2 + i * TRACK_DSCALE;
-			y = TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2 + j * TRACK_DSCALE;
+			x = (int)x0 - TRACKER_RES * TRACK_DSCALE / 2 + i * TRACK_DSCALE;
+			y = (int)y0 - TRACKER_RES * TRACK_DSCALE / 2 + j * TRACK_DSCALE;
 			putpixel(screen_buff, x, y, tracker_view[tracker_i][i][j]);
 		}
 
 	// border
-	rect(screen_buff, TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	     TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, LBLU);
+	rect(screen_buff, x0 - TRACKER_RES * TRACK_DSCALE / 2, y0 - TRACKER_RES * TRACK_DSCALE / 2,
+	     x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, LBLU);
 }

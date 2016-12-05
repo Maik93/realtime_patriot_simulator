@@ -12,7 +12,7 @@
 //                           ^ -> TRACKER_BASE_INDEX
 //-----------------------------------------------------
 #define MAX_ENEMY_MISSILES	3
-#define MAX_TRACKERS		1
+#define MAX_TRACKERS		4
 #define MAX_THREADS			MAX_ENEMY_MISSILES + MAX_TRACKERS + 3
 //-----------------------------------------------------
 #define ENEMY_MISSILES_BASE_INDEX	0
