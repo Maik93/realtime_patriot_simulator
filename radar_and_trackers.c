@@ -19,7 +19,8 @@ int			current_i;		// actual index of radar array; for graphic porpuses
 // TRACKER VARIABLES
 //-----------------------------------------------------
 int tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
-int points_tracked[MAX_TRACKERS][2]; // list of all currently tracked points
+struct point points_tracked[MAX_TRACKERS];	// array of all currently tracked points
+int tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
 
 //-----------------------------------------------------
 // RADAR FUNCTIONS
@@ -51,18 +52,18 @@ void lock_new_target() {
 
 	// check if not yet tracked
 	for (i = 0; i < MAX_TRACKERS; i++) {
-		// if inside a circular round of any points_tracked I'll consider it already monitored
-		if (abs(points_tracked[i][0] - radar[current_i].x) <= TRACKER_RES &&
-		        abs(points_tracked[i][1] - radar[current_i].y) <= TRACKER_RES &&
-		        tp[i + TRACKER_BASE_INDEX].index != -1)
+		// if inside a circular round of any active points_tracked I'll consider it already monitored
+		if (abs(points_tracked[i].x - radar[current_i].x) <= TRACKER_RES &&
+		        abs(points_tracked[i].y - radar[current_i].y) <= TRACKER_RES &&
+		        tracker_is_active[i])
 			return;
 	}
 
 	// proceed locking tracker on current point, if there's not yet too many trackers
 	new_tracker_i = find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX);
 	if (new_tracker_i != -1) {
-		points_tracked[new_tracker_i - TRACKER_BASE_INDEX][0] = radar[current_i].x;
-		points_tracked[new_tracker_i - TRACKER_BASE_INDEX][1] = radar[current_i].y;
+		points_tracked[new_tracker_i - TRACKER_BASE_INDEX].x = radar[current_i].x;
+		points_tracked[new_tracker_i - TRACKER_BASE_INDEX].y = radar[current_i].y;
 
 		start_task(tracker_task, PER, DREL, PRI, new_tracker_i);
 	}
@@ -79,8 +80,13 @@ void *radar_task(void* arg) {
 	angle = RAMIN;
 	// dt = TSCALE * (float)get_task_period(i) / 1000;
 
+	// init radar distances
 	for (j = 0; j < ARES; j++)
 		radar[j].d = RMAX;
+
+	// set all trackers inactive
+	for (j = 0; j < MAX_TRACKERS; j++)
+		tracker_is_active[j] = 0;
 
 	set_period(i);
 	while (!sigterm_tasks) {
@@ -94,10 +100,8 @@ void *radar_task(void* arg) {
 		}
 
 		angle++;
-		if (angle > RAMAX) {
-			// printf("*bip*\n");
+		if (angle > RAMAX)
 			angle = RAMIN;
-		}
 
 		wait_for_period(i);
 	}
@@ -153,8 +157,44 @@ void get_image(int tracker_i, int x0, int y0) {
 		for (j = 0; j < TRACKER_RES; j++) {
 			x = x0 - TRACKER_RES / 2 + i;
 			y = y0 - TRACKER_RES / 2 + j;
-			tracker_view[tracker_i][i][j] = getpixel(screen, x, y);
+
+			// take only points in world
+			if (x > WORLD_BOX_X1 && x < WORLD_BOX_X2
+			        && y > WORLD_BOX_Y1 && y < WORLD_BOX_Y2)
+				tracker_view[tracker_i][i][j] = getpixel(screen, x, y);
+			else tracker_view[tracker_i][i][j] = BKG;
 		}
+}
+
+// Evaluate centroid of element seen by tracker_i, relative to the center of image.
+struct point compute_centroid(int tracker_i) {
+	struct point c_rel; // coord. of centroid
+	int n = 0; // number of points found for x and y
+	int i, j;
+
+	c_rel.x = 0;
+	c_rel.y = 0;
+	for (i = 0; i < TRACKER_RES; i++)
+		for (j = 0; j < TRACKER_RES; j++) {
+			// radar sprite doesn't count
+			if (tracker_view[tracker_i][i][j] != BKG &&
+			        tracker_view[tracker_i][i][j] != BLU) {
+				c_rel.x += i - TRACKER_RES / 2;
+				c_rel.y += j - TRACKER_RES / 2;
+				n++;
+			}
+		}
+
+	if (n != 0) {
+		c_rel.x /= n;
+		c_rel.y /= n;
+	}
+	else {
+		tracker_is_active[tracker_i] = 0;
+		printf("Tracker deactivated.\n");
+	}
+
+	return c_rel;
 }
 
 void *tracker_task(void* arg) {
@@ -163,16 +203,20 @@ void *tracker_task(void* arg) {
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
 
-	printf("Tracking (%d, %d)\n", points_tracked[tracker_i][0], points_tracked[tracker_i][1]);
+	printf("Start tracking (%d, %d)\n", points_tracked[tracker_i].x, points_tracked[tracker_i].y);
 
 	set_period(task_i);
-	while (!sigterm_tasks) {
-		get_image(tracker_i, points_tracked[tracker_i][0], points_tracked[tracker_i][1]);
+	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
+		get_image(tracker_i, points_tracked[tracker_i].x, points_tracked[tracker_i].y);
 
-		// now compute centroid, then refresh points_tracked
+		// now compute centroid, then update points_tracked (the center to follow)
+		struct point c = compute_centroid(tracker_i);
+		points_tracked[tracker_i].x += c.x;
+		points_tracked[tracker_i].y += c.y;
 
 		wait_for_period(task_i);
 	}
+	tp[task_i].index = -1;
 }
 
 // Shows what a tracker sees on right side of the screen.
@@ -194,5 +238,5 @@ void tracker_display(int tracker_i) {
 
 	// border
 	rect(screen_buff, TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	         TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, LBLU);
+	     TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, LBLU);
 }

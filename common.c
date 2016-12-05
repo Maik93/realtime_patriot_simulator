@@ -80,8 +80,6 @@ void *graphic_task(void* arg) {
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
 
-		circlefill(screen_buff, 304, 256, 2, RED);
-
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
 		// if not already running, starts radar_task

@@ -39,8 +39,8 @@
 //-----------------------------------------------------
 // TRACKER PARAMETERS AND DISPLAY POSITIONS
 //-----------------------------------------------------
-#define TRACKER_RES			30		// dimension of square box acquisition
-#define TRACK_DSCALE		3		// scale for displays
+#define TRACKER_RES			60		// dimension of square box acquisition
+#define TRACK_DSCALE		3/2		// scale for displays
 #define TRACK_D0_X			WORLD_BOX_X2 + 2 + TRACKER_RES*TRACK_DSCALE/2
 #define TRACK_D0_Y			WORLD_BOX_Y1 + TRACKER_RES*TRACK_DSCALE/2
 // #define 
@@ -54,6 +54,10 @@ struct scan {	// point acquired by scanner, with relative distance
 	int x;		// position detected
 	int y;
 	int d;		// distance measured
+};
+struct point {
+	int x;
+	int y;
 };
 
 // extern struct scan radar[ARES];
