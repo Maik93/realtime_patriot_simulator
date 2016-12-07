@@ -67,6 +67,16 @@ void time_add_ms(struct timespec *t, int ms) {
 	}
 }
 
+// Difference from time t1 to t2, in milliseconds. (t1>t2)
+float time_diff_ms(struct timespec t1, struct timespec t2) {
+	float dt;
+
+	if (t1.tv_sec < t2.tv_sec || (t1.tv_sec == t2.tv_sec && t1.tv_nsec < t2.tv_nsec)) return -1;
+
+	dt = (t1.tv_sec - t2.tv_sec) * 1000.0 + (t1.tv_nsec - t2.tv_nsec) / 1000000.0;
+	return dt;
+}
+
 /**
  * Compares two given times and returns 1 if first
  * 		is bigger, -1 if it's lower, 0 if equals to t2.

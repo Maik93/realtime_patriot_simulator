@@ -209,6 +209,7 @@ void store_point(int i) {
 	k = tracked_points[i].top;
 	k = (k + 1) % 3;
 
+	clock_gettime(CLOCK_MONOTONIC, &tracked_points[i].t[k]);
 	tracked_points[i].x[k] = current_points_tracked[i].x;
 	tracked_points[i].y[k] = current_points_tracked[i].y;
 	tracked_points[i].top = k;
@@ -216,35 +217,42 @@ void store_point(int i) {
 	tracked_points[i].n_samples++;
 }
 
-void evaluate_v_and_a(int i, float dt) {
-	int k, prev_k, prev_prev_k; // previous index point and its previous
+void evaluate_v_and_a(int tracker_i) {
+	int k, prev_k, prev_prev_k;	// previous index point and its previous
+	float vx_prev, vy_prev;	// previous velocity, needed to evaluate acc
+	float dt1, dt2;			// delta t from k to prev_k and from prev_k to prev_prev_k
 
-	if (tracked_points[i].n_samples < 3) return; // not enough points
+	if (tracked_points[tracker_i].n_samples < 3) return; // not enough points
 
-	k = tracked_points[i].top;
+	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + 3) % 3;
 	prev_prev_k = (prev_k - 1 + 3) % 3;
 
-	tracked_points[i].vx = (tracked_points[i].x[k] - tracked_points[i].x[prev_k]) / dt;
-	tracked_points[i].vy = (tracked_points[i].y[k] - tracked_points[i].y[prev_k]) / dt;
-	tracked_points[i].ax = (tracked_points[i].x[k] + tracked_points[i].x[prev_prev_k]) / (dt * dt);
-	tracked_points[i].ay = (tracked_points[i].y[k] + tracked_points[i].y[prev_prev_k]) / (dt * dt);
+	dt1 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
+	dt2 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[prev_k], tracked_points[tracker_i].t[prev_prev_k]) / 1000.0;
+
+	tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt1;
+	tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt1;
+
+	vx_prev = (tracked_points[tracker_i].x[prev_k] - tracked_points[tracker_i].x[prev_prev_k]) / dt2;
+	vy_prev = (tracked_points[tracker_i].y[prev_k] - tracked_points[tracker_i].y[prev_prev_k]) / dt2;
+
+	tracked_points[tracker_i].ax = (tracked_points[tracker_i].vx - vx_prev) / dt1;
+	tracked_points[tracker_i].ay = (tracked_points[tracker_i].vy - vy_prev) / dt1;
+
 
 	// printf("x: %d\tx_prev: %d\tvx: %f\tvy: %f\n",
 	printf("vx: %f\tvy: %f\tax: %f\tay: %f\n",
-	       tracked_points[i].x[k], tracked_points[i].x[prev_k],
-	       tracked_points[i].vx, tracked_points[i].vy,
-	       tracked_points[i].ax, tracked_points[i].ay);
+	       tracked_points[tracker_i].x[k], tracked_points[tracker_i].x[prev_k],
+	       tracked_points[tracker_i].vx, tracked_points[tracker_i].vy,
+	       tracked_points[tracker_i].ax, tracked_points[tracker_i].ay);
 }
 
 void *tracker_task(void* arg) {
 	int task_i, tracker_i;
-	float dt;
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
-
-	dt = TSCALE * (float)get_task_period(task_i) / 1000;
 
 	tracked_points[tracker_i].n_samples = 0;
 
@@ -260,7 +268,7 @@ void *tracker_task(void* arg) {
 		current_points_tracked[tracker_i].x += c.x;
 		current_points_tracked[tracker_i].y += c.y;
 		store_point(tracker_i);
-		evaluate_v_and_a(tracker_i, dt);
+		evaluate_v_and_a(tracker_i);
 
 		wait_for_period(task_i);
 	}

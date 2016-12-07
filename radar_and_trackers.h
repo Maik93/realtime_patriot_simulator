@@ -1,6 +1,8 @@
 #ifndef RADAR_AND_TRACKERS_H
 #define RADAR_AND_TRACKERS_H
 
+#include <time.h>
+
 #include "common.h"
 
 //-----------------------------------------------------
@@ -72,6 +74,7 @@ struct tracker {		// circular buffer structure + vel and acc measured
 	int top;		// index of the current point element
 	int x[3];	// array of x coordinates
 	int y[3];	// array of y coordinates
+	struct timespec t[3]; // time of acquisition of coord.
 	int n_samples;	// number of points detected
 	float vx;		// stimed velecity for x
 	float ax;		// stimed acceleration for x
