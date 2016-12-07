@@ -118,7 +118,7 @@ void *interp(void* arg) {
 		case KEY_SPACE:
 			new_i = find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX);
 			if (new_i != -1)
-				start_task(missile_task, PER, DREL, PRI, new_i);
+				start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_i);
 			break;
 
 		case KEY_UP:

@@ -5,10 +5,14 @@
 #include "common.h"
 
 //-----------------------------------------------------
-// MISSILE CONSTANTS
+// GRAPHICAL CONSTANTS
 //-----------------------------------------------------
 #define ML		15					// length and width of the missile
 #define MW		6
+#define TCOL	GREY		// trail color
+//-----------------------------------------------------
+// PHYSICS CONSTANTS
+//-----------------------------------------------------
 #define VMINL	15					// min and max initial hor. speed for missiles coming from left (m/s)
 #define VMAXL	60
 #define VMINT	5					// min and max initial hor. speed for missiles coming from top (m/s)
@@ -24,14 +28,14 @@
 // #define DA_DOT	1*PI/180		// max alpha_dot variation per step (rad/s)
 // #define XCEN	0			// x center for the missile arrow
 // #define YCEN	0			// y center for the missile arrow
-// #define RMIN	5			// min radius
-// #define RMAX	10			// man radius
-// #define HMAX	WIN_HEIGHT - YBOX -RMAX -10 // max initial height
-// #define HMIN	HMAX - 150		// min initial height
+//-----------------------------------------------------
+// TASK CONSTANTS
+//-----------------------------------------------------
+#define MISSILE_PER		20	// task period in ms
+#define MISSILE_DREL	MISSILE_PER	// relative deadline in ms
+#define MISSILE_PRI		60	// task priority
 //-----------------------------------------------------
 #define TLEN	30			// circular buffer length
-#define TCOL	GREEN		// trail color
-
 //-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------
@@ -58,7 +62,9 @@ extern struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
 extern struct cbuf		trail[MAX_ENEMY_MISSILES];		// trail buffer
 extern int		tflag;		// trail flag
 extern int		tl;			// actual trail length
-
+//-----------------------------------------------------
+// PUBLIC FUNCTIONS
+//-----------------------------------------------------
 void draw_trail(int i, int w);
 void draw_missile(int i);
 void *missile_task(void* arg);

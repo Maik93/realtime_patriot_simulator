@@ -50,6 +50,13 @@
 #define TRACK_D3_X			TRACK_D1_X
 #define TRACK_D3_Y			TRACK_D2_Y
 //-----------------------------------------------------
+// TASK CONSTANTS
+//-----------------------------------------------------
+#define TRACKER_PER		50	// task period in ms
+#define TRACKER_DREL	TRACKER_PER	// relative deadline in ms
+#define TRACKER_PRI		50	// task priority
+//-----------------------------------------
+//-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------
 struct scan {	// point acquired by scanner, with relative distance
@@ -61,9 +68,19 @@ struct point {
 	int x;
 	int y;
 };
-
-// extern struct scan radar[ARES];
-
+struct tracker {		// circular buffer structure + vel and acc measured
+	int top;		// index of the current point element
+	int x[3];	// array of x coordinates
+	int y[3];	// array of y coordinates
+	int n_samples;	// number of points detected
+	float vx;		// stimed velecity for x
+	float ax;		// stimed acceleration for x
+	float vy;		// same for y
+	float ay;
+};
+//-----------------------------------------------------
+// PUBLIC FUNCTIONS
+//-----------------------------------------------------
 void *radar_task(void* arg);
 void draw_radar_display();
 void *tracker_task(void* arg);

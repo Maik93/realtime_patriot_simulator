@@ -14,8 +14,8 @@
 struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_ENEMY_MISSILES];	// trail buffer
 
-int tflag = 0;	// trail flag
-int tl = 15;	// actual trail length
+int tflag = 1;	// trail flag
+int tl = 30;	// actual trail length
 
 // Store position of element i.
 void store_trail(int i) {
@@ -121,6 +121,8 @@ void init_missile(int i) {
 	missile[i].destroied = 0;
 	missile[i].c = RED;
 	missile[i].r = ML;
+
+	printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
 }
 
 // Brain of an enemy missile.

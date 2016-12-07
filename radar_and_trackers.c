@@ -18,9 +18,10 @@ int			current_i;		// actual index of radar array; for graphic porpuses
 //-----------------------------------------------------
 // TRACKER VARIABLES
 //-----------------------------------------------------
-int tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
-struct point points_tracked[MAX_TRACKERS];	// array of all currently tracked points
-int tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
+int		tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
+struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points
+struct tracker	tracked_points[MAX_TRACKERS];		// history of last 3 points tracked for each tracker
+int		tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
 
 //-----------------------------------------------------
 // RADAR FUNCTIONS
@@ -38,7 +39,7 @@ void read_sensor(int degree) {
 		y = RPOSY - d * sin(alpha);
 		c = getpixel(screen, x, y);
 		d = d + RSTEP;
-	} while ((d <= RMAX) && (c == BKG || c == BLU));
+	} while ((d <= RMAX) && (c == BKG || c == BLU || c == GREY));
 
 	// store absolute values (i.e. of the screen)
 	radar[degree - RAMIN].x = x;
@@ -52,9 +53,9 @@ void lock_new_target() {
 
 	// check if not yet tracked
 	for (i = 0; i < MAX_TRACKERS; i++) {
-		// if inside a circular round of any active points_tracked I'll consider it already monitored
-		if (abs(points_tracked[i].x - radar[current_i].x) <= TRACKER_RES &&
-		        abs(points_tracked[i].y - radar[current_i].y) <= TRACKER_RES &&
+		// if inside a circular round of any active current_points_tracked I'll consider it already monitored
+		if (abs(current_points_tracked[i].x - radar[current_i].x) <= TRACKER_RES &&
+		        abs(current_points_tracked[i].y - radar[current_i].y) <= TRACKER_RES &&
 		        tracker_is_active[i])
 			return;
 	}
@@ -63,10 +64,10 @@ void lock_new_target() {
 	new_task_i = find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX);
 	if (new_task_i != -1) {
 		new_tracker_i = new_task_i - TRACKER_BASE_INDEX;
-		points_tracked[new_tracker_i].x = radar[current_i].x;
-		points_tracked[new_tracker_i].y = radar[current_i].y;
+		current_points_tracked[new_tracker_i].x = radar[current_i].x;
+		current_points_tracked[new_tracker_i].y = radar[current_i].y;
 
-		start_task(tracker_task, PER, DREL, PRI, new_task_i);
+		start_task(tracker_task, TRACKER_PER, TRACKER_DREL, TRACKER_PRI, new_task_i);
 	}
 }
 
@@ -179,7 +180,8 @@ struct point compute_centroid(int tracker_i) {
 		for (j = 0; j < TRACKER_RES; j++) {
 			// radar sprite doesn't count
 			if (tracker_view[tracker_i][i][j] != BKG &&
-			        tracker_view[tracker_i][i][j] != BLU) {
+			        tracker_view[tracker_i][i][j] != BLU &&
+			        tracker_view[tracker_i][i][j] != GREY) {
 				c_rel.x += i - TRACKER_RES / 2;
 				c_rel.y += j - TRACKER_RES / 2;
 				n++;
@@ -198,26 +200,71 @@ struct point compute_centroid(int tracker_i) {
 	return c_rel;
 }
 
+// Store last 3 points tracked to compute vel and acc.
+void store_point(int i) {
+	int k;
+
+	if (i >= MAX_TRACKERS) return;
+
+	k = tracked_points[i].top;
+	k = (k + 1) % 3;
+
+	tracked_points[i].x[k] = current_points_tracked[i].x;
+	tracked_points[i].y[k] = current_points_tracked[i].y;
+	tracked_points[i].top = k;
+
+	tracked_points[i].n_samples++;
+}
+
+void evaluate_v_and_a(int i, float dt) {
+	int k, prev_k, prev_prev_k; // previous index point and its previous
+
+	if (tracked_points[i].n_samples < 3) return; // not enough points
+
+	k = tracked_points[i].top;
+	prev_k = (k - 1 + 3) % 3;
+	prev_prev_k = (prev_k - 1 + 3) % 3;
+
+	tracked_points[i].vx = (tracked_points[i].x[k] - tracked_points[i].x[prev_k]) / dt;
+	tracked_points[i].vy = (tracked_points[i].y[k] - tracked_points[i].y[prev_k]) / dt;
+	tracked_points[i].ax = (tracked_points[i].x[k] + tracked_points[i].x[prev_prev_k]) / (dt * dt);
+	tracked_points[i].ay = (tracked_points[i].y[k] + tracked_points[i].y[prev_prev_k]) / (dt * dt);
+
+	// printf("x: %d\tx_prev: %d\tvx: %f\tvy: %f\n",
+	printf("vx: %f\tvy: %f\tax: %f\tay: %f\n",
+	       tracked_points[i].x[k], tracked_points[i].x[prev_k],
+	       tracked_points[i].vx, tracked_points[i].vy,
+	       tracked_points[i].ax, tracked_points[i].ay);
+}
+
 void *tracker_task(void* arg) {
 	int task_i, tracker_i;
+	float dt;
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
 
-	// printf("Start tracking (%d, %d)\n", points_tracked[tracker_i].x, points_tracked[tracker_i].y);
+	dt = TSCALE * (float)get_task_period(task_i) / 1000;
+
+	tracked_points[tracker_i].n_samples = 0;
+
+	// printf("Start tracking (%d, %d)\n", current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 	tracker_is_active[tracker_i] = 1;
 
 	set_period(task_i);
 	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
-		get_image(tracker_i, points_tracked[tracker_i].x, points_tracked[tracker_i].y);
+		get_image(tracker_i, current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 
-		// now compute centroid, then update points_tracked (the center to follow)
+		// now compute centroid, then update current_points_tracked (the center to follow)
 		struct point c = compute_centroid(tracker_i);
-		points_tracked[tracker_i].x += c.x;
-		points_tracked[tracker_i].y += c.y;
+		current_points_tracked[tracker_i].x += c.x;
+		current_points_tracked[tracker_i].y += c.y;
+		store_point(tracker_i);
+		evaluate_v_and_a(tracker_i, dt);
 
 		wait_for_period(task_i);
 	}
+	printf("Tracker detached. Missed %d deadlines on %d runs.\n", tp[task_i].dmiss, tp[task_i].counts);
 	tp[task_i].index = -1;
 }
 

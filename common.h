@@ -21,11 +21,10 @@
 //-----------------------------------------------------
 // TASK CONSTANTS
 //-----------------------------------------------------
-#define PER		20	// task period in ms
-#define DREL	PER	// relative deadline in ms
-#define PRI		60	// task priority
-#define TSCALE	5	// time scale factor
-
+#define TSCALE		5	// time scale factor
+//-----------------------------------------------------
+// PUBLIC FUNCTIONS
+//-----------------------------------------------------
 void *graphic_task(void* arg);
 void *interp(void* arg);
 
