@@ -122,7 +122,7 @@ void init_missile(int i) {
 	missile[i].c = RED;
 	missile[i].r = ML;
 
-	printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
+	// printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
 }
 
 // Brain of an enemy missile.
@@ -137,7 +137,6 @@ void *missile_task(void* arg) {
 	set_period(i);
 	while (!sigterm_tasks && !missile[i].destroied) {
 		// while (0) {
-		// da_dot = frand(-DA_DOT, DA_DOT);
 
 		missile[i].vy -= G0 * dt;
 		missile[i].y += missile[i].vy * dt - G0 * dt * dt / 2;

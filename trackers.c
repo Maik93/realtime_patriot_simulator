@@ -8,7 +8,7 @@
 #include <allegro.h>
 
 #include "baseUtils.h"
-#include "common.h"
+// #include "common.h"
 
 //-----------------------------------------------------
 // PUBLIC VARIABLES
@@ -65,20 +65,23 @@ struct point compute_centroid(int tracker_i) {
 	if (n != 0) {
 		c_rel.x /= n;
 		c_rel.y /= n;
+
+		// put a green dot on evaluated centroid
+		tracker_view[tracker_i][c_rel.x + TRACKER_RES / 2][c_rel.y + TRACKER_RES / 2] = GREEN;
 	}
 	else tracker_is_active[tracker_i] = 0;
 
 	return c_rel;
 }
 
-// Store last 3 points tracked to compute vel and acc.
+// Store last TSTORE points tracked to compute vel and acc.
 void store_point(int i) {
 	int k;
 
 	if (i >= MAX_TRACKERS) return;
 
 	k = tracked_points[i].top;
-	k = (k + 1) % 3;
+	k = (k + 1) % TSTORE;
 
 	clock_gettime(CLOCK_MONOTONIC, &tracked_points[i].t[k]);
 	tracked_points[i].x[k] = current_points_tracked[i].x;
@@ -88,16 +91,51 @@ void store_point(int i) {
 	tracked_points[i].n_samples++;
 }
 
+float linear_curve_fitting(int tracker_i) {
+	int i, j, k, prev_k, y[TSTORE], sumy = 0;
+	float a0, a1, x[TSTORE], sumx = 0, sumxy = 0, sumx2 = 0;
+
+	k = (tracked_points[tracker_i].top + 1) % TSTORE; // start from older one
+	prev_k = k;
+	for (j = 0; j < TSTORE; j++) {
+		x[j] = TSCALE *
+		       time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
+		y[j] = tracked_points[tracker_i].x[k];
+
+		// printf("dt=%f\tX=%d\n", x[j], y[j]);
+
+		k = (k + 1) % TSTORE;
+		prev_k = (k - 1 + TSTORE) % TSTORE;
+	}
+
+	for (i = 0; i < TSTORE; i++) {
+		sumx += x[i];
+		sumx2 += x[i] * x[i];
+		sumy += y[i];
+		sumxy += x[i] * y[i];
+	}
+
+	a0 = ((sumx2 * sumy - sumx * sumxy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
+	a1 = ((TSTORE * sumxy - sumx * sumy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
+
+	// printf("Evaluated V=%f\n", a1);
+	return a1;
+}
+
+// void parab_curve_fitting(){
+
+// }
+
 void evaluate_v_and_a(int tracker_i) {
 	int k, prev_k, prev_prev_k;	// previous index point and its previous
 	float vx_prev, vy_prev;	// previous velocity, needed to evaluate acc
 	float dt1, dt2;			// delta t from k to prev_k and from prev_k to prev_prev_k
 
-	if (tracked_points[tracker_i].n_samples < 3) return; // not enough points
+	if (tracked_points[tracker_i].n_samples < TSTORE) return; // not enough points
 
 	k = tracked_points[tracker_i].top;
-	prev_k = (k - 1 + 3) % 3;
-	prev_prev_k = (prev_k - 1 + 3) % 3;
+	prev_k = (k - 1 + TSTORE) % TSTORE;
+	prev_prev_k = (prev_k - 1 + TSTORE) % TSTORE;
 
 	dt1 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
 	dt2 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[prev_k], tracked_points[tracker_i].t[prev_prev_k]) / 1000.0;
@@ -111,7 +149,7 @@ void evaluate_v_and_a(int tracker_i) {
 	tracked_points[tracker_i].ay = (tracked_points[tracker_i].vy - vy_prev) / dt1;*/
 
 	// Verlet method: compute v at time prev_k
-	tracked_points[tracker_i].vx =
+	/*tracked_points[tracker_i].vx =
 	    (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_prev_k]) / (dt1 + dt2);
 	tracked_points[tracker_i].vy =
 	    (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_prev_k]) / (dt1 + dt2);
@@ -123,12 +161,17 @@ void evaluate_v_and_a(int tracker_i) {
 	tracked_points[tracker_i].ay =
 	    ((tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt1 +
 	     (tracked_points[tracker_i].y[prev_prev_k] - tracked_points[tracker_i].y[prev_k]) / dt2)
-	    * 2 / (dt1 + dt2);
+	    * 2 / (dt1 + dt2);*/
 
-	printf("vx: %f\tvy: %f\tax: %f\tay: %f\n",
+	tracked_points[tracker_i].vx = linear_curve_fitting(tracker_i);
+	tracked_points[tracker_i].vy = -1;
+	tracked_points[tracker_i].ax = 0;
+	tracked_points[tracker_i].ay = -G0;
+
+	/*printf("vx: %f\tvy: %f\tax: %f\tay: %f\n",
 	       tracked_points[tracker_i].x[k], tracked_points[tracker_i].x[prev_k],
 	       tracked_points[tracker_i].vx, tracked_points[tracker_i].vy,
-	       tracked_points[tracker_i].ax, tracked_points[tracker_i].ay);
+	       tracked_points[tracker_i].ax, tracked_points[tracker_i].ay);*/
 }
 
 //-----------------------------------------------------

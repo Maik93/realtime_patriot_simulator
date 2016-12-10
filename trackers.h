@@ -8,6 +8,8 @@
 // TRACKER PARAMETERS AND DISPLAY POSITIONS
 //-----------------------------------------------------
 #define TRACKER_RES			60		// dimension of square box acquisition
+#define TSTORE				10		// number of points stored by the tracker
+//-----------------------------------------------------
 #define TRACK_DSCALE		3/2		// scale for displays
 #define TRACK_D0_X			WORLD_BOX_X2 + 5 + TRACKER_RES*TRACK_DSCALE/2
 #define TRACK_D0_Y			WORLD_BOX_Y1 + TRACKER_RES*TRACK_DSCALE/2
@@ -20,7 +22,7 @@
 //-----------------------------------------------------
 // TASK CONSTANTS
 //-----------------------------------------------------
-#define TRACKER_PER		50	// task period in ms
+#define TRACKER_PER		20	// task period in ms - best is 60 for evaluate_v_and_a
 #define TRACKER_DREL	TRACKER_PER	// relative deadline in ms
 #define TRACKER_PRI		50	// task priority
 //-----------------------------------------------------
@@ -32,9 +34,9 @@ struct point {
 };
 struct tracker {		// circular buffer structure + vel and acc measured
 	int top;		// index of the current point element
-	int x[3];	// array of x coordinates
-	int y[3];	// array of y coordinates
-	struct timespec t[3]; // time of acquisition of coord.
+	int x[TSTORE];	// array of x coordinates
+	int y[TSTORE];	// array of y coordinates
+	struct timespec t[TSTORE]; // time of acquisition of coord.
 	int n_samples;	// number of points detected
 	float vx;		// stimed velecity for x
 	float ax;		// stimed acceleration for x
