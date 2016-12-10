@@ -20,7 +20,8 @@ OBJ2 = common
 OBJ3 = missiles
 OBJ4 = radar
 OBJ5 = trackers
-OBJS = $(MAIN).o $(OBJ1).o $(OBJ2).o $(OBJ3).o $(OBJ4).o $(OBJ5).o
+OBJ6 = rocket_laucher
+OBJS = $(MAIN).o $(OBJ1).o $(OBJ2).o $(OBJ3).o $(OBJ4).o $(OBJ5).o $(OBJ6).o
 #---------------------------------------------------
 # LIBS are the external libraries to be used
 #---------------------------------------------------
@@ -42,6 +43,8 @@ $(OBJ4).o: $(OBJ4).c
 	$(CC) -c $(OBJ4).c $(DEBUGFLAGS)
 $(OBJ5).o: $(OBJ5).c
 	$(CC) -c $(OBJ5).c $(DEBUGFLAGS)
+$(OBJ6).o: $(OBJ6).c
+	$(CC) -c $(OBJ6).c $(DEBUGFLAGS)
 #---------------------------------------------------
 # Command that can be specified inline: make run
 #---------------------------------------------------

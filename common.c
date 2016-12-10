@@ -11,6 +11,7 @@
 #include "missiles.h"
 #include "radar.h"
 #include "trackers.h"
+#include "rocket_laucher.h"
 
 // Draws word box.
 void draw_world() {
@@ -44,6 +45,7 @@ void *graphic_task(void* arg) {
 
 		draw_world();
 		draw_radar_symbol();
+		draw_launcher();
 
 		// enemy missiles
 		for (i = 0; i < MAX_ENEMY_MISSILES; i++) {

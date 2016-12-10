@@ -29,7 +29,8 @@
 #define CHAR_HEIGHT	10	// vertical pixels occupied by a char
 //-----------------------------------------------------
 #define COLOR_DEPTH	8
-#define BLACK	0
+#define TRANSP	0
+#define BLACK	16
 #define WHITE	15
 #define GREEN	10
 #define GREY	8
