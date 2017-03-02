@@ -91,9 +91,11 @@ void *graphic_task(void* arg) {
 
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
-		// if not already running, starts radar_task
-		if (tp[MAX_THREADS - 2].index == -1)
-			start_task(radar_task, 2, 2, 30, MAX_THREADS - 2);
+		// if not already running, starts radar_task and rocket_laucher_task
+		if (tp[RADAR_INDEX].index == -1)
+			start_task(radar_task, 2, 2, 30, RADAR_INDEX);
+		if (tp[ROCKET_LAUCHER_INDEX].index == -1)
+			start_task(rocket_laucher_task, 50, 50, 50, ROCKET_LAUCHER_INDEX);
 
 		wait_for_period(a);
 	}

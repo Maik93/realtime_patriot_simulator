@@ -7,18 +7,22 @@
 
 //-----------------------------------------------------
 // TASKS - Here's how is organized task_param array:
-// | .. 3x Enemy missiles .. | .. 1x Trackers .. | Graphic | Radar | Interpreter |
+// | .. 3x Enemy missiles .. | .. 1x Trackers .. | Graphic | Radar | Rocket_laucher | Interpreter |
 // ^ -> ENEMY_MISSILES_BASE_INDEX
 //                           ^ -> TRACKER_BASE_INDEX
 //-----------------------------------------------------
 #define MAX_ENEMY_MISSILES	3
 #define MAX_TRACKERS		4
-#define MAX_THREADS			MAX_ENEMY_MISSILES + MAX_TRACKERS + 3
+#define MAX_THREADS			MAX_ENEMY_MISSILES + MAX_TRACKERS + 4
 //-----------------------------------------------------
 #define ENEMY_MISSILES_BASE_INDEX	0
 #define ENEMY_MISSILES_TOP_INDEX	ENEMY_MISSILES_BASE_INDEX + MAX_ENEMY_MISSILES
 #define TRACKER_BASE_INDEX			MAX_ENEMY_MISSILES
 #define TRACKER_TOP_INDEX			TRACKER_BASE_INDEX + MAX_TRACKERS
+#define GRAPHIC_INDEX				MAX_THREADS - 4
+#define RADAR_INDEX					MAX_THREADS - 3
+#define ROCKET_LAUCHER_INDEX		MAX_THREADS - 2
+#define INTERPRETER_INDEX			MAX_THREADS - 1
 //-----------------------------------------------------
 // GRAPHICS CONSTANTS
 //-----------------------------------------------------

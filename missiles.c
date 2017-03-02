@@ -122,7 +122,7 @@ void init_missile(int i) {
 	missile[i].c = RED;
 	missile[i].r = ML;
 
-	// printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
+	printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
 }
 
 // Brain of an enemy missile.

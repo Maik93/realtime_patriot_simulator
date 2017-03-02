@@ -204,15 +204,19 @@ void kill_all_task() {
 			pthread_join(tid[i], NULL);
 
 			switch (i) {
-			case MAX_THREADS - 3: // display
+			case GRAPHIC_INDEX:
 				printf("Display task:\tRunned %d times.\t%d deadline misses.\n",
 				       tp[i].counts, tp[i].dmiss);
 				break;
-			case MAX_THREADS - 2: // radar
+			case RADAR_INDEX:
 				printf("Radar task:\tRunned %d times.\t%d deadline misses.\n",
 				       tp[i].counts, tp[i].dmiss);
 				break;
-			case MAX_THREADS - 1: // interp
+			case ROCKET_LAUCHER_INDEX:
+				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses.\n",
+				       tp[i].counts, tp[i].dmiss);
+				break;
+			case INTERPRETER_INDEX:
 				printf("Interp task:\tRunned %d times.\t%d deadline misses.\n",
 				       tp[i].counts, tp[i].dmiss);
 				break;

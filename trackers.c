@@ -81,6 +81,11 @@ void store_point(int i) {
 	if (i >= MAX_TRACKERS) return;
 
 	k = tracked_points[i].top;
+
+	// don't store same coord.
+	if (current_points_tracked[i].x == tracked_points[i].x[k] ||
+	        current_points_tracked[i].y == tracked_points[i].y[k]) return;
+
 	k = (k + 1) % TSTORE;
 
 	clock_gettime(CLOCK_MONOTONIC, &tracked_points[i].t[k]);
@@ -118,7 +123,7 @@ float linear_curve_fitting(int tracker_i) {
 	a0 = ((sumx2 * sumy - sumx * sumxy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
 	a1 = ((TSTORE * sumxy - sumx * sumy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
 
-	// printf("Evaluated V=%f\n", a1);
+	printf("Evaluated V=%f\n", a1);
 	return a1;
 }
 
