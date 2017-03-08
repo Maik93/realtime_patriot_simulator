@@ -54,15 +54,16 @@
 // STRUCT
 //-----------------------------------------------------
 struct task_param {
-	int		index;			// task index, the easyest way to find him
+	int		index;			// task index. See above how task_param array
+							// is organized. Equals to -1 for inactive tasks.
 	// long	wcet;			// in microseconds
 	int		period;			// relative (ms)
 	int		deadline;		// relative (ms)
 	int		priority;		// in [0-99]
 	int		dmiss;			// num of misses
-	struct	timespec at;	// next activ. time
-	struct	timespec dl;	// abs. deadline
-	int		counts;			// number of times this task is runned
+	struct	timespec at;	// next activation time (absolute)
+	struct	timespec dl;	// deadline (absolute)
+	int		counts;			// number of runs for this task
 };
 
 //-----------------------------------------------------

@@ -1,3 +1,9 @@
+/**
+ * -----------------------------------------------------------------------
+ * Enemy missiles. Casually spowned from top or left corner, they fall
+ * cause of gravity until reached the ground or destroied by Patriot.
+ * -----------------------------------------------------------------------
+ */
 #include "missiles.h"
 
 #include <stdlib.h>
@@ -12,12 +18,13 @@
 // #include "radar_and_trackers.h"
 
 struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
-struct cbuf		trail[MAX_ENEMY_MISSILES];	// trail buffer
+struct cbuf		trail[MAX_ENEMY_MISSILES];		// trail buffer
 
-int tflag = 1;	// trail flag
+// TODO: reset to 0 befor delivery
+int tflag = 1;	// switcher for trail's visibility [0-1]
 int tl = 30;	// actual trail length
 
-// Store position of element i.
+// Store position of missile i.
 void store_trail(int i) {
 	int k;
 	if (i >= MAX_ENEMY_MISSILES) return;
@@ -31,6 +38,7 @@ void store_trail(int i) {
 // Clear trail stack.
 void clear_trail(int i) {
 	int j;
+	if (i >= MAX_ENEMY_MISSILES) return;
 	for (j = 0; j < TLEN; j++) {
 		trail[i].x[j] = 0;
 		trail[i].y[j] = 0;
@@ -38,10 +46,10 @@ void clear_trail(int i) {
 	trail[i].top=0;
 }
 
-// Draws trail of element i, for the length of w.
+// Draw trail of missile i, for the length of w.
 void draw_trail(int i, int w) {
-	int j, k;
-	int x, y;
+	int j, k; // indexes
+	int x, y; // positions
 	for (j = 0; j < w; j++) {
 		k = (trail[i].top + TLEN - j) % TLEN;
 		x = WORLD_BOX_X1 + trail[i].x[k];
@@ -69,7 +77,6 @@ void handle_corners(int i) {
 	right = (missile[i].x > WORLD_BOX_WIDTH - missile[i].r);
 	top = (missile[i].y > WORLD_BOX_HEIGHT - missile[i].r);
 	bottom = (missile[i].y <= missile[i].r);
-	// printf("%d %d %d %d.\n", left, right, top, bottom);
 
 	if (left || right) missile_vanish(i);
 	if (bottom) missile_explode(i);
@@ -122,13 +129,13 @@ void init_missile(int i) {
 	missile[i].c = RED;
 	missile[i].r = ML;
 
+	// DBG
 	printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
 }
 
-// Brain of an enemy missile.
 void *missile_task(void* arg) {
 	int i; // task index
-	float dt, dv; //, da_dot;
+	float dt;
 	i = get_task_index(arg);
 
 	init_missile(i);
@@ -136,27 +143,18 @@ void *missile_task(void* arg) {
 
 	set_period(i);
 	while (!sigterm_tasks && !missile[i].destroied) {
-		// while (0) {
-
 		missile[i].vy -= G0 * dt;
 		missile[i].y += missile[i].vy * dt - G0 * dt * dt / 2;
 		missile[i].x += missile[i].vx * dt;
 		missile[i].alpha = atan2(missile[i].vy, missile[i].vx);
-
-		// old, without gravity
-		/*int vx, vy;
-		missile[i].alpha_dot += da_dot;
-		missile[i].alpha += missile[i].alpha_dot * dt;
-		vx = missile[i].v * cos(missile[i].alpha);
-		vy = missile[i].v * sin(missile[i].alpha);
-		missile[i].x += vx * dt;
-		missile[i].y += vy * dt;*/
 
 		handle_corners(i);
 		store_trail(i);
 
 		wait_for_period(i);
 	}
+
+	// clear arrays when destroyed
 	tp[i].index = -1;
 	clear_trail(i);
 }

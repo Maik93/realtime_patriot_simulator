@@ -45,8 +45,8 @@ fixed deg2fix(int degree) {
 
 /**
  * Copy a time value in other variable.
- * @param td destination time variable
- * @param ts source time variable
+ * @param td: destination time variable
+ * @param ts: source time variable
  */
 void time_copy(struct timespec *td, struct timespec ts) {
 	td->tv_sec = ts.tv_sec;
@@ -55,8 +55,8 @@ void time_copy(struct timespec *td, struct timespec ts) {
 
 /**
  * Add tot milliseconds to a given time.
- * @param t  time that will be incremented
- * @param ms milliseconds to add to given time
+ * @param t:  time that will be incremented
+ * @param ms: milliseconds to add to given time
  */
 void time_add_ms(struct timespec *t, int ms) {
 	t->tv_sec += ms / 1000;
@@ -71,17 +71,18 @@ void time_add_ms(struct timespec *t, int ms) {
 float time_diff_ms(struct timespec t1, struct timespec t2) {
 	float dt;
 
-	if (t1.tv_sec < t2.tv_sec || (t1.tv_sec == t2.tv_sec && t1.tv_nsec < t2.tv_nsec)) return -1;
+	// Check consistency
+	if (t1.tv_sec < t2.tv_sec || (t1.tv_sec == t2.tv_sec && t1.tv_nsec < t2.tv_nsec))
+		return -1;
 
-	dt = (t1.tv_sec - t2.tv_sec) * 1000.0 + (t1.tv_nsec - t2.tv_nsec) / 1000000.0;
-	return dt;
+	return (t1.tv_sec - t2.tv_sec) * 1000.0 + (t1.tv_nsec - t2.tv_nsec) / 1000000.0;
 }
 
 /**
  * Compares two given times and returns 1 if first
  * 		is bigger, -1 if it's lower, 0 if equals to t2.
- * @param t1  first time
- * @param t2  second time
+ * @param t1: first time
+ * @param t2: second time
  */
 int time_cmp(struct timespec t1, struct timespec t2) {
 	if (t1.tv_sec > t2.tv_sec) return 1;
@@ -97,7 +98,7 @@ int time_cmp(struct timespec t1, struct timespec t2) {
 
 /**
  * Get the int value passed as argument to a task.
- * @param arg  is a casted void task_param structure
+ * @param arg: a casted void task_param structure
  */
 int get_task_index(void *arg) {
 	struct task_param *tp;
@@ -127,6 +128,7 @@ void set_period(int index) {
  * 		activation and, when awaken, updates activation time and deadline.
  */
 void wait_for_period(int index) {
+	// TODO: handle deadlines
 	deadline_miss(index);
 	tp[index].counts++;
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &(tp[index].at), NULL);
@@ -149,8 +151,8 @@ int deadline_miss(int index) {
 }
 
 /**
- * Find out the first element of tp array with index equals to -1 (free slot),
- 		and return its position. If none is found, return -1.
+ * Find out the first element of tp array with index equals to -1 (free slot)
+ * 		in given index range, and return its position. If nothing is found, return -1.
  */
 int find_free_slot(int min_index, int max_index) {
 	int i = min_index;
@@ -164,12 +166,12 @@ int find_free_slot(int min_index, int max_index) {
 
 /**
  * Create a new FIFO syncronous task with desired attributes and function.
- * @param  task_fun pointer to function that the task will execute
- * @param  period   repetition time, in milliseconds
- * @param  deadline max relative time from start to end of task
- * @param  priority 0-255 value reguarding importance of this task
- * @param  index    desired index to give to thread
- * @return          ID of just created task
+ * @param  task_fun: pointer to function that the task will execute
+ * @param  period:   repetition time, in milliseconds
+ * @param  deadline: max relative time from start to end of task
+ * @param  priority: 0-255 value reguarding importance of this task
+ * @param  index:    desired index to give to thread
+ * @return:          ID of just created task
  */
 pthread_t start_task(void *task_fun, int period, int deadline, int priority, int index) {
 	struct sched_param sched_par;
@@ -194,11 +196,11 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
 
 /**
  * Blocking function that ask all threads to terminate, wait them,
- * 		then print num of deadline miss for each task.
+ * 		then, for each task, print out number of deadline missed.
  */
 void kill_all_task() {
 	int i;
-	sigterm_tasks = 1;
+	sigterm_tasks = 1; // sends to all tasks a request to close
 	for (i = 0; i <= MAX_THREADS - 1; i++) { // Don't kill interpreter task
 		if (tp[i].index != -1) {
 			pthread_join(tid[i], NULL);
@@ -233,14 +235,14 @@ void kill_all_task() {
 /**
  * Blocking function that wait for an input from keyboard
  * 		and returns its scancode and ascii.
- * @param scan  scancode of the pressed key
- * @param ascii ascii code of the pressed key
+ * @param scan:  scancode of the pressed key
+ * @param ascii: ascii code of the pressed key
  */
 void get_keycodes(char *scan, char *ascii) {
 	int k;
-	k = readkey(); // block until a key is pressed
-	*ascii = k; // get ascii code
-	*scan = k >> 8; // get scan code
+	k = readkey();	// block until a key is pressed
+	*ascii = k;		// get ascii code
+	*scan = k >> 8;	// get scan code
 }
 
 /**
@@ -256,11 +258,11 @@ int listen_scancode() {
 /**
  * Reads a string from the keyboard and displays the echo in
  * 		graphic mode at position (x,y), color c and background b.
- * @param str complete string written by used (until enter)
- * @param x   x position for the grafical output
- * @param y   y position for the grafical output
- * @param c   color for the printed text
- * @param b   backgroud for the printed text
+ * @param str: will be populated by the complete string written by the user (until enter key)
+ * @param x:   x position for the grafical output
+ * @param y:   y position for the grafical output
+ * @param c:   color for the printed text
+ * @param b:   backgroud for the printed text
  */
 void get_string(char *str, int x, int y, int c, int b) {
 	char ascii, scan, s[2];
@@ -286,6 +288,7 @@ void activate_mouse() {
 	if (mouse_bmp != NULL) {
 		set_mouse_sprite(mouse_bmp);
 		set_mouse_sprite_focus(0, 0);
+		// move mouse at center of the screen
 		// position_mouse(WIN_WIDTH / 2, WIN_HEIGHT / 2);
 	}
 	else

@@ -1,3 +1,7 @@
+/**
+ * Trackers: they're attached by the radar on every object seen in the sky.
+ * Following this object, they try to evaluate velocities and accelerations.
+ */
 #include "trackers.h"
 
 // #include <stddef.h>
@@ -10,22 +14,16 @@
 #include "baseUtils.h"
 // #include "common.h"
 
-//-----------------------------------------------------
-// PUBLIC VARIABLES
-//-----------------------------------------------------
-struct point	current_points_tracked[MAX_TRACKERS];		// array of all currently tracked points
-int				tracker_is_active[MAX_TRACKERS];			// flag activity for trackers
-//-----------------------------------------------------
-// PRIVATE VARIABLES
-//-----------------------------------------------------
-int				tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES];// image buffer for trackers
-struct tracker	tracked_points[MAX_TRACKERS];				// history of last 3 points tracked for each tracker
+// public variables
+struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points
+int				tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
 
-//-----------------------------------------------------
-// PRIVATE FUNCTIONS
-//-----------------------------------------------------
+// private variables
+int tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
+struct tracker
+	tracked_points[MAX_TRACKERS]; // memory for trackers, containing points acquired and vel and acc evaluated
 
-// Store pixels contained in a square centered in (x0, y0) and width TRACKER_RES.
+// Store pixels contained in the square centered in (x0, y0) and width TRACKER_RES.
 void get_image(int tracker_i, int x0, int y0) {
 	int i, j; // image matrix indexes
 	int x, y; // graphical coordinates
@@ -52,7 +50,7 @@ struct point compute_centroid(int tracker_i) {
 	c_rel.y = 0;
 	for (i = 0; i < TRACKER_RES; i++)
 		for (j = 0; j < TRACKER_RES; j++) {
-			// radar sprite doesn't count
+			// radar and rocket_launcher sprites are excluded (BLU), as enemy missile trails (GREY)
 			if (tracker_view[tracker_i][i][j] != BKG &&
 			        tracker_view[tracker_i][i][j] != BLU &&
 			        tracker_view[tracker_i][i][j] != GREY) {
@@ -62,11 +60,12 @@ struct point compute_centroid(int tracker_i) {
 			}
 		}
 
+	// check if some point is seen, otherwise deactivate the tracker
 	if (n != 0) {
 		c_rel.x /= n;
 		c_rel.y /= n;
 
-		// put a green dot on evaluated centroid
+		// put a green dot on the evaluated centroid
 		tracker_view[tracker_i][c_rel.x + TRACKER_RES / 2][c_rel.y + TRACKER_RES / 2] = GREEN;
 	}
 	else tracker_is_active[tracker_i] = 0;
@@ -74,7 +73,7 @@ struct point compute_centroid(int tracker_i) {
 	return c_rel;
 }
 
-// Store last TSTORE points tracked to compute vel and acc.
+// Store last TSTORE points tracked.
 void store_point(int i) {
 	int k;
 
@@ -84,10 +83,10 @@ void store_point(int i) {
 
 	// don't store same coord.
 	if (current_points_tracked[i].x == tracked_points[i].x[k] ||
-	        current_points_tracked[i].y == tracked_points[i].y[k]) return;
+	        current_points_tracked[i].y == tracked_points[i].y[k])
+		return;
 
 	k = (k + 1) % TSTORE;
-
 	clock_gettime(CLOCK_MONOTONIC, &tracked_points[i].t[k]);
 	tracked_points[i].x[k] = current_points_tracked[i].x;
 	tracked_points[i].y[k] = current_points_tracked[i].y;
@@ -179,20 +178,16 @@ void evaluate_v_and_a(int tracker_i) {
 	       tracked_points[tracker_i].ax, tracked_points[tracker_i].ay);*/
 }
 
-//-----------------------------------------------------
-// PUBLIC FUNCTIONS
-//-----------------------------------------------------
-
 void *tracker_task(void* arg) {
-	int task_i, tracker_i;
+	int task_i, tracker_i; // indexes
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
 
 	tracked_points[tracker_i].n_samples = 0;
+	tracker_is_active[tracker_i] = 1;
 
 	// printf("Start tracking (%d, %d)\n", current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
-	tracker_is_active[tracker_i] = 1;
 
 	set_period(task_i);
 	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
@@ -211,7 +206,7 @@ void *tracker_task(void* arg) {
 	tp[task_i].index = -1;
 }
 
-// Shows what a tracker sees on right side of the screen.
+// Shows what each tracker sees in the right side of the screen.
 void tracker_display(int tracker_i) {
 	int i, j;	// image matrix indexes
 	int x0, y0;	// center to draw display

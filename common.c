@@ -1,3 +1,8 @@
+/**
+ * -----------------------------------------------------------------------
+ * Functions related to graphics and keyboard controls.
+ * -----------------------------------------------------------------------
+ */
 #include "common.h"
 
 #include <stdlib.h>
@@ -20,13 +25,6 @@ void draw_world() {
 	line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, RED); // top missile spawn
 	line(screen_buff, WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMINL),
 	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), RED); // left missile spawn
-}
-
-// Draws a nice radar symbol.
-void draw_radar_symbol() {
-	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 2, BLU);
-	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, BLU);
-	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, BLU);
 }
 
 // Graphical task.
@@ -60,7 +58,7 @@ void *graphic_task(void* arg) {
 		// this will hide a green dot in (0, 0) caused by trails
 		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);
 
-		// check how many enemy missiles
+		// warning for max enemy missiles reached
 		if (find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX)
 		        == -1) {
 			sprintf(str, "Max number of enemy missiles reached");
@@ -68,7 +66,7 @@ void *graphic_task(void* arg) {
 			           MENU_BOX_X1 + 20, MENU_BOX_Y2 - CHAR_HEIGHT - 20, RED, -1);
 		}
 
-		// check how many trackers
+		// warning for max trackers reached
 		if (find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX) == -1) {
 			sprintf(str, "Max number of trackers reached");
 			textout_ex(screen_buff, font, str,
@@ -80,6 +78,7 @@ void *graphic_task(void* arg) {
 			if (tp[i].index != -1)
 				tracker_display(i - TRACKER_BASE_INDEX);
 
+		// TODO: handle deadlines
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
 
@@ -89,6 +88,7 @@ void *graphic_task(void* arg) {
 		// circlefill(screen_buff, 253, 319, 10, LBLU);
 		// circlefill(screen_buff, 190, 404, 10, WHITE);
 
+		// update screen with the content of screen_buff
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
 		// if not already running, starts radar_task and rocket_laucher_task
@@ -103,44 +103,39 @@ void *graphic_task(void* arg) {
 
 // Keyboard interpeter task.
 void *interp(void* arg) {
-	int a, scan, new_i;
+	int a, scan, new_missile_index;
 	a = get_task_index(arg);
 	set_period(a);
 	while (!sigterm_tasks) {
 		scan = listen_scancode();
 		// if (scan != 0) printf("Readed keyscan: %d\n", (int)scan);
 		switch (scan) {
-		/*case 3: // C key
-			for (int j = 0; j < active_missiles; ++j)
-				printf("Logging missile %d: x=%f y=%f v=%d va=%f.\n",
-				       j, missile[j].x, missile[j].y, (int)missile[j].v, missile[j].alpha);
-			break;*/
-		case 24: // X key
+		case 24: // X key - turn on/off trails for enemy missiles
 			tflag = !tflag;
 			printf("tflag setted to %d\n", tflag);
 			break;
 
-		case KEY_SPACE:
-			new_i = find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX);
-			if (new_i != -1)
-				start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_i);
+		case KEY_SPACE: // spawn a new enemy missile
+			new_missile_index = find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX);
+			if (new_missile_index != -1)
+				start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
 			break;
 
 		case KEY_UP:
-			// TODO
+			// TODO: something
 			break;
 		case KEY_DOWN:
-			// TODO
+			// TODO: something
 			break;
 
-		case KEY_LEFT:
+		case KEY_LEFT: // reduce trail length
 			if (tl > 10) tl--;
 			break;
-		case KEY_RIGHT:
+		case KEY_RIGHT: // increment trail length
 			if (tl < TLEN) tl++;
 			break;
 
-		case KEY_ESC:
+		case KEY_ESC: // close everything
 			kill_all_task();
 			break;
 
