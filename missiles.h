@@ -4,6 +4,8 @@
 #include "baseUtils.h"
 #include "common.h"
 
+// extern float vx[MAX_ENEMY_MISSILES], vy[MAX_ENEMY_MISSILES];
+
 //-----------------------------------------------------
 // GRAPHICAL CONSTANTS
 //-----------------------------------------------------

@@ -25,6 +25,10 @@
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS
 //-----------------------------------------------------
+int world2abs_x(int x);
+int world2abs_y(int y);
+int abs2world_x(int x);
+int abs2world_y(int y);
 void *graphic_task(void* arg);
 void *interp(void* arg);
 

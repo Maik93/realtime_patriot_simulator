@@ -14,6 +14,7 @@ int main(int argc, char const *argv[]) {
 	init(0);			// without mouse integration
 	srand(time(NULL));	// initialize random generator
 
+	// TODO: add PER and DEL constants
 	start_task(graphic_task, 20, 20, 10, GRAPHIC_INDEX);
 	// and it will spawn radar and rocket_laucher tasks
 

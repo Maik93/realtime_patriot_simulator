@@ -18,6 +18,22 @@
 #include "trackers.h"
 #include "rocket_laucher.h"
 
+int world2abs_x(int x) {
+	return WORLD_BOX_X1 + x;
+}
+
+int world2abs_y(int y) {
+	return WORLD_BOX_Y2 - y;
+}
+
+int abs2world_x(int x) {
+	return x - WORLD_BOX_X1;
+}
+
+int abs2world_y(int y) {
+	return WORLD_BOX_Y2 - y;
+}
+
 // Draws word box.
 void draw_world() {
 	rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
@@ -87,6 +103,12 @@ void *graphic_task(void* arg) {
 		// circlefill(screen_buff, 338, 404, 10, GREEN);
 		// circlefill(screen_buff, 253, 319, 10, LBLU);
 		// circlefill(screen_buff, 190, 404, 10, WHITE);
+
+		// next point predicted
+		// circle(screen_buff, world2abs_x(pred_x), world2abs_y(pred_y), 5, BLU);
+		float delta_t = TSCALE * (float)20 / 1000;
+		for (i = 0; i < MAX_TRACKERS; i++)
+			draw_predictions(i, delta_t);
 
 		// update screen with the content of screen_buff
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);

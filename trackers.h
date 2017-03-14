@@ -5,6 +5,8 @@
 #include "baseUtils.h"
 #include "common.h"
 
+extern float pred_x, pred_y;
+
 //-----------------------------------------------------
 // TRACKER PARAMETERS AND DISPLAY POSITIONS
 //-----------------------------------------------------
@@ -23,7 +25,7 @@
 //-----------------------------------------------------
 // TASK CONSTANTS
 //-----------------------------------------------------
-#define TRACKER_PER		20			// task period in ms - DBG best is 60 for evaluate_v_and_a
+#define TRACKER_PER		20			// task period in ms
 #define TRACKER_DREL	TRACKER_PER	// relative deadline in ms
 #define TRACKER_PRI		50			// task priority
 
@@ -36,8 +38,8 @@ struct point {
 };
 struct tracker {	// circular buffer for last TSTORE points acquired + vel and acc measured
 	int top;		// index of the current point element
-	int x[TSTORE];	// array for x coordinates
-	int y[TSTORE];	// array for y coordinates
+	int x[TSTORE];	// array for x coordinates (world coord)
+	int y[TSTORE];	// array for y coordinates (world coord)
 	struct timespec t[TSTORE]; // time of acquisition of coord. Allows more accuracy than just TRACKER_PER
 	int n_samples;	// number of points in this circular buffer (matters only for first steps)
 	float vx;		// estimated velecity for x and y
@@ -57,6 +59,7 @@ extern int tracker_is_active[MAX_TRACKERS];
 // PUBLIC FUNCTIONS
 //-----------------------------------------------------
 void tracker_display(int tracker_i);
+void draw_predictions(int tracker_i, float delta_t);
 void *tracker_task(void* arg);
 
 #endif

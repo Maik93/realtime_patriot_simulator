@@ -14,8 +14,10 @@
 #include "baseUtils.h"
 // #include "common.h"
 
+float pred_x, pred_y;
+
 // public variables
-struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points
+struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points (abs. coord)
 int				tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
 
 // private variables
@@ -88,14 +90,14 @@ void store_point(int i) {
 
 	k = (k + 1) % TSTORE;
 	clock_gettime(CLOCK_MONOTONIC, &tracked_points[i].t[k]);
-	tracked_points[i].x[k] = current_points_tracked[i].x;
-	tracked_points[i].y[k] = current_points_tracked[i].y;
+	tracked_points[i].x[k] = abs2world_x(current_points_tracked[i].x);
+	tracked_points[i].y[k] = abs2world_y(current_points_tracked[i].y);
 	tracked_points[i].top = k;
 
 	tracked_points[i].n_samples++;
 }
 
-float linear_curve_fitting(int tracker_i) {
+/*float linear_curve_fitting(int tracker_i) {
 	int i, j, k, prev_k, y[TSTORE], sumy = 0;
 	float a0, a1, x[TSTORE], sumx = 0, sumxy = 0, sumx2 = 0;
 
@@ -124,25 +126,61 @@ float linear_curve_fitting(int tracker_i) {
 
 	printf("Evaluated V=%f\n", a1);
 	return a1;
-}
+}*/
 
 // void parab_curve_fitting(){
 
 // }
 
-void evaluate_v_and_a(int tracker_i) {
-	int k, prev_k, prev_prev_k;	// previous index point and its previous
-	float vx_prev, vy_prev;	// previous velocity, needed to evaluate acc
-	float dt1, dt2;			// delta t from k to prev_k and from prev_k to prev_prev_k
+void draw_predictions(int tracker_i, float delta_t) {
+	float x, y, vy;
+	int k, prev_k;
 
-	if (tracked_points[tracker_i].n_samples < TSTORE) return; // not enough points
+	k = tracked_points[tracker_i].top;
+	prev_k = (k - 1 + TSTORE) % TSTORE;
+
+	x = tracked_points[tracker_i].x[k];
+	y = tracked_points[tracker_i].y[k];
+	vy = tracked_points[tracker_i].vy;
+
+	int c = 0;
+	while (y > 0 && c < 200) {
+		c++;
+		x += tracked_points[tracker_i].vx * delta_t;
+		y += (0.5 * tracked_points[tracker_i].ay * delta_t + vy) * delta_t;
+		vy += tracked_points[tracker_i].ay * delta_t;
+
+		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
+	}
+}
+
+void evaluate_v_and_a(int task_i, int tracker_i) {
+	int k, prev_k, prev_prev_k;	// previous index point and its previous
+	float vx_prev, vy_prev;		// previous velocity, needed to evaluate acc
+	float dt1, dt2;				// delta t from k to prev_k and from prev_k to prev_prev_k
+
+	// if (tracked_points[tracker_i].n_samples < TSTORE) return; // not enough points
+	if (tracked_points[tracker_i].n_samples < 2) return; // not enough points
 
 	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + TSTORE) % TSTORE;
 	prev_prev_k = (prev_k - 1 + TSTORE) % TSTORE;
 
-	dt1 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
-	dt2 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[prev_k], tracked_points[tracker_i].t[prev_prev_k]) / 1000.0;
+	// dt1 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
+	// dt2 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[prev_k], tracked_points[tracker_i].t[prev_prev_k]) / 1000.0;
+	float dt = TSCALE * (float)get_task_period(task_i) / 1000;
+
+	tracked_points[tracker_i].ax = 0;
+	tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt;
+	pred_x = tracked_points[tracker_i].vx * dt + tracked_points[tracker_i].x[k];
+
+	tracked_points[tracker_i].ay = -G0;
+	tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
+	// float pred_vy = tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy;
+	// pred_y = pred_vy * dt + tracked_points[tracker_i].y[k];
+	pred_y = (1 / 2 * tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy) * dt + tracked_points[tracker_i].y[k];
+
+	// printf("Predicted (%f; %f)\t", round(pred_x), round(pred_y));
 
 	// Eulerian method
 	/*tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt1;
@@ -167,13 +205,13 @@ void evaluate_v_and_a(int tracker_i) {
 	     (tracked_points[tracker_i].y[prev_prev_k] - tracked_points[tracker_i].y[prev_k]) / dt2)
 	    * 2 / (dt1 + dt2);*/
 
-	tracked_points[tracker_i].vx = linear_curve_fitting(tracker_i);
+	/*tracked_points[tracker_i].vx = linear_curve_fitting(tracker_i);
 	tracked_points[tracker_i].vy = -1;
 	tracked_points[tracker_i].ax = 0;
-	tracked_points[tracker_i].ay = -G0;
+	tracked_points[tracker_i].ay = -G0;*/
 
 	/*printf("vx: %f\tvy: %f\tax: %f\tay: %f\n",
-	       tracked_points[tracker_i].x[k], tracked_points[tracker_i].x[prev_k],
+	//       tracked_points[tracker_i].x[k], tracked_points[tracker_i].x[prev_k],
 	       tracked_points[tracker_i].vx, tracked_points[tracker_i].vy,
 	       tracked_points[tracker_i].ax, tracked_points[tracker_i].ay);*/
 }
@@ -193,12 +231,12 @@ void *tracker_task(void* arg) {
 	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
 		get_image(tracker_i, current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 
-		// now compute centroid, then update current_points_tracked (the center to follow)
-		struct point c = compute_centroid(tracker_i);
-		current_points_tracked[tracker_i].x += c.x;
+		// DBG: maybe there are different pixels
+		struct point c = compute_centroid(tracker_i); // relative from center of tracking box
+		current_points_tracked[tracker_i].x += c.x; // altering the center to follow
 		current_points_tracked[tracker_i].y += c.y;
 		store_point(tracker_i);
-		evaluate_v_and_a(tracker_i);
+		evaluate_v_and_a(task_i, tracker_i);
 
 		wait_for_period(task_i);
 	}

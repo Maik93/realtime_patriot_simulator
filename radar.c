@@ -123,8 +123,8 @@ void draw_radar_display() {
 	// draws all detected distances
 	for (i = 0; i < ARES; i++) {
 		// convert from absolute position to radar's origin
-		rx = radar[i].x - RPOSX_W - WORLD_BOX_X1;
-		ry = WORLD_BOX_Y2 - RPOSY_W - radar[i].y;
+		rx = abs2world_x(radar[i].x - RPOSX_W);
+		ry = abs2world_y(radar[i].y + RPOSY_W);
 
 		// locate it in radar display, absolute referring system
 		ax = RDISPLAY_ORIGIN_X + round(rx * RSCALE);

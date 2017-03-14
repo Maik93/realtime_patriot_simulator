@@ -17,6 +17,9 @@
 #include "common.h"
 // #include "radar_and_trackers.h"
 
+// DBG
+// float vx[MAX_ENEMY_MISSILES], vy[MAX_ENEMY_MISSILES];
+
 struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_ENEMY_MISSILES];		// trail buffer
 
@@ -43,7 +46,7 @@ void clear_trail(int i) {
 		trail[i].x[j] = 0;
 		trail[i].y[j] = 0;
 	}
-	trail[i].top=0;
+	trail[i].top = 0;
 }
 
 // Draw trail of missile i, for the length of w.
@@ -52,8 +55,8 @@ void draw_trail(int i, int w) {
 	int x, y; // positions
 	for (j = 0; j < w; j++) {
 		k = (trail[i].top + TLEN - j) % TLEN;
-		x = WORLD_BOX_X1 + trail[i].x[k];
-		y = WORLD_BOX_Y2 - trail[i].y[k];
+		x = world2abs_x(trail[i].x[k]);
+		y = world2abs_y(trail[i].y[k]);
 		putpixel(screen_buff, x, y, TCOL);
 	}
 }
@@ -99,10 +102,12 @@ void draw_missile(int i) {
 	p3y = missile[i].y - MW * ca;
 
 	triangle(screen_buff,
-	         WORLD_BOX_X1 + p1x, WORLD_BOX_Y2 - p1y, // nose point
-	         WORLD_BOX_X1 + p2x, WORLD_BOX_Y2 - p2y, // left wing
-	         WORLD_BOX_X1 + p3x, WORLD_BOX_Y2 - p3y, // right wing
+	         world2abs_x(p1x), world2abs_y(p1y), // nose point
+	         world2abs_x(p2x), world2abs_y(p2y), // left wing
+	         world2abs_x(p3x), world2abs_y(p3y), // right wing
 	         missile[i].c);
+	// DBG
+	//  circlefill(screen_buff, world2abs_x(missile[i].x), world2abs_y(missile[i].y), ML, RED);
 }
 
 // A missile can spawn from top or left side, each one with 1/2 of probability.
@@ -130,7 +135,9 @@ void init_missile(int i) {
 	missile[i].r = ML;
 
 	// DBG
-	printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
+	// printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
+	// vx[i] = missile[i].vx;
+	// vy[i] = missile[i].vy;
 }
 
 void *missile_task(void* arg) {
@@ -150,6 +157,9 @@ void *missile_task(void* arg) {
 
 		handle_corners(i);
 		store_trail(i);
+
+		// DBG
+		// printf("actual (%f; %f)\n", round(missile[i].x), round(missile[i].y));
 
 		wait_for_period(i);
 	}
