@@ -5,7 +5,7 @@
 #include "baseUtils.h"
 #include "common.h"
 
-extern float pred_x, pred_y;
+// extern float pred_x, pred_y;
 
 //-----------------------------------------------------
 // TRACKER PARAMETERS AND DISPLAY POSITIONS

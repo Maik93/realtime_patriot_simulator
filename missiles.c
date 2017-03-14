@@ -115,7 +115,8 @@ void init_missile(int i) {
 	float r, v;
 
 	r = frand(0, 2);
-	if (r < 1) { // left side
+	// if (r < 1) { // left side
+	if (1) { // DBG
 		missile[i].x = ML;
 		missile[i].y = frand(YMINL, YMAXL);
 		missile[i].alpha = frand(AMINL, AMAXL);
@@ -159,7 +160,8 @@ void *missile_task(void* arg) {
 		store_trail(i);
 
 		// DBG
-		// printf("actual (%f; %f)\n", round(missile[i].x), round(missile[i].y));
+		// if (i == 0)
+		printf("Actual v = (%f; %f)\n", missile[i].vx, missile[i].vy);
 
 		wait_for_period(i);
 	}

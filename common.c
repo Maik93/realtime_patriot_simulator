@@ -106,9 +106,11 @@ void *graphic_task(void* arg) {
 
 		// next point predicted
 		// circle(screen_buff, world2abs_x(pred_x), world2abs_y(pred_y), 5, BLU);
+
 		float delta_t = TSCALE * (float)20 / 1000;
 		for (i = 0; i < MAX_TRACKERS; i++)
-			draw_predictions(i, delta_t);
+			if (tp[i].index != -1)
+				draw_predictions(i, delta_t/3);
 
 		// update screen with the content of screen_buff
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);

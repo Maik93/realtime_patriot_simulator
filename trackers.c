@@ -14,7 +14,7 @@
 #include "baseUtils.h"
 // #include "common.h"
 
-float pred_x, pred_y;
+// float pred_x, pred_y;
 
 // public variables
 struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points (abs. coord)
@@ -97,44 +97,11 @@ void store_point(int i) {
 	tracked_points[i].n_samples++;
 }
 
-/*float linear_curve_fitting(int tracker_i) {
-	int i, j, k, prev_k, y[TSTORE], sumy = 0;
-	float a0, a1, x[TSTORE], sumx = 0, sumxy = 0, sumx2 = 0;
-
-	k = (tracked_points[tracker_i].top + 1) % TSTORE; // start from older one
-	prev_k = k;
-	for (j = 0; j < TSTORE; j++) {
-		x[j] = TSCALE *
-		       time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
-		y[j] = tracked_points[tracker_i].x[k];
-
-		// printf("dt=%f\tX=%d\n", x[j], y[j]);
-
-		k = (k + 1) % TSTORE;
-		prev_k = (k - 1 + TSTORE) % TSTORE;
-	}
-
-	for (i = 0; i < TSTORE; i++) {
-		sumx += x[i];
-		sumx2 += x[i] * x[i];
-		sumy += y[i];
-		sumxy += x[i] * y[i];
-	}
-
-	a0 = ((sumx2 * sumy - sumx * sumxy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
-	a1 = ((TSTORE * sumxy - sumx * sumy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
-
-	printf("Evaluated V=%f\n", a1);
-	return a1;
-}*/
-
-// void parab_curve_fitting(){
-
-// }
-
 void draw_predictions(int tracker_i, float delta_t) {
 	float x, y, vy;
 	int k, prev_k;
+
+	// if (tracked_points[tracker_i].vx == 0) return;
 
 	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + TSTORE) % TSTORE;
@@ -144,7 +111,7 @@ void draw_predictions(int tracker_i, float delta_t) {
 	vy = tracked_points[tracker_i].vy;
 
 	int c = 0;
-	while (y > 0 && c < 200) {
+	while (y > 0 && c < 500) {
 		c++;
 		x += tracked_points[tracker_i].vx * delta_t;
 		y += (0.5 * tracked_points[tracker_i].ay * delta_t + vy) * delta_t;
@@ -152,6 +119,40 @@ void draw_predictions(int tracker_i, float delta_t) {
 
 		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
 	}
+}
+
+// Cause of ax = 0, vx is constant. Evaluating the best aproximating line for x positions,
+// I can exctract vx as the coefficent of the first-order term. Mean squar error minimization is used.
+float evaluate_vx(int tracker_i) {
+	int i, j, k, first_k; // indexes
+	float a0, a1; // coefficients of the fitting line
+	float x[TSTORE], sumx = 0, sumxy = 0, sumx2 = 0;
+	int y[TSTORE], sumy = 0;
+
+	first_k = (tracked_points[tracker_i].top + 1) % TSTORE;
+	k = first_k; // start from older one
+
+	// load points to fit: y is hte horizontal position of missile at time x
+	for (j = 0; j < TSTORE; j++) {
+		x[j] = TSCALE *
+		       time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[first_k]) / 1000.0;
+		y[j] = tracked_points[tracker_i].x[k];
+
+		k = (k + 1) % TSTORE;
+	}
+
+	for (i = 0; i < TSTORE; i++) {
+		sumx += x[i];
+		sumx2 += x[i] * x[i];
+		sumy += y[i];
+		sumxy += x[i] * y[i];
+	}
+
+	// a0 = ((sumx2 * sumy - sumx * sumxy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
+	a1 = ((TSTORE * sumxy - sumx * sumy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
+
+	// printf("From fitting: Vx = %f\n", a1);
+	return a1;
 }
 
 void evaluate_v_and_a(int task_i, int tracker_i) {
@@ -162,25 +163,39 @@ void evaluate_v_and_a(int task_i, int tracker_i) {
 	// if (tracked_points[tracker_i].n_samples < TSTORE) return; // not enough points
 	if (tracked_points[tracker_i].n_samples < 2) return; // not enough points
 
+	// if (tracked_points[tracker_i].x[k] == tracked_points[tracker_i].x[prev_k]) return;
+
 	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + TSTORE) % TSTORE;
 	prev_prev_k = (prev_k - 1 + TSTORE) % TSTORE;
 
-	// dt1 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
-	// dt2 = TSCALE * time_diff_ms(tracked_points[tracker_i].t[prev_k], tracked_points[tracker_i].t[prev_prev_k]) / 1000.0;
-	float dt = TSCALE * (float)get_task_period(task_i) / 1000;
+	// float dt = TSCALE * (float)get_task_period(task_i) / 1000;
+	float dt = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
 
 	tracked_points[tracker_i].ax = 0;
-	tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt;
-	pred_x = tracked_points[tracker_i].vx * dt + tracked_points[tracker_i].x[k];
+	// tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt;
+	tracked_points[tracker_i].vx = evaluate_vx(tracker_i);
+	// pred_x = tracked_points[tracker_i].vx * dt + tracked_points[tracker_i].x[k];
 
 	tracked_points[tracker_i].ay = -G0;
 	tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
-	// float pred_vy = tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy;
-	// pred_y = pred_vy * dt + tracked_points[tracker_i].y[k];
-	pred_y = (1 / 2 * tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy) * dt + tracked_points[tracker_i].y[k];
+	/*float prev_vy;
+	if (tracked_points[tracker_i].vy == 0)
+		prev_vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
+	else
+		prev_vy = tracked_points[tracker_i].vy;
+	tracked_points[tracker_i].vy = tracked_points[tracker_i].ay * dt + prev_vy;*/
 
-	// printf("Predicted (%f; %f)\t", round(pred_x), round(pred_y));
+	/*float pred_vy = tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy;
+	pred_y = pred_vy * dt + tracked_points[tracker_i].y[k];*/
+	// pred_y = (1 / 2 * tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy) * dt + tracked_points[tracker_i].y[k];
+
+	// DBG
+	// if (tracker_i == 0) {
+	printf("Predicted v = (%f; %f)\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
+	/*if (tracked_points[tracker_i].vx == 0)
+		printf("it seems that vx is zero!\n");*/
+	// }
 
 	// Eulerian method
 	/*tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt1;
