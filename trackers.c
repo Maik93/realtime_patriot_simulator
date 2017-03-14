@@ -132,7 +132,7 @@ float evaluate_vx(int tracker_i) {
 	first_k = (tracked_points[tracker_i].top + 1) % TSTORE;
 	k = first_k; // start from older one
 
-	// load points to fit: y is hte horizontal position of missile at time x
+	// load points to fit: y is the horizontal position of missile at time x
 	for (j = 0; j < TSTORE; j++) {
 		x[j] = TSCALE *
 		       time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[first_k]) / 1000.0;
@@ -155,6 +155,42 @@ float evaluate_vx(int tracker_i) {
 	return a1;
 }
 
+float evaluate_vy(int tracker_i) {
+	int i, j, k, first_k; // indexes
+	float a0, a1, a2; // coefficients of the fitting parabole
+	float x[TSTORE], sumx = 0, sumxy = 0, sumx2 = 0, sumx3 = 0, p, q;
+	int y[TSTORE], sumy = 0;
+
+	first_k = (tracked_points[tracker_i].top + 1) % TSTORE;
+	k = first_k; // start from older one
+
+	// load points to fit: y is the vertical position of missile at time x
+	for (j = 0; j < TSTORE; j++) {
+		x[j] = TSCALE *
+		       time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[first_k]) / 1000.0;
+		y[j] = tracked_points[tracker_i].y[k];
+
+		k = (k + 1) % TSTORE;
+	}
+
+	for (i = 0; i < TSTORE; i++) {
+		sumx += x[i];
+		sumx2 += x[i] * x[i];
+		sumx3 += x[i] * x[i] * x[i];
+		sumy += y[i];
+		sumxy += x[i] * y[i];
+	}
+	a2 = -G0 / 2;
+	p = sumy - a2 * sumx2;
+	q = sumxy - a2 * sumx3;
+
+	// a0 = ((sumx2 * p - sumx * q) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
+	a1 = ((TSTORE * q - sumx * p) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
+
+	printf("From fitting: Vy = %f\n", a1);
+	return a1;
+}
+
 void evaluate_v_and_a(int task_i, int tracker_i) {
 	int k, prev_k, prev_prev_k;	// previous index point and its previous
 	float vx_prev, vy_prev;		// previous velocity, needed to evaluate acc
@@ -169,7 +205,6 @@ void evaluate_v_and_a(int task_i, int tracker_i) {
 	prev_k = (k - 1 + TSTORE) % TSTORE;
 	prev_prev_k = (prev_k - 1 + TSTORE) % TSTORE;
 
-	// float dt = TSCALE * (float)get_task_period(task_i) / 1000;
 	float dt = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
 
 	tracked_points[tracker_i].ax = 0;
@@ -178,24 +213,12 @@ void evaluate_v_and_a(int task_i, int tracker_i) {
 	// pred_x = tracked_points[tracker_i].vx * dt + tracked_points[tracker_i].x[k];
 
 	tracked_points[tracker_i].ay = -G0;
-	tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
-	/*float prev_vy;
-	if (tracked_points[tracker_i].vy == 0)
-		prev_vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
-	else
-		prev_vy = tracked_points[tracker_i].vy;
-	tracked_points[tracker_i].vy = tracked_points[tracker_i].ay * dt + prev_vy;*/
-
-	/*float pred_vy = tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy;
-	pred_y = pred_vy * dt + tracked_points[tracker_i].y[k];*/
+	// tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
+	tracked_points[tracker_i].vy = evaluate_vy(tracker_i);
 	// pred_y = (1 / 2 * tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy) * dt + tracked_points[tracker_i].y[k];
 
 	// DBG
-	// if (tracker_i == 0) {
-	printf("Predicted v = (%f; %f)\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
-	/*if (tracked_points[tracker_i].vx == 0)
-		printf("it seems that vx is zero!\n");*/
-	// }
+	// printf("Predicted v = (%f; %f)\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
 
 	// Eulerian method
 	/*tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt1;
