@@ -48,6 +48,16 @@ void *graphic_task(void* arg) {
 	int i, a;
 	char str[50];
 
+	// convert to transparent, then scale down a bitmap file
+	/*int n = 10;
+	char file_name_in[30], file_name_out[30];
+	for (i = 1; i <= n; i++) {
+		sprintf(file_name_in, "explosion/%d.bmp", i);
+		sprintf(file_name_out, "explosion/%d.bmp", i);
+		make_bmp_transp(file_name_in, file_name_out);
+		make_bmp_half(file_name_in, file_name_out);
+	}*/
+
 	a = get_task_index(arg);
 	set_period(a);
 	while (!sigterm_tasks) {
@@ -63,7 +73,7 @@ void *graphic_task(void* arg) {
 
 		// enemy missiles
 		for (i = 0; i < MAX_ENEMY_MISSILES; i++) {
-			if (!missile[i].destroied && tp[i].index != -1) {
+			if (tp[i].index != -1) {
 				draw_missile(i);
 				if (tflag) draw_trail(i, tl);
 			}
@@ -110,7 +120,7 @@ void *graphic_task(void* arg) {
 		float delta_t = TSCALE * (float)20 / 1000;
 		for (i = 0; i < MAX_TRACKERS; i++)
 			if (tp[i].index != -1)
-				draw_predictions(i, delta_t/3);
+				draw_predictions(i, delta_t / 3);
 
 		// update screen with the content of screen_buff
 		blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);

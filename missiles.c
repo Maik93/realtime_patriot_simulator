@@ -61,15 +61,16 @@ void draw_trail(int i, int w) {
 	}
 }
 
-// Makes disappear a missile from graphics.
-void missile_vanish(int index) {
-	missile[index].destroied = 1;
-}
-
 // What to do when a missile explode.
 void missile_explode(int index) {
-	missile_vanish(index);
-	// TODO: add some explosions!
+	// this starts explosion animation in graphic task (draw_missile)
+	missile[index].in_destruction = 1;
+}
+
+// Makes disappear a missile from graphics, without exploding.
+void missile_vanish(int index) {
+	missile[index].in_destruction = DESTR_BMP_NUM + 1;
+	tp[index].index = -1;
 }
 
 // A missile should vanish if outside top, left or right borders, explode if bottom.
@@ -91,23 +92,41 @@ void draw_missile(int i) {
 	float p1x, p1y, p2x, p2y, p3x, p3y; // world coord.
 	float ca, sa;
 
-	ca = cos(missile[i].alpha);
-	sa = sin(missile[i].alpha);
+	// for explosions
+	BITMAP* explosion_bmp;
+	char explosion_file[30];
 
-	p1x = missile[i].x + ML * ca; // nose point
-	p1y = missile[i].y + ML * sa;
-	p2x = missile[i].x - MW * sa; // left wing
-	p2y = missile[i].y + MW * ca;
-	p3x = missile[i].x + MW * sa; // right wing
-	p3y = missile[i].y - MW * ca;
+	if (missile[i].in_destruction == 0) {
+		ca = cos(missile[i].alpha);
+		sa = sin(missile[i].alpha);
 
-	triangle(screen_buff,
-	         world2abs_x(p1x), world2abs_y(p1y), // nose point
-	         world2abs_x(p2x), world2abs_y(p2y), // left wing
-	         world2abs_x(p3x), world2abs_y(p3y), // right wing
-	         missile[i].c);
-	// DBG
-	//  circlefill(screen_buff, world2abs_x(missile[i].x), world2abs_y(missile[i].y), ML, RED);
+		p1x = missile[i].x + ML * ca; // nose point
+		p1y = missile[i].y + ML * sa;
+		p2x = missile[i].x - MW * sa; // left wing
+		p2y = missile[i].y + MW * ca;
+		p3x = missile[i].x + MW * sa; // right wing
+		p3y = missile[i].y - MW * ca;
+
+		triangle(screen_buff,
+		         world2abs_x(p1x), world2abs_y(p1y), // nose point
+		         world2abs_x(p2x), world2abs_y(p2y), // left wing
+		         world2abs_x(p3x), world2abs_y(p3y), // right wing
+		         missile[i].c);
+	}
+	else {
+		sprintf(explosion_file, "explosion/%d.bmp", missile[i].in_destruction);
+		explosion_bmp = load_bitmap(explosion_file, NULL);
+		draw_sprite(screen_buff, explosion_bmp,
+		            world2abs_x(missile[i].x) - explosion_bmp->w / 2,
+		            world2abs_y(missile[i].y) - explosion_bmp->h / 2);
+		destroy_bitmap(explosion_bmp);
+
+		missile[i].in_destruction++;
+
+		// if we're at last animation step, flag missile task as free
+		if (missile[i].in_destruction > DESTR_BMP_NUM)
+			tp[i].index = -1;
+	}
 }
 
 // A missile can spawn from top or left side, each one with 1/2 of probability.
@@ -131,7 +150,7 @@ void init_missile(int i) {
 
 	missile[i].vx = v * cos(missile[i].alpha);
 	missile[i].vy = v * sin(missile[i].alpha);
-	missile[i].destroied = 0;
+	missile[i].in_destruction = 0;
 	missile[i].c = RED;
 	missile[i].r = ML;
 
@@ -150,7 +169,7 @@ void *missile_task(void* arg) {
 	dt = TSCALE * (float)get_task_period(i) / 1000;
 
 	set_period(i);
-	while (!sigterm_tasks && !missile[i].destroied) {
+	while (!sigterm_tasks && missile[i].in_destruction == 0) {
 		missile[i].vy -= G0 * dt;
 		missile[i].y += missile[i].vy * dt - G0 * dt * dt / 2;
 		missile[i].x += missile[i].vx * dt;
@@ -160,13 +179,13 @@ void *missile_task(void* arg) {
 		store_trail(i);
 
 		// DBG
-		// if (i == 0)
-		printf("Actual v = (%f; %f)\n", missile[i].vx, missile[i].vy);
+		// printf("Actual v = (%f; %f)\n", missile[i].vx, missile[i].vy);
 
 		wait_for_period(i);
 	}
 
-	// clear arrays when destroyed
-	tp[i].index = -1;
-	clear_trail(i);
+	// the missile stops to move, but I don't flag its task slot as free,
+	// because I've to make explosion animation
+
+	clear_trail(i); // TODO: clear predicions too
 }

@@ -12,6 +12,7 @@
 #define ML		15		// length of the missile
 #define MW		6		// width of the missile
 #define TCOL	GREY	// trail color
+#define DESTR_BMP_NUM 10 // number of bitmaps used in missile destruction animation
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
@@ -47,7 +48,7 @@ struct missile {	// missile structure
 	float vx;		// x velocity (m/s)
 	float vy;		// y velocity (m/s)
 	float alpha;	// orientation angle (rads)
-	int destroied;	// flag for collisions ecc
+	int in_destruction; // if 0 the missile is intact, otherwise it represents explosion animation step (max 10)
 };
 struct cbuf {		// circular buffer structure
 	int top;		// index of the last element inserted

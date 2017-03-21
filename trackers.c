@@ -187,7 +187,8 @@ float evaluate_vy(int tracker_i) {
 	// a0 = ((sumx2 * p - sumx * q) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
 	a1 = ((TSTORE * q - sumx * p) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
 
-	printf("From fitting: Vy = %f\n", a1);
+	// DBG
+	// printf("From fitting: Vy = %f\n", a1);
 	return a1;
 }
 

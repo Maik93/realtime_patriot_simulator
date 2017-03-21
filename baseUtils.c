@@ -280,6 +280,49 @@ void get_string(char *str, int x, int y, int c, int b) {
 	str[i] = '\0';
 }
 
+// Take a bitmap and convert every white pixel to 0 (transparent).
+void make_bmp_transp(char file_name_in[30], char file_name_out[30]) {
+	BITMAP *bmp_in, *bmp_out; // pointers to bitmap
+	PALETTE pal; // color palette
+	int x, y, c;
+	int transp, white;
+
+	white = 15;
+	transp = 0;
+
+	bmp_in = load_bitmap(file_name_in, NULL);
+	bmp_out = create_bitmap(bmp_in->w, bmp_in->h);
+	for (x = 0; x < bmp_in->w; x++)
+		for (y = 0; y < bmp_in->h; y++) {
+			c = getpixel(bmp_in, x, y);
+			if (c == white) c = transp;
+			putpixel(bmp_out, x, y, c);
+		}
+	get_palette(pal);
+	save_bitmap(file_name_out, bmp_out, pal);
+	destroy_bitmap(bmp_in);
+	destroy_bitmap(bmp_out);
+}
+
+// Take a bitmap and scale it to half of its original dimensions.
+void make_bmp_half(char file_name_in[30], char file_name_out[30]) {
+	BITMAP *bmp_in, *bmp_out; // pointers to bitmap
+	PALETTE pal; // color palette
+	int x, y, c;
+
+	bmp_in = load_bitmap(file_name_in, NULL);
+	bmp_out = create_bitmap(bmp_in->w / 2, bmp_in->h / 2);
+	for (x = 0; x < bmp_in->w; x = x + 2)
+		for (y = 0; y < bmp_in->h; y = y + 2) {
+			c = getpixel(bmp_in, x, y);
+			putpixel(bmp_out, x / 2, y / 2, c);
+		}
+	get_palette(pal);
+	save_bitmap(file_name_out, bmp_out, pal);
+	destroy_bitmap(bmp_in);
+	destroy_bitmap(bmp_out);
+}
+
 // Enable mouse integration, handled by hardware, with custom icon.
 void activate_mouse() {
 	BITMAP* mouse_bmp = load_bitmap("mouse.bmp", NULL);

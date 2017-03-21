@@ -33,16 +33,16 @@
 #define CHAR_HEIGHT	10	// vertical pixels occupied by a char
 //-----------------------------------------------------
 #define COLOR_DEPTH	8
-#define TRANSP	0
-#define BLACK	16
-#define WHITE	15
-#define GREEN	10
-#define GREY	8
-#define BLU		9
-#define LBLU	54
-#define RED		4
-#define GND		19		// window's background color
-#define BKG		20		// world background color
+#define TRANSP		0
+#define BLACK		16
+#define WHITE		15
+#define GREEN		10
+#define GREY		8
+#define BLU			9
+#define LBLU		54
+#define RED			4
+#define GND			19		// window's background color
+#define BKG			20		// world background color
 // #define MCOL	14		// menu color
 // #define NCOL	7		// numbers color
 //-----------------------------------------------------
@@ -108,6 +108,8 @@ void kill_all_task();
 void get_keycodes(char *scan, char *ascii);
 int listen_scancode();
 void get_string(char *str, int x, int y, int c, int b);
+void make_bmp_transp(char file_name_in[30], char file_name_out[30]);
+void make_bmp_half(char file_name_in[30], char file_name_out[30]);
 void activate_mouse();
 void init(int enable_mouse);
 
