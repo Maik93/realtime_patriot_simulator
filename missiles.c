@@ -134,8 +134,8 @@ void init_missile(int i) {
 	float r, v;
 
 	r = frand(0, 2);
-	// if (r < 1) { // left side
-	if (1) { // DBG
+	if (r < 1) { // left side
+	// if (1) { // DBG
 		missile[i].x = ML;
 		missile[i].y = frand(YMINL, YMAXL);
 		missile[i].alpha = frand(AMINL, AMAXL);
@@ -187,5 +187,5 @@ void *missile_task(void* arg) {
 	// the missile stops to move, but I don't flag its task slot as free,
 	// because I've to make explosion animation
 
-	clear_trail(i); // TODO: clear predicions too
+	clear_trail(i);
 }

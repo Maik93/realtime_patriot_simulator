@@ -101,8 +101,6 @@ void draw_predictions(int tracker_i, float delta_t) {
 	float x, y, vy;
 	int k, prev_k;
 
-	// if (tracked_points[tracker_i].vx == 0) return;
-
 	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + TSTORE) % TSTORE;
 
@@ -197,10 +195,7 @@ void evaluate_v_and_a(int task_i, int tracker_i) {
 	float vx_prev, vy_prev;		// previous velocity, needed to evaluate acc
 	float dt1, dt2;				// delta t from k to prev_k and from prev_k to prev_prev_k
 
-	// if (tracked_points[tracker_i].n_samples < TSTORE) return; // not enough points
 	if (tracked_points[tracker_i].n_samples < 2) return; // not enough points
-
-	// if (tracked_points[tracker_i].x[k] == tracked_points[tracker_i].x[prev_k]) return;
 
 	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + TSTORE) % TSTORE;
@@ -209,50 +204,23 @@ void evaluate_v_and_a(int task_i, int tracker_i) {
 	float dt = TSCALE * time_diff_ms(tracked_points[tracker_i].t[k], tracked_points[tracker_i].t[prev_k]) / 1000.0;
 
 	tracked_points[tracker_i].ax = 0;
-	// tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt;
 	tracked_points[tracker_i].vx = evaluate_vx(tracker_i);
-	// pred_x = tracked_points[tracker_i].vx * dt + tracked_points[tracker_i].x[k];
 
 	tracked_points[tracker_i].ay = -G0;
-	// tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt;
 	tracked_points[tracker_i].vy = evaluate_vy(tracker_i);
-	// pred_y = (1 / 2 * tracked_points[tracker_i].ay * dt + tracked_points[tracker_i].vy) * dt + tracked_points[tracker_i].y[k];
 
 	// DBG
 	// printf("Predicted v = (%f; %f)\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
+}
 
-	// Eulerian method
-	/*tracked_points[tracker_i].vx = (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt1;
-	tracked_points[tracker_i].vy = (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt1;
-	vx_prev = (tracked_points[tracker_i].x[prev_k] - tracked_points[tracker_i].x[prev_prev_k]) / dt2;
-	vy_prev = (tracked_points[tracker_i].y[prev_k] - tracked_points[tracker_i].y[prev_prev_k]) / dt2;
-	tracked_points[tracker_i].ax = (tracked_points[tracker_i].vx - vx_prev) / dt1;
-	tracked_points[tracker_i].ay = (tracked_points[tracker_i].vy - vy_prev) / dt1;*/
-
-	// Verlet method: compute v at time prev_k
-	/*tracked_points[tracker_i].vx =
-	    (tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_prev_k]) / (dt1 + dt2);
-	tracked_points[tracker_i].vy =
-	    (tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_prev_k]) / (dt1 + dt2);
-
-	tracked_points[tracker_i].ax =
-	    ((tracked_points[tracker_i].x[k] - tracked_points[tracker_i].x[prev_k]) / dt1 +
-	     (tracked_points[tracker_i].x[prev_prev_k] - tracked_points[tracker_i].x[prev_k]) / dt2)
-	    * 2 / (dt1 + dt2);
-	tracked_points[tracker_i].ay =
-	    ((tracked_points[tracker_i].y[k] - tracked_points[tracker_i].y[prev_k]) / dt1 +
-	     (tracked_points[tracker_i].y[prev_prev_k] - tracked_points[tracker_i].y[prev_k]) / dt2)
-	    * 2 / (dt1 + dt2);*/
-
-	/*tracked_points[tracker_i].vx = linear_curve_fitting(tracker_i);
-	tracked_points[tracker_i].vy = -1;
+void clear_tracker_struct(int task_i, int tracker_i) {
+	tracked_points[tracker_i].vx = 0;
+	tracked_points[tracker_i].vy = 0;
 	tracked_points[tracker_i].ax = 0;
-	tracked_points[tracker_i].ay = -G0;*/
-
-	/*printf("vx: %f\tvy: %f\tax: %f\tay: %f\n",
-	//       tracked_points[tracker_i].x[k], tracked_points[tracker_i].x[prev_k],
-	       tracked_points[tracker_i].vx, tracked_points[tracker_i].vy,
-	       tracked_points[tracker_i].ax, tracked_points[tracker_i].ay);*/
+	tracked_points[tracker_i].ay = 0;
+	tracked_points[tracker_i].n_samples = 0; // there's no need to clear circular buffer, just n_samples
+	tracker_is_active[tracker_i] = 0;
+	tp[task_i].index = -1;
 }
 
 void *tracker_task(void* arg) {
@@ -264,6 +232,7 @@ void *tracker_task(void* arg) {
 	tracked_points[tracker_i].n_samples = 0;
 	tracker_is_active[tracker_i] = 1;
 
+	// DBG
 	// printf("Start tracking (%d, %d)\n", current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 
 	set_period(task_i);
@@ -280,7 +249,7 @@ void *tracker_task(void* arg) {
 		wait_for_period(task_i);
 	}
 	printf("Tracker detached. Missed %d deadlines on %d runs.\n", tp[task_i].dmiss, tp[task_i].counts);
-	tp[task_i].index = -1;
+	clear_tracker_struct(task_i, tracker_i);
 }
 
 // Shows what each tracker sees in the right side of the screen.
