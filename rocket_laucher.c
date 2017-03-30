@@ -40,6 +40,29 @@ void draw_launcher() {
 	destroy_bitmap(body);
 }
 
+void draw_current_trajectory() {
+	float x, y, v, vx, vy, ax, ay, alpha, delta_t;
+	int c = 500; // max number of iterations
+
+	alpha = angle * PI / 180;
+	x = abs2world_x(LAUNCHER_PIVOT_X);
+	y = abs2world_y(LAUNCHER_PIVOT_Y);
+	v = 100;
+	vx = v * cos(alpha);
+	vy = -v * sin(alpha);
+	ay = -G0;
+	delta_t = TSCALE * (float)20 / 1000;
+
+	while (y > 0 && c > 0) { // add conditions to fit worldbox
+		x += vx * delta_t;
+		y += (0.5 * ay * delta_t + vy) * delta_t;
+		vy += ay * delta_t;
+
+		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
+		c--;
+	}
+}
+
 void *rocket_laucher_task(void* arg) {
 	int i = get_task_index(arg);
 	// float dt = TSCALE * (float)get_task_period(i) / 1000;

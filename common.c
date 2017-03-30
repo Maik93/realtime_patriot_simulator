@@ -71,6 +71,8 @@ void *graphic_task(void* arg) {
 		draw_radar_symbol();
 		draw_launcher();
 
+		draw_current_trajectory();
+
 		// enemy missiles
 		for (i = 0; i < MAX_ENEMY_MISSILES; i++) {
 			if (tp[i].index != -1) {

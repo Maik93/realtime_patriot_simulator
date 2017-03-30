@@ -100,6 +100,7 @@ void store_point(int i) {
 void draw_predictions(int tracker_i, float delta_t) {
 	float x, y, vy;
 	int k, prev_k;
+	int c = 500; // max number of iterations, to avoid accidental infinite loop
 
 	k = tracked_points[tracker_i].top;
 	prev_k = (k - 1 + TSTORE) % TSTORE;
@@ -108,14 +109,13 @@ void draw_predictions(int tracker_i, float delta_t) {
 	y = tracked_points[tracker_i].y[k];
 	vy = tracked_points[tracker_i].vy;
 
-	int c = 0;
-	while (y > 0 && c < 500) {
-		c++;
+	while (y > 0 && c > 0) {
 		x += tracked_points[tracker_i].vx * delta_t;
 		y += (0.5 * tracked_points[tracker_i].ay * delta_t + vy) * delta_t;
 		vy += tracked_points[tracker_i].ay * delta_t;
 
 		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
+		c--;
 	}
 }
 

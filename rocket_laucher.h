@@ -12,6 +12,7 @@
 #define LAUNCHER_BOLT_R		4
 
 void draw_launcher();
+void draw_current_trajectory();
 void *rocket_laucher_task(void* arg);
 
 #endif
