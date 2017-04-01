@@ -58,7 +58,8 @@ void draw_current_trajectory() {
 		y += (0.5 * ay * delta_t + vy) * delta_t;
 		vy += ay * delta_t;
 
-		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
+		if (x < WORLD_BOX_WIDTH && y < WORLD_BOX_HEIGHT)
+			putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
 		c--;
 	}
 }

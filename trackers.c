@@ -225,6 +225,7 @@ void clear_tracker_struct(int task_i, int tracker_i) {
 
 void *tracker_task(void* arg) {
 	int task_i, tracker_i; // indexes
+	float comp_perc; // percentual of computation time, in relation to its period
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
@@ -239,7 +240,6 @@ void *tracker_task(void* arg) {
 	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
 		get_image(tracker_i, current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 
-		// DBG: maybe there are different pixels
 		struct point c = compute_centroid(tracker_i); // relative from center of tracking box
 		current_points_tracked[tracker_i].x += c.x; // altering the center to follow
 		current_points_tracked[tracker_i].y += c.y;
@@ -248,7 +248,10 @@ void *tracker_task(void* arg) {
 
 		wait_for_period(task_i);
 	}
-	printf("Tracker detached. Missed %d deadlines on %d runs.\n", tp[task_i].dmiss, tp[task_i].counts);
+
+	comp_perc = tp[task_i].comp_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
+	printf("Tracker detached. Missed %d deadlines on %d runs. %d%% of utilization.\n", tp[task_i].dmiss, tp[task_i].counts, (int)round(comp_perc));
+
 	clear_tracker_struct(task_i, tracker_i);
 }
 

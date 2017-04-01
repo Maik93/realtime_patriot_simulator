@@ -8,6 +8,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <math.h>
 #include <time.h>
 #include <pthread.h>
 #include <allegro.h>
@@ -123,6 +124,13 @@ void set_period(int index) {
 	time_add_ms(&(tp[index].dl), tp[index].deadline);
 }
 
+// Sum actual computational time in tp[index].comp_time_sum.
+void update_conputational_time(int index) {
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	tp[index].comp_time_sum += tp[index].period - time_diff_ms(tp[index].at, now);
+}
+
 /**
  * Suspends the calling task (identified by his index) until the next
  * 		activation and, when awaken, updates activation time and deadline.
@@ -130,6 +138,7 @@ void set_period(int index) {
 void wait_for_period(int index) {
 	// TODO: handle deadlines
 	deadline_miss(index);
+	update_conputational_time(index);
 	tp[index].counts++;
 	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &(tp[index].at), NULL);
 	time_add_ms(&(tp[index].at), tp[index].period);
@@ -182,6 +191,7 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
 	tp[index].priority = priority;
 	tp[index].dmiss = 0;
 	tp[index].counts = 0;
+	tp[index].comp_time_sum = 0;
 
 	pthread_attr_init(&att[index]);
 	pthread_attr_setinheritsched(&att[index], PTHREAD_EXPLICIT_SCHED);
@@ -200,27 +210,31 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
  */
 void kill_all_task() {
 	int i;
+	float comp_perc; // percentual of computation time, in relation to its period
+
 	sigterm_tasks = 1; // sends to all tasks a request to close
 	for (i = 0; i <= MAX_THREADS - 1; i++) { // Don't kill interpreter task
 		if (tp[i].index != -1) {
 			pthread_join(tid[i], NULL);
 
+			comp_perc = tp[i].comp_time_sum / (tp[i].period * tp[i].counts) * 100.0;
+
 			switch (i) {
 			case GRAPHIC_INDEX:
-				printf("Display task:\tRunned %d times.\t%d deadline misses.\n",
-				       tp[i].counts, tp[i].dmiss);
+				printf("Display task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
 				break;
 			case RADAR_INDEX:
-				printf("Radar task:\tRunned %d times.\t%d deadline misses.\n",
-				       tp[i].counts, tp[i].dmiss);
+				printf("Radar task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
 				break;
 			case ROCKET_LAUCHER_INDEX:
-				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses.\n",
-				       tp[i].counts, tp[i].dmiss);
+				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
 				break;
 			case INTERPRETER_INDEX:
-				printf("Interp task:\tRunned %d times.\t%d deadline misses.\n",
-				       tp[i].counts, tp[i].dmiss);
+				printf("Interp task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
 				break;
 			default: break;
 			}

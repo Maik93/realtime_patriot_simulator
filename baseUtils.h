@@ -53,10 +53,11 @@
 //-----------------------------------------------------
 // STRUCT
 //-----------------------------------------------------
+// See above how task_param array is organized.
 struct task_param {
-	int		index;			// task index. See above how task_param array
-							// is organized. Equals to -1 for inactive tasks.
+	int		index;			// task index. Equals to -1 for inactive tasks.
 	// long	wcet;			// in microseconds
+	double	comp_time_sum;	// sum of computational times (ms)
 	int		period;			// relative (ms)
 	int		deadline;		// relative (ms)
 	int		priority;		// in [0-99]
