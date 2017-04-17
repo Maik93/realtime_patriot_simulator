@@ -19,11 +19,11 @@
 // public variables
 struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points (abs. coord)
 int				tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
+struct tracker
+	tracked_points[MAX_TRACKERS]; // memory for trackers, containing points acquired and vel and acc evaluated
 
 // private variables
 int tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
-struct tracker
-	tracked_points[MAX_TRACKERS]; // memory for trackers, containing points acquired and vel and acc evaluated
 
 // Store pixels contained in the square centered in (x0, y0) and width TRACKER_RES.
 void get_image(int tracker_i, int x0, int y0) {
@@ -232,6 +232,7 @@ void *tracker_task(void* arg) {
 
 	tracked_points[tracker_i].n_samples = 0;
 	tracker_is_active[tracker_i] = 1;
+	printf("Tracker %d activated.\n", tracker_i);
 
 	// DBG
 	// printf("Start tracking (%d, %d)\n", current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
@@ -250,7 +251,8 @@ void *tracker_task(void* arg) {
 	}
 
 	comp_perc = tp[task_i].comp_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
-	printf("Tracker detached. Missed %d deadlines on %d runs. %d%% of utilization.\n", tp[task_i].dmiss, tp[task_i].counts, (int)round(comp_perc));
+	printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
+	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(comp_perc));
 
 	clear_tracker_struct(task_i, tracker_i);
 }

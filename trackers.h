@@ -54,6 +54,8 @@ struct tracker {	// circular buffer for last TSTORE points acquired + vel and ac
 extern struct point
 	current_points_tracked[MAX_TRACKERS];
 extern int tracker_is_active[MAX_TRACKERS];
+struct tracker
+	tracked_points[MAX_TRACKERS];
 
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS
