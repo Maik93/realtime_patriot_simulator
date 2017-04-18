@@ -85,10 +85,15 @@ void demo_inertia() {
 
 void fixed_angle() {
 	int tracker_i;
-	float pwr, delta_sqrt, t1, t2;
+	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
 
 	// go to (45+180)° and stop
 	angle_des = 45 + 180;
+	theta = angle_des / 180 * PI;
+	sec_theta = 1 / cos(theta);
+	s_theta = sin(theta);
+	c_theta = cos(theta);
+	t_theta = tan(theta);
 
 	// going to operative position
 	if (abs(angle - angle_des) > 0.001) {
@@ -96,38 +101,64 @@ void fixed_angle() {
 		angle_prev = angle;
 		angle_des_prev = angle_des;
 	}
+	else {
+		for (tracker_i = 0; tracker_i < MAX_TRACKERS; tracker_i++) {
+			if (tracker_is_active[tracker_i]) {
 
-	for (tracker_i = 0; tracker_i < MAX_TRACKERS; tracker_i++) {
-		if (tracker_is_active[tracker_i]) {
+				// evaluate x positions where the trajectors collide
+				sqrt_part = sqrt(pow(tracked_points[tracker_i].vx, 2) *
+				                 pow(LAUNCHER_V0, 2) *
+				                 (pow(G0, 2) * pow(sec_theta, 2) *
+				                  pow(tracked_points[tracker_i].x[tracked_points[tracker_i].top] - abs2world_x(LAUNCHER_PIVOT_X), 2) -
+				                  pow(sec_theta, 2) * tracked_points[tracker_i].vx * tracked_points[tracker_i].vy *
+				                  (sin(2 * theta) * pow(LAUNCHER_V0, 2) +
+				                   2 * G0 * (-tracked_points[tracker_i].x[tracked_points[tracker_i].top] + abs2world_x(LAUNCHER_PIVOT_X))) +
+				                  pow(tracked_points[tracker_i].vx, 2) *
+				                  (2 * G0 * pow(sec_theta, 2) *
+				                   (-tracked_points[tracker_i].y[tracked_points[tracker_i].top] + abs2world_y(LAUNCHER_PIVOT_Y)) +
+				                   pow(LAUNCHER_V0, 2) * pow(t_theta, 2)) +
+				                  pow(LAUNCHER_V0, 2) *
+				                  (pow(tracked_points[tracker_i].vy, 2) +
+				                   2 * G0 * (tracked_points[tracker_i].y[tracked_points[tracker_i].top] - abs2world_y(LAUNCHER_PIVOT_Y) +
+				                             (-tracked_points[tracker_i].x[tracked_points[tracker_i].top] + abs2world_x(LAUNCHER_PIVOT_X)) * t_theta))));
+				x1 = (G0 * pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) *
+				      abs2world_x(LAUNCHER_PIVOT_X) + pow(LAUNCHER_V0, 2) *
+				      (-(tracked_points[tracker_i].vx * tracked_points[tracker_i].vy) -
+				       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
+				      - sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
+				                            pow(LAUNCHER_V0, 2)));
+				x2 = (G0 * pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) *
+				      abs2world_x(LAUNCHER_PIVOT_X) + pow(LAUNCHER_V0, 2) *
+				      (-(tracked_points[tracker_i].vx * tracked_points[tracker_i].vy) -
+				       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
+				      + sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
+				                            pow(LAUNCHER_V0, 2)));
+				// printf("x1 %f\tx2 %f\n", x1, x2);
 
-			// evaluate time to wait for open fire
-			pwr = -2 * sqrt(2) * tracked_points[tracker_i].vx * LAUNCHER_V0 -
-			      2 * sqrt(2) * tracked_points[tracker_i].vy * LAUNCHER_V0 -
-			      4 * G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] +
-			      4 * G0 * abs2world_x(LAUNCHER_PIVOT_X);
-			delta_sqrt = sqrt(pwr * pwr - 4 * (-2 * G0 * tracked_points[tracker_i].vx +
-			                                   sqrt(2) * G0 * LAUNCHER_V0) *
-			                  (4 * tracked_points[tracker_i].vy * tracked_points[tracker_i].x[tracked_points[tracker_i].top] -
-			                   2 * sqrt(2) * LAUNCHER_V0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] -
-			                   4 * tracked_points[tracker_i].vy * abs2world_x(LAUNCHER_PIVOT_X) +
-			                   2 * sqrt(2) * LAUNCHER_V0 * abs2world_x(LAUNCHER_PIVOT_X) -
-			                   4 * tracked_points[tracker_i].vx * tracked_points[tracker_i].y[tracked_points[tracker_i].top] -
-			                   2 * sqrt(2) * LAUNCHER_V0 * tracked_points[tracker_i].y[tracked_points[tracker_i].top] +
-			                   4 * tracked_points[tracker_i].vx * abs2world_y(LAUNCHER_PIVOT_Y) +
-			                   2 * sqrt(2) * LAUNCHER_V0 * abs2world_y(LAUNCHER_PIVOT_Y)));
-			t1 = (2 * sqrt(2) * tracked_points[tracker_i].vx * LAUNCHER_V0 +
-			      2 * sqrt(2) * tracked_points[tracker_i].vy * LAUNCHER_V0 +
-			      4 * G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - 4 * G0 * abs2world_x(LAUNCHER_PIVOT_X)
-			      - delta_sqrt) /
-			     (2.*(-2 * G0 * tracked_points[tracker_i].vx +
-			          sqrt(2) * G0 * LAUNCHER_V0));
-			t2 = (2 * sqrt(2) * tracked_points[tracker_i].vx * LAUNCHER_V0 +
-			      2 * sqrt(2) * tracked_points[tracker_i].vy * LAUNCHER_V0 +
-			      4 * G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - 4 * G0 * abs2world_x(LAUNCHER_PIVOT_X)
-			      + delta_sqrt) /
-			     (2.*(-2 * G0 * tracked_points[tracker_i].vx +
-			          sqrt(2) * G0 * LAUNCHER_V0));
-			printf("%f\t%f\n", t1, t2);
+				// evaluate values of t where enemy missile will be intercepted
+				t1 = (x1 - tracked_points[tracker_i].x[tracked_points[tracker_i].top]) /
+				     tracked_points[tracker_i].vx;
+				t2 = (x2 - tracked_points[tracker_i].x[tracked_points[tracker_i].top]) /
+				     tracked_points[tracker_i].vx;
+				// printf("t1 %f\tt2 %f\n", t1, t2);
+
+				// and now search for the solution with t positive
+				float t_impact, t_tot, t_wait;
+				if (t1 > 0) {
+					t_impact = t1;
+					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / LAUNCHER_V0;
+				}
+				else if (t2 > 0) {
+					t_impact = t2;
+					t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / LAUNCHER_V0;
+				}
+				else {
+					printf("No point of interception. We're gonna die.\n");
+					return;
+				}
+				t_wait = t_impact - t_tot;
+				printf("Shoot in %f\n", t_wait);
+			}
 		}
 	}
 }
@@ -150,6 +181,10 @@ void *rocket_laucher_task(void* arg) {
 
 		case 2: // fixed at 45°
 			fixed_angle();
+			break;
+
+		default:
+			demo_inertia();
 			break;
 		}
 

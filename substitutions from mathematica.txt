@@ -1,8 +1,8 @@
-Subscript(v,ex)
-tracked_points[tracker_i].vx
-
 Subscript(v,p0)
 LAUNCHER_V0
+
+Subscript(v,ex)
+tracked_points[tracker_i].vx
 
 Subscript(v,ey)
 tracked_points[tracker_i].vy
@@ -24,3 +24,12 @@ G0
 
 Sqrt
 sqrt
+
+Power
+pow
+
+Sec(\[Theta])
+sec_theta
+
+Sin(\[Theta])
+s_theta
