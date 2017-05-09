@@ -88,7 +88,8 @@ void fixed_angle() {
 	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
 
 	// go to (45+180)° and stop
-	angle_des = 45 + 180;
+	// angle_des = 45 + 180;
+	angle_des = 30 + 180;
 	theta = angle_des / 180 * PI;
 	sec_theta = 1 / cos(theta);
 	s_theta = sin(theta);

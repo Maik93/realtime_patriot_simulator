@@ -16,7 +16,7 @@
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
-#define LAUNCHER_V0			75	// velocity (in module) to shoot every missile
+#define LAUNCHER_V0			120	// velocity (in module) to shoot every missile
 //-----------------------------------------------------
 
 void draw_launcher();
