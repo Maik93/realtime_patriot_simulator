@@ -15,6 +15,7 @@
 
 #include "baseUtils.h"
 #include "common.h"
+#include "rocket_laucher.h" // TODO: correct in rocket_launcher!!
 // #include "radar_and_trackers.h"
 
 // DBG
@@ -129,47 +130,84 @@ void draw_missile(int i) {
 	}
 }
 
-// A missile can spawn from top or left side, each one with 1/2 of probability.
-void init_missile(int i) {
-	float r, v;
+/**
+ * Inspecting missile's index is possible to know if it is owned by enemies or by the Patriot.
+ * Return 0 for enemies, 1 for Patriot, -1 otherwise.
+ */
+int check_missile_type(int index) {
+	if (index >= ENEMY_MISSILES_BASE_INDEX && index < ENEMY_MISSILES_TOP_INDEX)
+		return 0;
+	if (index >= PATRIOT_MISSILES_BASE_INDEX && index < PATRIOT_MISSILES_TOP_INDEX)
+		return 1;
+	return -1;
+}
 
-	r = frand(0, 2);
-	if (r < 1) { // left side
-	// if (1) { // DBG
-		missile[i].x = ML;
-		missile[i].y = frand(YMINL, YMAXL);
-		missile[i].alpha = frand(AMINL, AMAXL);
-		v = frand(VMINL, VMAXL);
-	}
-	else { // top side
-		missile[i].x = frand(XMINT, XMAXT);
-		missile[i].y = WORLD_BOX_HEIGHT - ML;
-		missile[i].alpha = frand(AMINT, AMAXT);
-		v = frand(VMINT, VMAXT);
-	}
+/**
+ * Initialize the just created missile, caracterizing it as enemy or patriot's.
+ * Return 1 if everything went well.
+ */
+int init_missile(int i) {
+	float r, v, alpha;
 
-	missile[i].vx = v * cos(missile[i].alpha);
-	missile[i].vy = v * sin(missile[i].alpha);
-	missile[i].in_destruction = 0;
-	missile[i].c = RED;
-	missile[i].r = ML;
+	switch (check_missile_type(i)) {
+	case 0: // Enemy missile
+		// An enemy missile can spawn from top or left side, each one with 1/2 of probability.
+		r = frand(0, 2);
+		// if (1) { // DBG
+		if (r < 1) { // left side
+			missile[i].x = ML;
+			missile[i].y = frand(YMINL, YMAXL);
+			missile[i].alpha = frand(AMINL, AMAXL);
+			v = frand(VMINL, VMAXL);
+		}
+		else { // top side
+			missile[i].x = frand(XMINT, XMAXT);
+			missile[i].y = WORLD_BOX_HEIGHT - ML;
+			missile[i].alpha = frand(AMINT, AMAXT);
+			v = frand(VMINT, VMAXT);
+		}
+
+		missile[i].vx = v * cos(missile[i].alpha);
+		missile[i].vy = v * sin(missile[i].alpha);
+		missile[i].in_destruction = 0;
+		missile[i].c = RED;
+		missile[i].r = ML;
+		break;
+
+	case 1: // Patriot missile
+		alpha = (30 + 180) / 180 * PI; // TODO: let user change it
+		missile[i].vx = LAUNCHER_V0 * cos(alpha);
+		missile[i].vy = LAUNCHER_V0 * sin(alpha);
+		missile[i].in_destruction = 0;
+		missile[i].c = BLU;
+		missile[i].r = ML;
+		break;
+
+	default:
+		printf("Error creating missile task. %d seems to be an invalid index\n", i);
+		return 0;
+	}
 
 	// DBG
 	// printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
 	// vx[i] = missile[i].vx;
 	// vy[i] = missile[i].vy;
+
+	return 1;
 }
 
 void *missile_task(void* arg) {
-	int i; // task index
+	int i;	// task index
+	int ok;	// flag for correct missile initialization
 	float dt;
 	i = get_task_index(arg);
 
-	init_missile(i);
+	ok = init_missile(i);
+
 	dt = TSCALE * (float)get_task_period(i) / 1000;
 
 	set_period(i);
-	while (!sigterm_tasks && missile[i].in_destruction == 0) {
+	while (ok && !sigterm_tasks && missile[i].in_destruction == 0) {
 		missile[i].vy -= G0 * dt;
 		missile[i].y += missile[i].vy * dt - G0 * dt * dt / 2;
 		missile[i].x += missile[i].vx * dt;

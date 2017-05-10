@@ -7,6 +7,7 @@
 #include "baseUtils.h"
 #include "common.h"
 #include "trackers.h"
+#include "missiles.h"
 
 #define LAUNCHER_MODE	2
 // 0: demo without inertia, 1: demo with inertia, 2: fixed at 45°
@@ -83,6 +84,14 @@ void demo_inertia() {
 	angle_des_prev = angle_des;
 }
 
+/*void shoot_now() {
+	int new_missile_index;
+
+	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
+	if (new_missile_index != -1)
+		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
+}*/
+
 void fixed_angle() {
 	int tracker_i;
 	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
@@ -102,6 +111,8 @@ void fixed_angle() {
 		angle_prev = angle;
 		angle_des_prev = angle_des;
 	}
+
+	// evaluate when Patriot have to shoot
 	else {
 		for (tracker_i = 0; tracker_i < MAX_TRACKERS; tracker_i++) {
 			if (tracker_is_active[tracker_i]) {
@@ -154,11 +165,16 @@ void fixed_angle() {
 					t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / LAUNCHER_V0;
 				}
 				else {
-					printf("No point of interception. We're gonna die.\n");
+					printf("No point of interception. We're gonna die. Have a nice day!\n");
 					return;
 				}
 				t_wait = t_impact - t_tot;
 				printf("Shoot in %f\n", t_wait);
+
+				/*if(abs(t_wait) < 0.01) {
+					printf("Shoot now!\n");
+					shoot_now();
+				}*/
 			}
 		}
 	}
@@ -180,7 +196,7 @@ void *rocket_laucher_task(void* arg) {
 			demo_inertia();
 			break;
 
-		case 2: // fixed at 45°
+		case 2: // fixed at a certain angle
 			fixed_angle();
 			break;
 

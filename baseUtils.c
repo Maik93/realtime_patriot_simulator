@@ -161,7 +161,8 @@ int deadline_miss(int index) {
 
 /**
  * Find out the first element of tp array with index equals to -1 (free slot)
- * 		in given index range, and return its position. If nothing is found, return -1.
+ * 		in given index range [min_index, max_index), and return its position.
+ * 		If nothing is found, return -1.
  */
 int find_free_slot(int min_index, int max_index) {
 	int i = min_index;
