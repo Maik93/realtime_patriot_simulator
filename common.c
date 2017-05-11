@@ -74,8 +74,17 @@ void *graphic_task(void* arg) {
 		draw_current_trajectory();
 
 		// enemy missiles
-		for (i = 0; i < MAX_ENEMY_MISSILES; i++) {
+		for (i = ENEMY_MISSILES_BASE_INDEX; i < ENEMY_MISSILES_TOP_INDEX; i++) {
 			if (tp[i].index != -1) {
+				draw_missile(i);
+				if (tflag) draw_trail(i, tl);
+			}
+		}
+
+		// Patriot missiles
+		for (i = PATRIOT_MISSILES_BASE_INDEX; i < PATRIOT_MISSILES_TOP_INDEX; i++) {
+			if (tp[i].index != -1) {
+				printf("Drawing missile %d\n", i);
 				draw_missile(i);
 				if (tflag) draw_trail(i, tl);
 			}

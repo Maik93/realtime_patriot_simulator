@@ -229,13 +229,6 @@ void *tracker_task(void* arg) {
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
-	/*tracker_i = task_i;
-	tracker_i -= TRACKER_BASE_INDEX;*/
-	printf("Debug: %d minus %d = %d\n", task_i, TRACKER_BASE_INDEX, tracker_i);
-	int summed = task_i + TRACKER_BASE_INDEX;
-	printf("Debug: %d plus %d = %d\n", task_i, TRACKER_BASE_INDEX, summed);
-	printf("Debug: %d minus %d = %d inline cal\n", task_i, TRACKER_BASE_INDEX, task_i - TRACKER_BASE_INDEX);
-	printf("Debug: %d plus %d = %d inline cal\n", task_i, TRACKER_BASE_INDEX, task_i + TRACKER_BASE_INDEX);
 
 	tracked_points[tracker_i].n_samples = 0;
 	tracker_is_active[tracker_i] = 1;
