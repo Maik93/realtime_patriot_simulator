@@ -84,7 +84,7 @@ void *graphic_task(void* arg) {
 		// Patriot missiles
 		for (i = PATRIOT_MISSILES_BASE_INDEX; i < PATRIOT_MISSILES_TOP_INDEX; i++) {
 			if (tp[i].index != -1) {
-				printf("Drawing missile %d\n", i);
+				// printf("Drawing missile %d\n", i);
 				draw_missile(i);
 				if (tflag) draw_trail(i, tl);
 			}

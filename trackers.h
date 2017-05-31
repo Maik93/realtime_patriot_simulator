@@ -13,7 +13,7 @@
 #define TRACKER_RES			60		// dimension of square box acquisition
 #define TSTORE				10		// number of points stored by the tracker
 //-----------------------------------------------------
-#define TRACK_DSCALE		3/2		// scale for displays
+#define TRACK_DSCALE		3/2		// scale for displayers
 #define TRACK_D0_X			WORLD_BOX_X2 + 5 + TRACKER_RES * TRACK_DSCALE / 2
 #define TRACK_D0_Y			WORLD_BOX_Y1 + TRACKER_RES * TRACK_DSCALE / 2
 #define TRACK_D1_X			TRACK_D0_X + TRACKER_RES * TRACK_DSCALE + 4

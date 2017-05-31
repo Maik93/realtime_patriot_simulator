@@ -88,8 +88,11 @@ void shoot_now() {
 	int new_missile_index;
 
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
-	if (new_missile_index != -1)
+	// if (new_missile_index != -1)
+	if (new_missile_index == PATRIOT_MISSILES_BASE_INDEX){
+		printf("Shoot now!!\n");
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
+	}
 }
 
 void fixed_angle() {
@@ -169,10 +172,9 @@ void fixed_angle() {
 					return;
 				}
 				t_wait = t_impact - t_tot;
-				printf("Shoot in %f\n", t_wait);
+				// printf("Shoot in %f\n", t_wait);
 
 				if(abs(t_wait) < 0.01) {
-					printf("Shoot now!\n");
 					shoot_now();
 					return;
 				}

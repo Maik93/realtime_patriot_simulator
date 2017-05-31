@@ -4,8 +4,6 @@
 #include "baseUtils.h"
 #include "common.h"
 
-// extern float vx[MAX_ENEMY_MISSILES], vy[MAX_ENEMY_MISSILES];
-
 //-----------------------------------------------------
 // GRAPHICAL CONSTANTS
 //-----------------------------------------------------
@@ -60,9 +58,9 @@ struct cbuf {		// circular buffer structure
 // PUBLIC VARIABLES
 //-----------------------------------------------------
 extern struct missile
-	missile[MAX_ENEMY_MISSILES];	// missile buffer
+	missile[MAX_MISSILES];	// missile buffer
 extern struct cbuf
-	trail[MAX_ENEMY_MISSILES];		// trail buffer
+	trail[MAX_MISSILES];	// trail buffer
 
 extern int		tflag;		// switcher for trail's visibility [0-1]
 extern int		tl;			// actual trail length

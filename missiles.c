@@ -18,11 +18,9 @@
 #include "rocket_laucher.h" // TODO: correct in rocket_launcher!!
 // #include "radar_and_trackers.h"
 
-// DBG
-// float vx[MAX_ENEMY_MISSILES], vy[MAX_ENEMY_MISSILES];
 
-struct missile	missile[MAX_ENEMY_MISSILES];	// missile buffer
-struct cbuf		trail[MAX_ENEMY_MISSILES];		// trail buffer
+struct missile	missile[MAX_MISSILES];	// missile buffer
+struct cbuf		trail[MAX_MISSILES];	// trail buffer
 
 // TODO: reset to 0 befor delivery
 int tflag = 1;	// switcher for trail's visibility [0-1]
@@ -31,7 +29,7 @@ int tl = 30;	// actual trail length
 // Store position of missile i.
 void store_trail(int i) {
 	int k;
-	if (i >= MAX_ENEMY_MISSILES) return;
+	if (i >= MAX_MISSILES) return;
 	k = trail[i].top;
 	k = (k + 1) % TLEN;
 	trail[i].x[k] = missile[i].x;
@@ -97,7 +95,7 @@ void draw_missile(int i) {
 	BITMAP* explosion_bmp;
 	char explosion_file[30];
 
-	if (missile[i].in_destruction == 0) {
+	if (missile[i].in_destruction == 0) { // normal, operational mode
 		ca = cos(missile[i].alpha);
 		sa = sin(missile[i].alpha);
 
@@ -114,7 +112,7 @@ void draw_missile(int i) {
 		         world2abs_x(p3x), world2abs_y(p3y), // right wing
 		         missile[i].c);
 	}
-	else {
+	else { // missile is in collision, making explosion animation
 		sprintf(explosion_file, "explosion/%d.bmp", missile[i].in_destruction);
 		explosion_bmp = load_bitmap(explosion_file, NULL);
 		draw_sprite(screen_buff, explosion_bmp,
@@ -124,7 +122,7 @@ void draw_missile(int i) {
 
 		missile[i].in_destruction++;
 
-		// if we're at last animation step, flag missile task as free
+		// if we're at last animation step, flag missile task as free to close it
 		if (missile[i].in_destruction > DESTR_BMP_NUM)
 			tp[i].index = -1;
 	}
@@ -148,6 +146,7 @@ int check_missile_type(int index) {
  */
 int init_missile(int i) {
 	float r, v, alpha;
+	int deg;
 
 	switch (check_missile_type(i)) {
 	case 0: // Enemy missile
@@ -166,21 +165,17 @@ int init_missile(int i) {
 			missile[i].alpha = frand(AMINT, AMAXT);
 			v = frand(VMINT, VMAXT);
 		}
-
-		missile[i].vx = v * cos(missile[i].alpha);
-		missile[i].vy = v * sin(missile[i].alpha);
-		missile[i].in_destruction = 0;
 		missile[i].c = RED;
-		missile[i].r = ML;
 		break;
 
 	case 1: // Patriot missile
-		alpha = (30 + 180) / 180 * PI; // TODO: let user change it
-		missile[i].vx = LAUNCHER_V0 * cos(alpha);
-		missile[i].vy = LAUNCHER_V0 * sin(alpha);
-		missile[i].in_destruction = 0;
+		deg = 30 + 180; // TODO: let user change it
+		alpha = -deg / 180.0 * PI; // alpha = -3.663333333333333;
+		missile[i].x = abs2world_x(LAUNCHER_PIVOT_X);
+		missile[i].y = abs2world_y(LAUNCHER_PIVOT_Y);
+		missile[i].alpha = alpha;
+		v = LAUNCHER_V0;
 		missile[i].c = BLU;
-		missile[i].r = ML;
 		break;
 
 	default:
@@ -188,10 +183,14 @@ int init_missile(int i) {
 		return 0;
 	}
 
+	missile[i].vx = v * cos(missile[i].alpha);
+	missile[i].vy = v * sin(missile[i].alpha);
+	missile[i].in_destruction = 0;
+	missile[i].r = ML;
+
 	// DBG
-	// printf("Missile vx: %f\tvy: %f\n", missile[i].vx, missile[i].vy);
-	// vx[i] = missile[i].vx;
-	// vy[i] = missile[i].vy;
+	if (i == PATRIOT_MISSILES_BASE_INDEX)
+		printf("deg: %d\talpha: %f\tvx: %f\tvy: %f\n", deg, alpha, missile[i].vx, missile[i].vy);
 
 	return 1;
 }
