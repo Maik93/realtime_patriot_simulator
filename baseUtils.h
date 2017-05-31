@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <allegro.h>
 
+#include "colors.h"
+
 //-----------------------------------------------------
 // TASKS - Here's how is organized task_param array:
 // | 3x Enemy missiles | 3x Patriot missiles | 4x Trackers | Graphic | Radar | Rocket_laucher | Interpreter |
@@ -36,20 +38,6 @@
 //-----------------------------------------------------
 #define CHAR_WIDTH	8	// horizontal pixels occupied by a char
 #define CHAR_HEIGHT	10	// vertical pixels occupied by a char
-//-----------------------------------------------------
-#define COLOR_DEPTH	8
-#define TRANSP		0
-#define BLACK		16
-#define WHITE		15
-#define GREEN		10
-#define GREY		8
-#define BLU			9
-#define LBLU		54
-#define RED			4
-#define GND			19		// window's background color
-#define BKG			20		// world background color
-// #define MCOL	14		// menu color
-// #define NCOL	7		// numbers color
 //-----------------------------------------------------
 // OTHER CONSTANTS
 //-----------------------------------------------------

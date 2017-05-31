@@ -13,6 +13,7 @@
 #include <allegro.h>
 
 #include "baseUtils.h"
+#include "colors.h"
 #include "missiles.h"
 #include "radar.h"
 #include "trackers.h"
@@ -37,10 +38,10 @@ int abs2world_y(int y) {
 // Draws word box.
 void draw_world() {
 	rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
-	rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, LBLU);
-	line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, RED); // top missile spawn
+	rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BORDER_COL);
+	line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, ENEMY_COL); // top missile spawn
 	line(screen_buff, WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMINL),
-	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), RED); // left missile spawn
+	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), ENEMY_COL); // left missile spawn
 }
 
 // Graphical task.
@@ -65,7 +66,7 @@ void *graphic_task(void* arg) {
 
 		// top menu
 		rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
-		rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, LBLU);
+		rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BORDER_COL);
 
 		draw_world();
 		draw_radar_symbol();
@@ -122,7 +123,7 @@ void *graphic_task(void* arg) {
 		// dots to test scanner
 		// circlefill(screen_buff, 343, 319, 10, RED);
 		// circlefill(screen_buff, 338, 404, 10, GREEN);
-		// circlefill(screen_buff, 253, 319, 10, LBLU);
+		// circlefill(screen_buff, 253, 319, 10, BORDER_COL);
 		// circlefill(screen_buff, 190, 404, 10, WHITE);
 
 		// next point predicted

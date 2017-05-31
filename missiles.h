@@ -9,7 +9,6 @@
 //-----------------------------------------------------
 #define ML		15		// length of the missile
 #define MW		6		// width of the missile
-#define TCOL	GREY	// trail color
 #define DESTR_BMP_NUM 10 // number of bitmaps used in missile destruction animation
 //-----------------------------------------------------
 // PHYSICS CONSTANTS

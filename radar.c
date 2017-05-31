@@ -15,6 +15,8 @@
 
 #include "baseUtils.h"
 #include "common.h"
+#include "colors.h"
+#include "missiles.h"
 #include "trackers.h"
 
 struct scan	radar[ARES];	// struct  of points detected
@@ -32,7 +34,8 @@ void read_sensor(int degree) {
 		y = RPOSY - d * sin(alpha);
 		c = getpixel(screen, x, y);
 		d = d + RSTEP;
-	} while ((d <= RMAX) && (c == BKG || c == BLU || c == GREY)); // radar, laucher and trails are ignored
+	} while ((d <= RMAX) && (c == BKG || c == PATMISS_COL ||
+	                         c == RSENSOR_COL || c == TCOL)); // radar, laucher and trails are ignored
 
 	// store absolute values (i.e. of the screen)
 	radar[degree - RAMIN].x = x;
@@ -102,9 +105,9 @@ void *radar_task(void* arg) {
 
 // Draws a nice radar symbol in the center of world ground.
 void draw_radar_symbol() {
-	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 2, BLU);
-	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, BLU);
-	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, BLU);
+	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 2, RSENSOR_COL);
+	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 10, RSENSOR_COL);
+	arc(screen_buff, RPOSX, RPOSY, deg2fix(45), deg2fix(135), 20, RSENSOR_COL);
 }
 
 // Draws output of the radar in top right of window's corner.
@@ -114,11 +117,11 @@ void draw_radar_display() {
 
 	// borders
 	arc(screen_buff, RDISPLAY_ORIGIN_X, RDISPLAY_ORIGIN_Y,
-	    deg2fix(RAMIN), deg2fix(RAMAX), RDISPLAY_RADIOUS, LBLU);
-	line(screen_buff, RDISPLAY_SL_X, RDISPLAY_SL_Y, RDISPLAY_LEFT_X, RDISPLAY_LEFT_Y, LBLU);
-	line(screen_buff, RDISPLAY_SR_X, RDISPLAY_SR_Y, RDISPLAY_RIGHT_X, RDISPLAY_RIGHT_Y, LBLU);
+	    deg2fix(RAMIN), deg2fix(RAMAX), RDISPLAY_RADIOUS, BORDER_COL);
+	line(screen_buff, RDISPLAY_SL_X, RDISPLAY_SL_Y, RDISPLAY_LEFT_X, RDISPLAY_LEFT_Y, BORDER_COL);
+	line(screen_buff, RDISPLAY_SR_X, RDISPLAY_SR_Y, RDISPLAY_RIGHT_X, RDISPLAY_RIGHT_Y, BORDER_COL);
 	arc(screen_buff, RDISPLAY_ORIGIN_X, RDISPLAY_ORIGIN_Y,
-	    deg2fix(RAMIN), deg2fix(RAMAX), RDISPLAY_START_RAD, LBLU);
+	    deg2fix(RAMIN), deg2fix(RAMAX), RDISPLAY_START_RAD, BORDER_COL);
 
 	// draws all detected distances
 	for (i = 0; i < ARES; i++) {
@@ -130,7 +133,8 @@ void draw_radar_display() {
 		ax = RDISPLAY_ORIGIN_X + round(rx * RSCALE);
 		ay = RDISPLAY_ORIGIN_Y - round(ry * RSCALE);
 
+		// show a dot on the display
 		if (radar[i].d < RMAX)
-			putpixel(screen_buff, ax, ay, GREEN);
+			putpixel(screen_buff, ax, ay, RDISPLAY_DOT_COL);
 	}
 }

@@ -15,6 +15,7 @@
 
 #include "baseUtils.h"
 #include "common.h"
+#include "colors.h"
 #include "rocket_laucher.h" // TODO: correct in rocket_launcher!!
 // #include "radar_and_trackers.h"
 
@@ -165,7 +166,7 @@ int init_missile(int i) {
 			missile[i].alpha = frand(AMINT, AMAXT);
 			v = frand(VMINT, VMAXT);
 		}
-		missile[i].c = RED;
+		missile[i].c = ENEMY_COL;
 		break;
 
 	case 1: // Patriot missile
@@ -175,7 +176,7 @@ int init_missile(int i) {
 		missile[i].y = abs2world_y(LAUNCHER_PIVOT_Y);
 		missile[i].alpha = alpha;
 		v = LAUNCHER_V0;
-		missile[i].c = BLU;
+		missile[i].c = PATMISS_COL;
 		break;
 
 	default:

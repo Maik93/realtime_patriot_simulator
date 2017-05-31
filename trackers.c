@@ -12,7 +12,10 @@
 #include <allegro.h>
 
 #include "baseUtils.h"
-// #include "common.h"
+#include "common.h"
+#include "colors.h"
+#include "missiles.h"
+#include "radar.h"
 
 // float pred_x, pred_y;
 
@@ -52,10 +55,11 @@ struct point compute_centroid(int tracker_i) {
 	c_rel.y = 0;
 	for (i = 0; i < TRACKER_RES; i++)
 		for (j = 0; j < TRACKER_RES; j++) {
-			// radar and rocket_launcher sprites are excluded (BLU), as enemy missile trails (GREY)
+			// radar and rocket_launcher sprites are excluded, as enemy missile trails
 			if (tracker_view[tracker_i][i][j] != BKG &&
-			        tracker_view[tracker_i][i][j] != BLU &&
-			        tracker_view[tracker_i][i][j] != GREY) {
+			        tracker_view[tracker_i][i][j] != PATMISS_COL &&
+			        tracker_view[tracker_i][i][j] != RSENSOR_COL &&
+			        tracker_view[tracker_i][i][j] != TCOL) {
 				c_rel.x += i - TRACKER_RES / 2;
 				c_rel.y += j - TRACKER_RES / 2;
 				n++;
@@ -67,7 +71,7 @@ struct point compute_centroid(int tracker_i) {
 		c_rel.x /= n;
 		c_rel.y /= n;
 
-		// put a green dot on the evaluated centroid
+		// highlight centroid with a green dot on tracker display
 		tracker_view[tracker_i][c_rel.x + TRACKER_RES / 2][c_rel.y + TRACKER_RES / 2] = GREEN;
 	}
 	else tracker_is_active[tracker_i] = 0;
@@ -114,7 +118,7 @@ void draw_predictions(int tracker_i, float delta_t) {
 		y += (0.5 * tracked_points[tracker_i].ay * delta_t + vy) * delta_t;
 		vy += tracked_points[tracker_i].ay * delta_t;
 
-		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), BLU);
+		putpixel(screen_buff, world2abs_x(x), world2abs_y(y), PREDICTION_COL);
 		c--;
 	}
 }
@@ -298,5 +302,5 @@ void tracker_display(int tracker_i) {
 
 	// border
 	rect(screen_buff, x0 - TRACKER_RES * TRACK_DSCALE / 2, y0 - TRACKER_RES * TRACK_DSCALE / 2,
-	     x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, LBLU);
+	     x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
 }
