@@ -10,12 +10,14 @@
 #include "trackers.h"
 #include "missiles.h"
 
-#define LAUNCHER_MODE	2
+// TODO: remove it
+/*#define LAUNCHER_MODE	2
 // 0: demo without inertia, 1: demo with inertia, 2: fixed at 45°
 
 // for demo without inertia
-int inc = 1;
+int inc = 1;*/
 
+// TODO: remove this
 // for demo with inertia
 float angle = 180;
 float angle_prev = 180;
@@ -70,20 +72,22 @@ void draw_current_trajectory() {
 	}
 }
 
+// TODO: remove this
 // without inertia
-void demo_base() {
+/*void demo_base() {
 	angle += inc;
 	if (angle <= 180 || angle >= 270) inc *= (-1);
-}
+}*/
 
-void demo_inertia() {
+// TODO: remove this
+/*void demo_inertia() {
 	angle = pole * angle_prev + (1 - pole) * angle_des_prev;
 	if (angle <= 181) angle_des = 270;
 	if (angle >= 269) angle_des = 180;
 	// printf("angle: %f\tangle_des: %d\tangle_prev:%f\n", angle, angle_des, angle_prev);
 	angle_prev = angle;
 	angle_des_prev = angle_des;
-}
+}*/
 
 void shoot_now() {
 	int new_missile_index;
@@ -102,18 +106,17 @@ void fixed_angle() {
 
 	// go to (45+180)° and stop
 	// angle_des = 45 + 180;
-	angle_des = 30 + 180;
-	theta = angle_des / 180 * PI;
+	theta = LAUNCHER_ANGLE_RAD;
 	sec_theta = 1 / cos(theta);
 	s_theta = sin(theta);
 	c_theta = cos(theta);
 	t_theta = tan(theta);
 
 	// going to operative position
-	if (abs(angle - angle_des) > 0.001) {
+	if (abs(angle - LAUNCHER_ANGLE_DEG) > 0.001) {
 		angle = pole * angle_prev + (1 - pole) * angle_des_prev;
 		angle_prev = angle;
-		angle_des_prev = angle_des;
+		angle_des_prev = LAUNCHER_ANGLE_DEG;
 	}
 
 	// evaluate when Patriot have to shoot
@@ -191,7 +194,10 @@ void *rocket_laucher_task(void* arg) {
 	set_period(i);
 	while (!sigterm_tasks) {
 
-		switch (LAUNCHER_MODE) {
+		fixed_angle();
+
+		// TODO: remove this
+		/*switch (LAUNCHER_MODE) {
 		case 0: // without inertia
 			demo_base();
 			break;
@@ -207,7 +213,7 @@ void *rocket_laucher_task(void* arg) {
 		default:
 			demo_inertia();
 			break;
-		}
+		}*/
 
 		wait_for_period(i);
 	}

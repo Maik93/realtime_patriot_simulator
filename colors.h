@@ -1,7 +1,8 @@
 #ifndef COLORS_H
 #define COLORS_H
+// Dark mode
 
-#include "baseUtils.h"
+// #include "baseUtils.h"
 //-----------------------------------------------------
 // BASIC COLORS DEFINITIONS
 //-----------------------------------------------------

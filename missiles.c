@@ -87,6 +87,14 @@ void handle_corners(int i) {
 	if (top) missile[i].y = WORLD_BOX_HEIGHT - missile[i].r;
 }
 
+// Take care of collisions with other objects.
+void check_proximities(int i) {
+	handle_corners(i);
+
+	// look for other missiles
+	// TODO
+}
+
 // Draw missile i in graphic coordinates.
 void draw_missile(int i) {
 	float p1x, p1y, p2x, p2y, p3x, p3y; // world coord.
@@ -153,7 +161,7 @@ int init_missile(int i) {
 	case 0: // Enemy missile
 		// An enemy missile can spawn from top or left side, each one with 1/2 of probability.
 		r = frand(0, 2);
-		// if (1) { // DBG
+		// if (0) { // DBG
 		if (r < 1) { // left side
 			missile[i].x = ML;
 			missile[i].y = frand(YMINL, YMAXL);
@@ -170,8 +178,9 @@ int init_missile(int i) {
 		break;
 
 	case 1: // Patriot missile
-		deg = 30 + 180; // TODO: let user change it
-		alpha = -deg / 180.0 * PI; // alpha = -3.663333333333333;
+		deg = LAUNCHER_ANGLE_DEG; // TODO: let user change it
+		// alpha = -deg / 180.0 * PI; // alpha = -3.663333333333333;
+		alpha = -LAUNCHER_ANGLE_RAD;
 		missile[i].x = abs2world_x(LAUNCHER_PIVOT_X);
 		missile[i].y = abs2world_y(LAUNCHER_PIVOT_Y);
 		missile[i].alpha = alpha;
@@ -213,7 +222,7 @@ void *missile_task(void* arg) {
 		missile[i].x += missile[i].vx * dt;
 		missile[i].alpha = atan2(missile[i].vy, missile[i].vx);
 
-		handle_corners(i);
+		check_proximities(i);
 		store_trail(i);
 
 		// DBG

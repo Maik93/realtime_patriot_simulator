@@ -16,7 +16,9 @@
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
-#define LAUNCHER_V0			120	// velocity (in module) to shoot every missile
+#define LAUNCHER_V0			120			// velocity (in module) to shoot every missile
+#define LAUNCHER_ANGLE_DEG	(180 + 30)	// angle from horizon. Graphic is counterclockwise
+#define LAUNCHER_ANGLE_RAD	(LAUNCHER_ANGLE_DEG / 180.0 * PI)
 //-----------------------------------------------------
 
 void draw_launcher();
