@@ -104,6 +104,7 @@ int listen_scancode();
 void get_string(char *str, int x, int y, int c, int b);
 void make_bmp_transp(char file_name_in[30], char file_name_out[30]);
 void make_bmp_half(char file_name_in[30], char file_name_out[30]);
+void convert_imgs_to_transp(char *dir);
 void activate_mouse();
 void init(int enable_mouse);
 

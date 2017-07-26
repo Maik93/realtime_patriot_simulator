@@ -20,6 +20,7 @@
 //-----------------------------------------------------
 // COLOR OBJECTS DEFINITIONS
 //-----------------------------------------------------
+#define TEXT_COL			WHITE	// all non-warning texts
 #define BORDER_COL			LBLU	// for every box in the window
 #define ENEMY_COL			RED		// for an enemy missile
 #define PATMISS_COL			BLU		// for a Patriot missile

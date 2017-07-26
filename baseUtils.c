@@ -338,6 +338,18 @@ void make_bmp_half(char file_name_in[30], char file_name_out[30]) {
 	destroy_bitmap(bmp_out);
 }
 
+// convert bmp images contained in given directory to transparent, then scale them down.
+void convert_imgs_to_transp(char *dir) {
+	int i, n = 10;
+	char file_name_in[30], file_name_out[30];
+	for (i = 1; i <= n; i++) {
+		sprintf(file_name_in, "%s/%d.bmp", dir , i);
+		sprintf(file_name_out, "%s/%d.bmp", dir , i);
+		make_bmp_transp(file_name_in, file_name_out);
+		make_bmp_half(file_name_in, file_name_out);
+	}
+}
+
 // Enable mouse integration, handled by hardware, with custom icon.
 void activate_mouse() {
 	BITMAP* mouse_bmp = load_bitmap("mouse.bmp", NULL);

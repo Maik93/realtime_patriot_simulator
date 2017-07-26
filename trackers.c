@@ -17,8 +17,6 @@
 #include "missiles.h"
 #include "radar.h"
 
-// float pred_x, pred_y;
-
 // public variables
 struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points (abs. coord)
 int				tracker_is_active[MAX_TRACKERS];		// flag activity for trackers

@@ -114,6 +114,12 @@ void draw_radar_symbol() {
 void draw_radar_display() {
 	int i;
 	int rx, ry, ax, ay;	// relative and absolute positions of points
+	char str[14];
+
+	// label
+	sprintf(str, "Radar display");
+	textout_centre_ex(screen_buff, font, str,
+	           RDISPLAY_ORIGIN_X, (RDISPLAY_ORIGIN_Y - RDISPLAY_RADIOUS) - 2 * CHAR_HEIGHT, TEXT_COL, -1);
 
 	// borders
 	arc(screen_buff, RDISPLAY_ORIGIN_X, RDISPLAY_ORIGIN_Y,
