@@ -24,6 +24,8 @@ float angle_prev = 180;
 float pole = 0.5;
 int angle_des, angle_des_prev;
 
+float shoot_timer; // time to next shoot
+
 void draw_launcher() {
 	BITMAP *body;
 
@@ -48,6 +50,7 @@ void draw_launcher() {
 	destroy_bitmap(body);
 }
 
+// Show actual trajectory of rocket launcher
 void draw_current_trajectory() {
 	float x, y, v, vx, vy, ax, ay, alpha, delta_t;
 	int c = 500; // max number of iterations
@@ -72,6 +75,19 @@ void draw_current_trajectory() {
 	}
 }
 
+// Textual infos in the bottom right of the window.
+void print_launcher_status() {
+	char str[20];
+	sprintf(str, "Patriot status");
+	textout_centre_ex(screen_buff, font, str, LAUNCHER_TITLE_POSX, LAUNCHER_TITLE_POSY, TEXT_TITL_COL, -1);
+	sprintf(str, "-> velocity: %d m/s", LAUNCHER_V0); // TODO: update it
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT1_X, LAUNCHER_STAT1_Y, TEXT_COL, -1);
+	sprintf(str, "-> angle:    %d°", LAUNCHER_ANGLE_DEG - 180); // TODO: update it
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT2_X, LAUNCHER_STAT2_Y, TEXT_COL, -1);
+	sprintf(str, "-> shoot in: %.2f s", shoot_timer); // TODO: update it
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT3_X, LAUNCHER_STAT3_Y, TEXT_COL, -1);
+}
+
 // TODO: remove this
 // without inertia
 /*void demo_base() {
@@ -89,12 +105,23 @@ void draw_current_trajectory() {
 	angle_des_prev = angle_des;
 }*/
 
+// TODO: fix this
+void update_shoot_timer(float suggested_t) {
+	if (shoot_timer == 0 && suggested_t > 0)
+		shoot_timer = suggested_t;
+	else if (shoot_timer > 0 && suggested_t < shoot_timer)
+		shoot_timer = suggested_t;
+	else// if (shoot_timer < 0)
+		shoot_timer = 0;
+}
+
+// TODO: change this name
 void shoot_now() {
 	int new_missile_index;
 
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
 	// if (new_missile_index != -1)
-	if (new_missile_index == PATRIOT_MISSILES_BASE_INDEX){
+	if (new_missile_index == PATRIOT_MISSILES_BASE_INDEX) {
 		printf("Shoot now!!\n");
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
 	}
@@ -177,8 +204,9 @@ void fixed_angle() {
 				}
 				t_wait = t_impact - t_tot;
 				// printf("Shoot in %f\n", t_wait);
+				update_shoot_timer(t_wait);
 
-				if(abs(t_wait) < 0.01) {
+				if (abs(t_wait) < 0.01) {
 					shoot_now();
 					return;
 				}

@@ -118,8 +118,7 @@ void draw_radar_display() {
 
 	// label
 	sprintf(str, "Radar display");
-	textout_centre_ex(screen_buff, font, str,
-	           RDISPLAY_ORIGIN_X, (RDISPLAY_ORIGIN_Y - RDISPLAY_RADIOUS) - 2 * CHAR_HEIGHT, TEXT_COL, -1);
+	textout_centre_ex(screen_buff, font, str, RDISPLAY_TITLE_X, RDISPLAY_TITLE_Y, TEXT_TITL_COL, -1);
 
 	// borders
 	arc(screen_buff, RDISPLAY_ORIGIN_X, RDISPLAY_ORIGIN_Y,

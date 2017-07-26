@@ -19,7 +19,7 @@
 #include "trackers.h"
 #include "rocket_laucher.h"
 
-// Static part of graphics, in which we draw each time.
+// Static part of graphics, a basic scenario in which we draw each time.
 BITMAP	*screen_base;
 
 int world2abs_x(int x) {
@@ -80,17 +80,13 @@ void right_menu() {
 	sprintf(str, "Trackers");
 	textout_centre_ex(screen_buff, font, str,
 	                  TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2,
-	                  TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2 - 2 * CHAR_HEIGHT, TEXT_COL, -1);
+	                  TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2 - 2 * CHAR_HEIGHT, TEXT_TITL_COL, -1);
 
 	// tracker empty boxes
-	rect(screen_buff, TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	     TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D0_Y + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
-	rect(screen_buff, TRACK_D1_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D1_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	     TRACK_D1_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D1_Y + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
-	rect(screen_buff, TRACK_D2_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D2_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	     TRACK_D2_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D2_Y + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
-	rect(screen_buff, TRACK_D3_X - TRACKER_RES * TRACK_DSCALE / 2, TRACK_D3_Y - TRACKER_RES * TRACK_DSCALE / 2,
-	     TRACK_D3_X + TRACKER_RES * TRACK_DSCALE / 2, TRACK_D3_Y + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
+	rect(screen_buff, TRACK_BOX1_X0, TRACK_BOX1_Y0, TRACK_BOX1_X1, TRACK_BOX1_Y1, BORDER_COL);
+	rect(screen_buff, TRACK_BOX2_X0, TRACK_BOX2_Y0, TRACK_BOX2_X1, TRACK_BOX2_Y1, BORDER_COL);
+	rect(screen_buff, TRACK_BOX3_X0, TRACK_BOX3_Y0, TRACK_BOX3_X1, TRACK_BOX3_Y1, BORDER_COL);
+	rect(screen_buff, TRACK_BOX4_X0, TRACK_BOX4_Y0, TRACK_BOX4_X1, TRACK_BOX4_Y1, BORDER_COL);
 }
 
 // Graphical task. Before the main loop, we can compose basic window background,
@@ -116,13 +112,11 @@ void *graphic_task(void* arg) {
 	top_menu();
 	right_menu();
 
-	// store this basic screen_buff
+	// store this basic scenario
 	blit(screen_buff, screen_base, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
-	// update screen with the content of screen_buff
-	blit(screen_buff, screen, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
-
-	// starts radar_task and rocket_laucher_task
+	// starts radar_task and rocket_laucher_task.
+	// It's done only now because they need a basic scenario to analize.
 	start_task(radar_task, 2, 2, 30, RADAR_INDEX);
 	start_task(rocket_laucher_task, 50, 50, 50, ROCKET_LAUCHER_INDEX);
 
@@ -130,17 +124,17 @@ void *graphic_task(void* arg) {
 	set_period(a);
 	while (!sigterm_tasks) {
 
-		// recover basic screen_buff
+		// recover basic scenario in screen_buff
 		blit(screen_base, screen_buff, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
+		// draw rocket launcher and its trajectory
 		draw_launcher();
 		draw_current_trajectory();
+		print_launcher_status();
 
 		// enemy and Patriot missiles
 		for (i = ENEMY_MISSILES_BASE_INDEX; i < PATRIOT_MISSILES_TOP_INDEX; i++) {
 			if (tp[i].index != -1) {
-				// DBG
-				// printf("Drawing missile %d\n", i);
 				draw_missile(i);
 				if (tflag) draw_trail(i, tl);
 			}
@@ -176,6 +170,7 @@ void *graphic_task(void* arg) {
 void *interp(void* arg) {
 	int a, scan, new_missile_index;
 	a = get_task_index(arg);
+
 	set_period(a);
 	while (!sigterm_tasks) {
 		scan = listen_scancode();

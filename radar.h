@@ -27,16 +27,18 @@
 #define RDISPLAY_Y_MARGIN	39						// margin from top of the window
 #define RDISPLAY_ORIGIN_X	MENU_BOX_X2 + 6 + 92	// vertex of the radar
 #define RDISPLAY_ORIGIN_Y	RDISPLAY_Y_MARGIN + RDISPLAY_RADIOUS
-//-----------------------------------------------------
 #define RDISPLAY_RIGHT_X	RDISPLAY_ORIGIN_X + 92	// positions of right and left extremes of the radar
 #define RDISPLAY_RIGHT_Y	RDISPLAY_ORIGIN_Y - 72
 #define RDISPLAY_SR_X		RDISPLAY_ORIGIN_X + 40	// where radar starts (right value)
 #define RDISPLAY_SR_Y		RDISPLAY_ORIGIN_Y - 30
-//-----------------------------------------------------
 #define RDISPLAY_LEFT_X		RDISPLAY_ORIGIN_X - 92
 #define RDISPLAY_LEFT_Y		RDISPLAY_RIGHT_Y
 #define RDISPLAY_SL_X		RDISPLAY_ORIGIN_X - 40	// where radar ends (left value)
 #define RDISPLAY_SL_Y		RDISPLAY_SR_Y
+//-----------------------------------------------------
+#define RDISPLAY_TITLE_X	RDISPLAY_ORIGIN_X
+#define RDISPLAY_TITLE_Y	(RDISPLAY_ORIGIN_Y - RDISPLAY_RADIOUS) - 2 * CHAR_HEIGHT
+//-----------------------------------------------------
 
 //-----------------------------------------------------
 // STRUCT
