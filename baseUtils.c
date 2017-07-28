@@ -389,7 +389,4 @@ void init(int enable_mouse) {
 	screen_buff = create_bitmap(SCREEN_W, SCREEN_H);
 	clear_bitmap(screen_buff);
 	clear_to_color(screen_buff, GND);
-
-	// starts a task that refresh graphic at 25fps, lowest priority possible
-	// create_and_start_task(task_graphic_refresh, 40, 40, 1);
 }

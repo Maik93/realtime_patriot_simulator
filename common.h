@@ -1,6 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define TSCALE		2			// time scale factor - DBG: best is 5
 //-----------------------------------------------------
 // BOX DIMENSIONS
 //-----------------------------------------------------
@@ -40,10 +41,7 @@
 #define MENU_ERROR2_Y	MENU_BOX_Y2 - CHAR_HEIGHT - 10
 #define MENU_ERROR1_X	MENU_ERROR2_X
 #define MENU_ERROR1_Y	MENU_ERROR2_Y - CHAR_HEIGHT
-//-----------------------------------------------------
-// TASK CONSTANTS
-//-----------------------------------------------------
-#define TSCALE		2	// time scale factor - DBG: best is 5
+
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS
 //-----------------------------------------------------
@@ -52,6 +50,6 @@ int world2abs_y(int y);
 int abs2world_x(int x);
 int abs2world_y(int y);
 void *graphic_task(void* arg);
-void *interp(void* arg);
+void *interp_task(void* arg);
 
 #endif

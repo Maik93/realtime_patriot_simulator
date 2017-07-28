@@ -31,8 +31,10 @@
 #define LAUNCHER_STAT2_Y	LAUNCHER_STAT1_Y + 2 * CHAR_HEIGHT
 #define LAUNCHER_STAT3_X	LAUNCHER_STAT1_X
 #define LAUNCHER_STAT3_Y	LAUNCHER_STAT2_Y + 2 * CHAR_HEIGHT
-//-----------------------------------------------------
 
+//-----------------------------------------------------
+// PUBLIC FUNCTIONS
+//-----------------------------------------------------
 void draw_launcher();
 void draw_current_trajectory();
 void print_launcher_status();

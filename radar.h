@@ -38,7 +38,6 @@
 //-----------------------------------------------------
 #define RDISPLAY_TITLE_X	RDISPLAY_ORIGIN_X
 #define RDISPLAY_TITLE_Y	(RDISPLAY_ORIGIN_Y - RDISPLAY_RADIOUS) - 2 * CHAR_HEIGHT
-//-----------------------------------------------------
 
 //-----------------------------------------------------
 // STRUCT

@@ -26,12 +26,6 @@
 #define YMINL	WORLD_BOX_HEIGHT - 100	// min and max vertical position for left spawn (world coord.)
 #define YMAXL	WORLD_BOX_HEIGHT - ML
 //-----------------------------------------------------
-// TASK CONSTANTS
-//-----------------------------------------------------
-#define MISSILE_PER		20			// task period in ms
-#define MISSILE_DREL	MISSILE_PER	// relative deadline in ms
-#define MISSILE_PRI		60			// task priority
-//-----------------------------------------------------
 #define TLEN			30			// circular buffer length (used to store trails)
 
 //-----------------------------------------------------

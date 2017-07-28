@@ -13,6 +13,7 @@
 #include <allegro.h>
 
 #include "baseUtils.h"
+#include "task_constants.h"
 #include "colors.h"
 #include "missiles.h"
 #include "radar.h"
@@ -112,7 +113,7 @@ void right_menu() {
 // then we can draw on it each time, insead of drawing again everything.
 void *graphic_task(void* arg) {
 	int i, a;
-	float delta_t = TSCALE * (float)20 / 1000; // TODO: substitute PER from constants
+	float delta_t = TSCALE * (float)GRAPH_PER / 1000;
 
 	// initializing screen bitmaps
 	screen_base = create_bitmap(SCREEN_W, SCREEN_H);
@@ -136,8 +137,8 @@ void *graphic_task(void* arg) {
 
 	// starts radar_task and rocket_laucher_task.
 	// It's done only now because they need a basic scenario to analize.
-	start_task(radar_task, 2, 2, 30, RADAR_INDEX);
-	start_task(rocket_laucher_task, 50, 50, 50, ROCKET_LAUCHER_INDEX);
+	start_task(radar_task, RADAR_PER, RADAR_DREL, RADAR_PRI, RADAR_INDEX);
+	start_task(rocket_laucher_task, LAUNCHER_PER, LAUNCHER_DREL, LAUNCHER_PRI, ROCKET_LAUCHER_INDEX);
 
 	a = get_task_index(arg);
 	set_period(a);
@@ -188,7 +189,7 @@ void *graphic_task(void* arg) {
 }
 
 // Keyboard interpeter task.
-void *interp(void* arg) {
+void *interp_task(void* arg) {
 	int a, scan, new_missile_index;
 	a = get_task_index(arg);
 

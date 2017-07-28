@@ -39,12 +39,6 @@
 #define TRACK_BOX4_Y0		TRACK_D3_Y - TRACKER_RES * TRACK_DSCALE / 2
 #define TRACK_BOX4_X1		TRACK_D3_X + TRACKER_RES * TRACK_DSCALE / 2
 #define TRACK_BOX4_Y1		TRACK_D3_Y + TRACKER_RES * TRACK_DSCALE / 2
-//-----------------------------------------------------
-// TASK CONSTANTS
-//-----------------------------------------------------
-#define TRACKER_PER		20			// task period in ms
-#define TRACKER_DREL	TRACKER_PER	// relative deadline in ms
-#define TRACKER_PRI		50			// task priority
 
 //-----------------------------------------------------
 // STRUCT

@@ -4,8 +4,8 @@
 #include <time.h>
 
 #include "baseUtils.h"
+#include "task_constants.h"
 #include "common.h"
-// #include "radar_and_trackers.h"
 
 int main(int argc, char const *argv[]) {
 	pthread_t interp_id;
@@ -14,20 +14,13 @@ int main(int argc, char const *argv[]) {
 	init(0);			// without mouse integration
 	srand(time(NULL));	// initialize random generator
 
-	// TODO: add PER and DEL constants for graphic_task
-	start_task(graphic_task, 20, 20, 10, GRAPHIC_INDEX);
-	// and it will spawn radar and rocket_laucher tasks
+	// start graphic task. It will take care of other tasks too.
+	start_task(graphic_task, GRAPH_PER, GRAPH_PER, GRAPH_PRI, GRAPHIC_INDEX);
 
-	// now radar_task spawns in graphic task
-	/*struct timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
-	time_add_ms(&now, 10);
-	clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &now, NULL);
+	// keybord listener.
+	interp_id = start_task(interp_task, INTERP_PER, INTERP_PER, INTERP_PRI, INTERPRETER_INDEX);
 
-	start_task(radar_task, 2, 2, 30, RADAR_INDEX);*/
-
-	interp_id = start_task(interp, 40, 40, 10, INTERPRETER_INDEX);
-
+	// wait for return of interp_task, caused by ESC_KEY
 	pthread_join(interp_id, NULL);
 
 	allegro_exit();

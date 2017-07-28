@@ -5,6 +5,7 @@
 #include <allegro.h>
 
 #include "baseUtils.h"
+#include "task_constants.h"
 #include "common.h"
 #include "colors.h"
 #include "trackers.h"
