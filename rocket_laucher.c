@@ -10,14 +10,14 @@
 #include "trackers.h"
 #include "missiles.h"
 
-// TODO: remove it
+// TODO: remove unused launcher modes
 /*#define LAUNCHER_MODE	2
 // 0: demo without inertia, 1: demo with inertia, 2: fixed at 45°
 
 // for demo without inertia
 int inc = 1;*/
 
-// TODO: remove this
+// TODO: place correctly angle and angle_prev
 // for demo with inertia
 float angle = 180;
 float angle_prev = 180;
@@ -80,11 +80,11 @@ void print_launcher_status() {
 	char str[20];
 	sprintf(str, "Patriot status");
 	textout_centre_ex(screen_buff, font, str, LAUNCHER_TITLE_POSX, LAUNCHER_TITLE_POSY, TEXT_TITL_COL, -1);
-	sprintf(str, "-> velocity: %d m/s", LAUNCHER_V0); // TODO: update it
+	sprintf(str, "-> velocity: %d m/s", LAUNCHER_V0); // TODO: update it with current value
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT1_X, LAUNCHER_STAT1_Y, TEXT_COL, -1);
-	sprintf(str, "-> angle:    %d°", LAUNCHER_ANGLE_DEG - 180); // TODO: update it
+	sprintf(str, "-> angle:    %d°", LAUNCHER_ANGLE_DEG - 180); // TODO: update it with current value
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT2_X, LAUNCHER_STAT2_Y, TEXT_COL, -1);
-	sprintf(str, "-> shoot in: %.2f s", shoot_timer); // TODO: update it
+	sprintf(str, "-> shoot in: %.2f s", shoot_timer); // TODO: update it with current value
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT3_X, LAUNCHER_STAT3_Y, TEXT_COL, -1);
 }
 
@@ -105,7 +105,7 @@ void print_launcher_status() {
 	angle_des_prev = angle_des;
 }*/
 
-// TODO: fix this
+// TODO: fix update_shoot_timer
 void update_shoot_timer(float suggested_t) {
 	if (shoot_timer == 0 && suggested_t > 0)
 		shoot_timer = suggested_t;
@@ -115,7 +115,7 @@ void update_shoot_timer(float suggested_t) {
 		shoot_timer = 0;
 }
 
-// TODO: change this name
+// TODO: change shoot_now name
 void shoot_now() {
 	int new_missile_index;
 

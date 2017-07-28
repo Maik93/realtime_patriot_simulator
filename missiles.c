@@ -16,14 +16,14 @@
 #include "baseUtils.h"
 #include "common.h"
 #include "colors.h"
-#include "rocket_laucher.h" // TODO: correct in rocket_launcher!!
+#include "rocket_laucher.h" // TODO: correct rocket_laucher.h name in rocket_launcher!!
 // #include "radar_and_trackers.h"
 
 
 struct missile	missile[MAX_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_MISSILES];	// trail buffer
 
-// TODO: reset to 0 befor delivery
+// TODO: reset tflag to 0 befor delivery
 int tflag = 1;	// switcher for trail's visibility [0-1]
 int tl = 30;	// actual trail length
 
@@ -178,7 +178,7 @@ int init_missile(int i) {
 		break;
 
 	case 1: // Patriot missile
-		deg = LAUNCHER_ANGLE_DEG; // TODO: let user change it
+		deg = LAUNCHER_ANGLE_DEG; // TODO: let user change LAUNCHER_ANGLE_DEG
 		// alpha = -deg / 180.0 * PI; // alpha = -3.663333333333333;
 		alpha = -LAUNCHER_ANGLE_RAD;
 		missile[i].x = abs2world_x(LAUNCHER_PIVOT_X);

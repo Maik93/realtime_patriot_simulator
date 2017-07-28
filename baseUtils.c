@@ -136,7 +136,7 @@ void update_conputational_time(int index) {
  * 		activation and, when awaken, updates activation time and deadline.
  */
 void wait_for_period(int index) {
-	// TODO: handle deadlines
+	// TODO: handle deadlines for tasks
 	deadline_miss(index);
 	update_conputational_time(index);
 	tp[index].counts++;

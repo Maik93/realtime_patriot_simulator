@@ -51,14 +51,30 @@ void top_menu() {
 	char str[50];
 
 	// border and filling
-	rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
+	// rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
 	rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BORDER_COL);
 
-	// TODO: add something, like command explainations
+	// list of commands
+	sprintf(str, "List of avaiable commands");
+	textout_ex(screen_buff, font, str, MENU_TITLE_X, MENU_TITLE_Y, TEXT_TITL_COL, -1);
+	sprintf(str, "space:      spawn new enemy missile");
+	textout_ex(screen_buff, font, str, MENU_CONTENT1_X, MENU_CONTENT1_Y, TEXT_COL, -1);
+	sprintf(str, "X:          toggle enemy missile trails");
+	textout_ex(screen_buff, font, str, MENU_CONTENT2_X, MENU_CONTENT2_Y, TEXT_COL, -1);
+	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
+	textout_ex(screen_buff, font, str, MENU_CONTENT3_X, MENU_CONTENT3_Y, TEXT_COL, -1);
+	sprintf(str, "left-rigth: dec./inc. Patriot shoot velocity");
+	textout_ex(screen_buff, font, str, MENU_CONTENT4_X, MENU_CONTENT4_Y, TEXT_COL, -1);
+	sprintf(str, "up-down:    inc./dec. Patriot shoot angle");
+	textout_ex(screen_buff, font, str, MENU_CONTENT5_X, MENU_CONTENT5_Y, TEXT_COL, -1);
+	sprintf(str, "Esc:        close program");
+	textout_ex(screen_buff, font, str, MENU_CONTENT6_X, MENU_CONTENT6_Y, TEXT_COL, -1);
 
 	// warning for max enemy missiles reached
 	if (find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX)
 	        == -1) {
+		// TODO: fix "Max number of enemy missiles reached"
+		printf("Max number of enemy missiles reached\n");
 		sprintf(str, "Max number of enemy missiles reached");
 		textout_ex(screen_buff, font, str,
 		           MENU_BOX_X1 + 20, MENU_BOX_Y2 - CHAR_HEIGHT - 20, RED, -1);
@@ -66,6 +82,8 @@ void top_menu() {
 
 	// warning for max trackers reached
 	if (find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX) == -1) {
+		// TODO: fix "Max number of trackers reached"
+		printf("Max number of trackers reached\n");
 		sprintf(str, "Max number of trackers reached");
 		textout_ex(screen_buff, font, str,
 		           MENU_BOX_X1 + 20, MENU_BOX_Y2 - 2 * CHAR_HEIGHT - 20, RED, -1);
@@ -93,7 +111,7 @@ void right_menu() {
 // then we can draw on it each time, insead of drawing again everything.
 void *graphic_task(void* arg) {
 	int i, a;
-	float delta_t = TSCALE * (float)20 / 1000;
+	float delta_t = TSCALE * (float)20 / 1000; // TODO: substitute PER from constants
 
 	// initializing screen bitmaps
 	screen_base = create_bitmap(SCREEN_W, SCREEN_H);
@@ -152,7 +170,7 @@ void *graphic_task(void* arg) {
 			if (tp[i].index != -1)
 				tracker_display(i - TRACKER_BASE_INDEX);
 
-		// TODO: handle deadlines
+		// TODO: graphically handle deadlines
 		/*if (deadline_miss(a))
 			show_dmiss(a);*/
 
@@ -175,10 +193,18 @@ void *interp(void* arg) {
 	while (!sigterm_tasks) {
 		scan = listen_scancode();
 		// if (scan != 0) printf("Readed keyscan: %d\n", (int)scan);
+
 		switch (scan) {
 		case 24: // X key - turn on/off trails for enemy missiles
 			tflag = !tflag;
 			printf("tflag setted to %d\n", tflag);
+			break;
+
+		case 26: // Z key - reduce trail length
+			if (tl > 10) tl--;
+			break;
+		case 3: // C key - increment trail length
+			if (tl < TLEN) tl++;
 			break;
 
 		case KEY_SPACE: // spawn a new enemy missile
@@ -188,17 +214,17 @@ void *interp(void* arg) {
 			break;
 
 		case KEY_UP:
-			// TODO: something
+			// TODO: add key_up to increment launcher angle
 			break;
 		case KEY_DOWN:
-			// TODO: something
+			// TODO: add key_down to decrement launcher angle
 			break;
 
-		case KEY_LEFT: // reduce trail length
-			if (tl > 10) tl--;
+		case KEY_LEFT: // reduce patriot missile velocities
+			// TODO: add key_left to increment missile velocities
 			break;
-		case KEY_RIGHT: // increment trail length
-			if (tl < TLEN) tl++;
+		case KEY_RIGHT: // increment patriot missile velocities
+			// TODO: add key_right to decrement missile velocities
 			break;
 
 		case KEY_ESC: // close everything
