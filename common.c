@@ -38,7 +38,7 @@ int abs2world_y(int y) {
 	return WORLD_BOX_Y2 - y;
 }
 
-// Draws word box.
+// Draw word box. This function is called only one time.
 void draw_world() {
 	rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
 	rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BORDER_COL);
@@ -47,10 +47,11 @@ void draw_world() {
 	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), ENEMY_COL); // left missile spawn
 }
 
-void top_menu() {
+// Draw static part of top menu. This function is called only one time.
+void top_menu_static() {
 	char str[50];
 
-	// border and filling
+	// border and filling TODO: permanently remove rectfill for top_menu?
 	// rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
 	rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BORDER_COL);
 
@@ -69,27 +70,27 @@ void top_menu() {
 	textout_ex(screen_buff, font, str, MENU_CONTENT5_X, MENU_CONTENT5_Y, TEXT_COL, -1);
 	sprintf(str, "Esc:        close program");
 	textout_ex(screen_buff, font, str, MENU_CONTENT6_X, MENU_CONTENT6_Y, TEXT_COL, -1);
+}
+
+// Draw dynamic part of top menu. This function is called in every graphic_task cicle.
+void top_menu_dynamic() {
+	char str[50];
 
 	// warning for max enemy missiles reached
 	if (find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX)
 	        == -1) {
-		// TODO: fix "Max number of enemy missiles reached"
-		printf("Max number of enemy missiles reached\n");
 		sprintf(str, "Max number of enemy missiles reached");
-		textout_ex(screen_buff, font, str,
-		           MENU_BOX_X1 + 20, MENU_BOX_Y2 - CHAR_HEIGHT - 20, RED, -1);
+		textout_ex(screen_buff, font, str, MENU_ERROR1_X, MENU_ERROR1_Y, RED, -1);
 	}
 
 	// warning for max trackers reached
 	if (find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX) == -1) {
-		// TODO: fix "Max number of trackers reached"
-		printf("Max number of trackers reached\n");
 		sprintf(str, "Max number of trackers reached");
-		textout_ex(screen_buff, font, str,
-		           MENU_BOX_X1 + 20, MENU_BOX_Y2 - 2 * CHAR_HEIGHT - 20, RED, -1);
+		textout_ex(screen_buff, font, str, MENU_ERROR2_X, MENU_ERROR2_Y, RED, -1);
 	}
 }
 
+// Draw tracker boxes and its title on right side. This function is called only one time.
 void right_menu() {
 	int i;
 	char str[8];
@@ -107,7 +108,7 @@ void right_menu() {
 	rect(screen_buff, TRACK_BOX4_X0, TRACK_BOX4_Y0, TRACK_BOX4_X1, TRACK_BOX4_Y1, BORDER_COL);
 }
 
-// Graphical task. Before the main loop, we can compose basic window background,
+// Graphical task. Before the main loop, we can compose a basic scenario,
 // then we can draw on it each time, insead of drawing again everything.
 void *graphic_task(void* arg) {
 	int i, a;
@@ -121,13 +122,13 @@ void *graphic_task(void* arg) {
 	draw_world();
 	draw_radar_symbol();
 
-	// DBG: dots to test scanner
+	// DBG: dots for test
 	/*circlefill(screen_buff, 343, 319, 10, RED);
 	circlefill(screen_buff, 338, 404, 10, GREEN);
 	circlefill(screen_buff, 253, 319, 10, BORDER_COL);
 	circlefill(screen_buff, 190, 404, 10, WHITE);*/
 
-	top_menu();
+	top_menu_static();
 	right_menu();
 
 	// store this basic scenario
@@ -145,6 +146,10 @@ void *graphic_task(void* arg) {
 		// recover basic scenario in screen_buff
 		blit(screen_base, screen_buff, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
+		top_menu_dynamic();
+
+		draw_radar_display();
+
 		// draw rocket launcher and its trajectory
 		draw_launcher();
 		draw_current_trajectory();
@@ -158,12 +163,10 @@ void *graphic_task(void* arg) {
 			}
 		}
 
-		// predictions for enemy missiles
+		// predicted trajectories for enemy missiles
 		for (i = 0; i < MAX_TRACKERS; i++)
 			if (tp[i].index != -1)
 				draw_predictions(i, delta_t / 3);
-
-		draw_radar_display();
 
 		// tracker views on right side of the screen
 		for (i = TRACKER_BASE_INDEX; i < TRACKER_TOP_INDEX; i++)

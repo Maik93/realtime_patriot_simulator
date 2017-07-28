@@ -17,7 +17,7 @@
 // for demo without inertia
 int inc = 1;*/
 
-// TODO: place correctly angle and angle_prev
+// TODO: find a good place for angle and angle_prev
 // for demo with inertia
 float angle = 180;
 float angle_prev = 180;
@@ -115,7 +115,6 @@ void update_shoot_timer(float suggested_t) {
 		shoot_timer = 0;
 }
 
-// TODO: change shoot_now name
 void shoot_now() {
 	int new_missile_index;
 
@@ -127,6 +126,7 @@ void shoot_now() {
 	}
 }
 
+// TODO: change fixed_angle name
 void fixed_angle() {
 	int tracker_i;
 	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;

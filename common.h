@@ -36,6 +36,11 @@
 #define MENU_CONTENT6_X	MENU_CONTENT5_X
 #define MENU_CONTENT6_Y	MENU_CONTENT5_Y + 2 * CHAR_HEIGHT
 //-----------------------------------------------------
+#define MENU_ERROR2_X	MENU_BOX_X1 + 20
+#define MENU_ERROR2_Y	MENU_BOX_Y2 - CHAR_HEIGHT - 10
+#define MENU_ERROR1_X	MENU_ERROR2_X
+#define MENU_ERROR1_Y	MENU_ERROR2_Y - CHAR_HEIGHT
+//-----------------------------------------------------
 // TASK CONSTANTS
 //-----------------------------------------------------
 #define TSCALE		2	// time scale factor - DBG: best is 5

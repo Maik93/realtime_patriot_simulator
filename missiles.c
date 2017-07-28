@@ -23,7 +23,7 @@
 struct missile	missile[MAX_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_MISSILES];	// trail buffer
 
-// TODO: reset tflag to 0 befor delivery
+// DBG: reset tflag to 0 befor delivery
 int tflag = 1;	// switcher for trail's visibility [0-1]
 int tl = 30;	// actual trail length
 
