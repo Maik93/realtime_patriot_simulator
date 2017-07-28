@@ -1,5 +1,5 @@
-#ifndef ROCKET_LAUCHER_H
-#define ROCKET_LAUCHER_H
+#ifndef ROCKET_LAUNCHER_H
+#define ROCKET_LAUNCHER_H
 
 #include "common.h"
 #include "trackers.h"
@@ -38,6 +38,6 @@
 void draw_launcher();
 void draw_current_trajectory();
 void print_launcher_status();
-void *rocket_laucher_task(void* arg);
+void *rocket_launcher_task(void* arg);
 
 #endif

@@ -36,8 +36,8 @@
 //-----------------------------------------------------
 // ROCKET LAUNCHER
 //-----------------------------------------------------
-#define LAUNCHER_PER		50			// period for rocket_laucher_task (ms)
-#define LAUNCHER_DREL		LAUNCHER_PER// relative deadline for rocket_laucher_task (ms)
-#define LAUNCHER_PRI		50			// priority of rocket_laucher_task
+#define LAUNCHER_PER		50			// period for rocket_launcher_task (ms)
+#define LAUNCHER_DREL		LAUNCHER_PER// relative deadline for rocket_launcher_task (ms)
+#define LAUNCHER_PRI		50			// priority of rocket_launcher_task
 
 #endif

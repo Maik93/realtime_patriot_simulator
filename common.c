@@ -18,7 +18,7 @@
 #include "missiles.h"
 #include "radar.h"
 #include "trackers.h"
-#include "rocket_laucher.h"
+#include "rocket_launcher.h"
 
 // Static part of graphics, a basic scenario in which we draw each time.
 BITMAP	*screen_base;
@@ -135,10 +135,10 @@ void *graphic_task(void* arg) {
 	// store this basic scenario
 	blit(screen_buff, screen_base, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
-	// starts radar_task and rocket_laucher_task.
+	// starts radar_task and rocket_launcher_task.
 	// It's done only now because they need a basic scenario to analize.
 	start_task(radar_task, RADAR_PER, RADAR_DREL, RADAR_PRI, RADAR_INDEX);
-	start_task(rocket_laucher_task, LAUNCHER_PER, LAUNCHER_DREL, LAUNCHER_PRI, ROCKET_LAUCHER_INDEX);
+	start_task(rocket_launcher_task, LAUNCHER_PER, LAUNCHER_DREL, LAUNCHER_PRI, ROCKET_LAUNCHER_INDEX);
 
 	a = get_task_index(arg);
 	set_period(a);

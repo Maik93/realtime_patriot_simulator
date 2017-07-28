@@ -229,7 +229,7 @@ void kill_all_task() {
 				printf("Radar task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
 				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
 				break;
-			case ROCKET_LAUCHER_INDEX:
+			case ROCKET_LAUNCHER_INDEX:
 				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
 				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
 				break;

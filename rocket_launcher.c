@@ -1,4 +1,4 @@
-#include "rocket_laucher.h"
+#include "rocket_launcher.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -216,7 +216,7 @@ void fixed_angle() {
 	}
 }
 
-void *rocket_laucher_task(void* arg) {
+void *rocket_launcher_task(void* arg) {
 	int i = get_task_index(arg);
 	// float dt = TSCALE * (float)get_task_period(i) / 1000;
 
