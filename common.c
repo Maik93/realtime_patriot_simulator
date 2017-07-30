@@ -52,8 +52,7 @@ void draw_world() {
 void top_menu_static() {
 	char str[50];
 
-	// border and filling TODO: permanently remove rectfill for top_menu?
-	// rectfill(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BKG);
+	// border
 	rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BORDER_COL);
 
 	// list of commands
@@ -173,10 +172,6 @@ void *graphic_task(void* arg) {
 		for (i = TRACKER_BASE_INDEX; i < TRACKER_TOP_INDEX; i++)
 			if (tp[i].index != -1)
 				tracker_display(i - TRACKER_BASE_INDEX);
-
-		// TODO: graphically handle deadlines
-		/*if (deadline_miss(a))
-			show_dmiss(a);*/
 
 		// this will hide a green dot in (0, 0) caused by trails
 		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);

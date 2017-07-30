@@ -19,6 +19,8 @@
 //-----------------------------------------------------
 #define LAUNCHER_V0			120			// velocity (in module) to shoot every missile
 #define LAUNCHER_ANGLE_DEG	(180 + 30)	// angle from horizon. Graphic is counterclockwise
+#define LAUNCHER_DEG0		180			// rocket launcher starts from horizontal
+#define LAUNCHER_POLE		0.5			// rocket launcher motion is a first order system
 #define LAUNCHER_ANGLE_RAD	(LAUNCHER_ANGLE_DEG / 180.0 * PI)
 //-----------------------------------------------------
 // TEXT MENU CONSTANTS
