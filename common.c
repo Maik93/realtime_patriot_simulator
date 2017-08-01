@@ -220,10 +220,12 @@ void *interp_task(void* arg) {
 			break;
 
 		case KEY_LEFT: // reduce patriot missile velocities
-			// TODO: add key_left to increment missile velocities
+			if (launcher_angle_des > 180)
+				launcher_angle_des--;
 			break;
 		case KEY_RIGHT: // increment patriot missile velocities
-			// TODO: add key_right to decrement missile velocities
+			if (launcher_angle_des < 270)
+				launcher_angle_des++;
 			break;
 
 		case KEY_ESC: // close everything

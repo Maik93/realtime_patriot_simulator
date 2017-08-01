@@ -155,7 +155,6 @@ int check_missile_type(int index) {
  */
 int init_missile(int i) {
 	float r, v, alpha;
-	int deg;
 
 	switch (check_missile_type(i)) {
 	case 0: // Enemy missile
@@ -178,9 +177,7 @@ int init_missile(int i) {
 		break;
 
 	case 1: // Patriot missile
-		deg = LAUNCHER_ANGLE_DEG; // TODO: let user change LAUNCHER_ANGLE_DEG
-		// alpha = -deg / 180.0 * PI; // alpha = -3.663333333333333;
-		alpha = -LAUNCHER_ANGLE_RAD;
+		alpha = -launcher_angle_current / 180.0 * PI;
 		missile[i].x = abs2world_x(LAUNCHER_PIVOT_X);
 		missile[i].y = abs2world_y(LAUNCHER_PIVOT_Y);
 		missile[i].alpha = alpha;
@@ -200,7 +197,7 @@ int init_missile(int i) {
 
 	// DBG
 	if (i == PATRIOT_MISSILES_BASE_INDEX)
-		printf("deg: %d\talpha: %f\tvx: %f\tvy: %f\n", deg, alpha, missile[i].vx, missile[i].vy);
+		printf("alpha: %f\tvx: %f\tvy: %f\n", alpha, missile[i].vx, missile[i].vy);
 
 	return 1;
 }
