@@ -7,6 +7,7 @@
 //-----------------------------------------------------
 // PUBLIC VARIABLES
 //-----------------------------------------------------
+int launch_velocity;
 int launcher_angle_des;
 float launcher_angle_current;
 
@@ -24,7 +25,11 @@ float launcher_angle_current;
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
 #define LAUNCHER_V0			120			// velocity (in module) to shoot every missile
+#define LAUNCHER_VMIN		20			// min and max velocity to shoot every missile
+#define LAUNCHER_VMAX		200
 #define LAUNCHER_ANGLE_DEG	(180 + 30)	// angle from horizon. Graphic is counterclockwise
+#define LAUNCHER_ANGLE_MIN	180			// min and max angle
+#define LAUNCHER_ANGLE_MAX	(180 + 90)
 #define LAUNCHER_DEG0		180			// rocket launcher starts from horizontal
 #define LAUNCHER_POLE		0.5			// rocket launcher motion is a first order system
 #define LAUNCHER_ANGLE_RAD	(LAUNCHER_ANGLE_DEG / 180.0 * PI)

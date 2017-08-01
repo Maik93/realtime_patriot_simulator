@@ -12,6 +12,7 @@
 #include "missiles.h"
 
 // Public variables
+int launch_velocity;		// start velocity of missiles produced by rocket launcher
 int launcher_angle_des;		// desired launcher angle in degree
 float launcher_angle_current;// current launcher angle in degree
 
@@ -54,7 +55,7 @@ void draw_current_trajectory() {
 	alpha = launcher_angle_current * PI / 180;
 	x = abs2world_x(LAUNCHER_PIVOT_X);
 	y = abs2world_y(LAUNCHER_PIVOT_Y);
-	v = LAUNCHER_V0;
+	v = launch_velocity;
 	vx = v * cos(alpha);
 	vy = -v * sin(alpha);
 	ay = -G0;
@@ -76,7 +77,7 @@ void print_launcher_status() {
 	char str[20];
 	sprintf(str, "Patriot status");
 	textout_centre_ex(screen_buff, font, str, LAUNCHER_TITLE_POSX, LAUNCHER_TITLE_POSY, TEXT_TITL_COL, -1);
-	sprintf(str, "-> velocity: %d m/s", LAUNCHER_V0); // TODO: update LAUNCHER_V0 with current value
+	sprintf(str, "-> velocity: %d m/s", launch_velocity);
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT1_X, LAUNCHER_STAT1_Y, TEXT_COL, -1);
 	sprintf(str, "-> angle:    %d°", launcher_angle_des - 180); // desired angle converted with horizon as baseline
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT2_X, LAUNCHER_STAT2_Y, TEXT_COL, -1);
@@ -130,32 +131,32 @@ void shoot_evaluation() {
 
 			// evaluate x positions where the trajectors collide
 			sqrt_part = sqrt(pow(tracked_points[tracker_i].vx, 2) *
-			                 pow(LAUNCHER_V0, 2) *
+			                 pow(launch_velocity, 2) *
 			                 (pow(G0, 2) * pow(sec_theta, 2) *
 			                  pow(tracked_points[tracker_i].x[tracked_points[tracker_i].top] - abs2world_x(LAUNCHER_PIVOT_X), 2) -
 			                  pow(sec_theta, 2) * tracked_points[tracker_i].vx * tracked_points[tracker_i].vy *
-			                  (sin(2 * theta) * pow(LAUNCHER_V0, 2) +
+			                  (sin(2 * theta) * pow(launch_velocity, 2) +
 			                   2 * G0 * (-tracked_points[tracker_i].x[tracked_points[tracker_i].top] + abs2world_x(LAUNCHER_PIVOT_X))) +
 			                  pow(tracked_points[tracker_i].vx, 2) *
 			                  (2 * G0 * pow(sec_theta, 2) *
 			                   (-tracked_points[tracker_i].y[tracked_points[tracker_i].top] + abs2world_y(LAUNCHER_PIVOT_Y)) +
-			                   pow(LAUNCHER_V0, 2) * pow(t_theta, 2)) +
-			                  pow(LAUNCHER_V0, 2) *
+			                   pow(launch_velocity, 2) * pow(t_theta, 2)) +
+			                  pow(launch_velocity, 2) *
 			                  (pow(tracked_points[tracker_i].vy, 2) +
 			                   2 * G0 * (tracked_points[tracker_i].y[tracked_points[tracker_i].top] - abs2world_y(LAUNCHER_PIVOT_Y) +
 			                             (-tracked_points[tracker_i].x[tracked_points[tracker_i].top] + abs2world_x(LAUNCHER_PIVOT_X)) * t_theta))));
 			x1 = (G0 * pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) *
-			      abs2world_x(LAUNCHER_PIVOT_X) + pow(LAUNCHER_V0, 2) *
+			      abs2world_x(LAUNCHER_PIVOT_X) + pow(launch_velocity, 2) *
 			      (-(tracked_points[tracker_i].vx * tracked_points[tracker_i].vy) -
 			       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
 			      - sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
-			                            pow(LAUNCHER_V0, 2)));
+			                            pow(launch_velocity, 2)));
 			x2 = (G0 * pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) *
-			      abs2world_x(LAUNCHER_PIVOT_X) + pow(LAUNCHER_V0, 2) *
+			      abs2world_x(LAUNCHER_PIVOT_X) + pow(launch_velocity, 2) *
 			      (-(tracked_points[tracker_i].vx * tracked_points[tracker_i].vy) -
 			       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
 			      + sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
-			                            pow(LAUNCHER_V0, 2)));
+			                            pow(launch_velocity, 2)));
 			// printf("x1 %f\tx2 %f\n", x1, x2);
 
 			// evaluate values of t where enemy missile will be intercepted
@@ -169,11 +170,11 @@ void shoot_evaluation() {
 			float t_impact, t_tot, t_wait;
 			if (t1 > 0) {
 				t_impact = t1;
-				t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / LAUNCHER_V0;
+				t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
 			}
 			else if (t2 > 0) {
 				t_impact = t2;
-				t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / LAUNCHER_V0;
+				t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
 			}
 			else {
 				printf("No point of interception. We're gonna die. Have a nice day!\n");
@@ -194,6 +195,8 @@ void shoot_evaluation() {
 void *rocket_launcher_task(void* arg) {
 	int i = get_task_index(arg);
 	// float dt = TSCALE * (float)get_task_period(i) / 1000;
+
+	launch_velocity = LAUNCHER_V0;
 
 	// initializing launcher angle
 	launcher_angle_des = LAUNCHER_ANGLE_DEG;

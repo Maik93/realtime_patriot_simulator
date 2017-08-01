@@ -181,7 +181,7 @@ int init_missile(int i) {
 		missile[i].x = abs2world_x(LAUNCHER_PIVOT_X);
 		missile[i].y = abs2world_y(LAUNCHER_PIVOT_Y);
 		missile[i].alpha = alpha;
-		v = LAUNCHER_V0;
+		v = launch_velocity;
 		missile[i].c = PATMISS_COL;
 		break;
 

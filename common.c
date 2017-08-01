@@ -212,19 +212,21 @@ void *interp_task(void* arg) {
 				start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
 			break;
 
-		case KEY_UP:
-			// TODO: add key_up to increment launcher angle
+		case KEY_UP: // reduce patriot missile initial velocities
+			if (launch_velocity < LAUNCHER_VMAX)
+				launch_velocity++;
 			break;
-		case KEY_DOWN:
-			// TODO: add key_down to decrement launcher angle
+		case KEY_DOWN: // increment patriot missile initial velocities
+			if (launch_velocity > LAUNCHER_VMIN)
+				launch_velocity--;
 			break;
 
-		case KEY_LEFT: // reduce patriot missile velocities
-			if (launcher_angle_des > 180)
+		case KEY_LEFT: // reduce patriot angle
+			if (launcher_angle_des > LAUNCHER_ANGLE_MIN)
 				launcher_angle_des--;
 			break;
-		case KEY_RIGHT: // increment patriot missile velocities
-			if (launcher_angle_des < 270)
+		case KEY_RIGHT: // increment patriot angle
+			if (launcher_angle_des < LAUNCHER_ANGLE_MAX)
 				launcher_angle_des++;
 			break;
 
