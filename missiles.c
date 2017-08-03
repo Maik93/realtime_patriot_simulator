@@ -88,11 +88,24 @@ void handle_corners(int i) {
 }
 
 // Take care of collisions with other objects.
-void check_proximities(int i) {
-	handle_corners(i);
+void check_proximities(int this_index) {
+	int other_index, dx, dy, distance;
+
+	handle_corners(this_index);
 
 	// look for other missiles
-	// TODO
+	for (other_index = ENEMY_MISSILES_BASE_INDEX; other_index < PATRIOT_MISSILES_TOP_INDEX; other_index++) {
+		if (this_index != other_index && tp[other_index].index != -1 &&
+		        missile[this_index].in_destruction == 0) {
+			dx = missile[this_index].x - missile[other_index].x;
+			dy = missile[this_index].y - missile[other_index].y;
+			distance = sqrt(dx * dx + dy * dy);
+			if (distance <= missile[this_index].r) {
+				missile_explode(this_index);
+				return;
+			}
+		}
+	}
 }
 
 // Draw missile i in graphic coordinates.

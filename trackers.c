@@ -151,6 +151,7 @@ float evaluate_vx(int tracker_i) {
 	// a0 = ((sumx2 * sumy - sumx * sumxy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
 	a1 = ((TSTORE * sumxy - sumx * sumy) * 1.0 / (TSTORE * sumx2 - sumx * sumx) * 1.0);
 
+	// DBG
 	// printf("From fitting: Vx = %f\n", a1);
 	return a1;
 }

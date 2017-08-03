@@ -110,12 +110,13 @@ void shoot_now() {
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
 	// if (new_missile_index != -1) {
 	if (new_missile_index == PATRIOT_MISSILES_BASE_INDEX) { // DBG: shoot only one missile at time
-		printf("Shoot now!!\n");
+		// TODO: add shoot interval between launches
+		// DBG: printf("Shoot now!!\n");
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
 	}
 }
 
-// Evaluate when Patriot have to shoot.
+// Evaluate when Patriot has to shoot.
 void shoot_evaluation() {
 	int tracker_i;
 	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
@@ -194,7 +195,6 @@ void shoot_evaluation() {
 
 void *rocket_launcher_task(void* arg) {
 	int i = get_task_index(arg);
-	// float dt = TSCALE * (float)get_task_period(i) / 1000;
 
 	launch_velocity = LAUNCHER_V0;
 

@@ -72,10 +72,8 @@ void lock_new_target() {
 // If something is detected, a tracker is attached in that position.
 void *radar_task(void* arg) {
 	int angle, j, i = get_task_index(arg);
-	// float dt;
 
 	angle = RAMIN;
-	// dt = TSCALE * (float)get_task_period(i) / 1000;
 
 	// init radar detected distances
 	for (j = 0; j < ARES; j++)
@@ -91,6 +89,7 @@ void *radar_task(void* arg) {
 		current_i = angle - RAMIN;
 
 		if (radar[current_i].d < RMAX) {
+			// DBG
 			/*printf("Distance: %d / %d - angle: %d p: %d %d\n", radar[current_i].d, RMAX,
 			       angle, radar[current_i].x, radar[current_i].y);*/
 			lock_new_target();
@@ -114,7 +113,7 @@ void draw_radar_symbol() {
 // Draws output of the radar in top right of window's corner.
 void draw_radar_display() {
 	int i;
-	int rx, ry, ax, ay;	// relative and absolute positions of points
+	int rx, ry, ax, ay; // relative and absolute positions of points
 	char str[14];
 
 	// label
