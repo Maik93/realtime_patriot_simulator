@@ -20,6 +20,7 @@ float launcher_angle_current;// current launcher angle in degree
 float angle_prev;			// previous launcher angle in degree
 float pole;					// pole of the first order schematization of launcher movements
 float shoot_timer;			// time to next shoot
+struct timespec last_time_shoot;
 
 // Draw rochet launcher.
 void draw_launcher() {
@@ -105,12 +106,19 @@ void move_launcher() {
 }
 
 void shoot_now() {
+	struct timespec now;
 	int new_missile_index;
 
+	// if a missile is launched earlier then LAUNCHER_T_INTERVAL don't do nothing
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	if (time_diff_ms(now, last_time_shoot) < LAUNCHER_T_INTERVAL)
+		return;
+	// otherwise store actual time as last_time_shoot
+	time_copy(&last_time_shoot, now);
+
+	// produce a new Patriot missile, if there's not too much already present
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
-	// if (new_missile_index != -1) {
-	if (new_missile_index == PATRIOT_MISSILES_BASE_INDEX) { // DBG: shoot only one missile at time
-		// TODO: add shoot interval between launches
+	if (new_missile_index != -1) {
 		// DBG: printf("Shoot now!!\n");
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
 	}
@@ -158,6 +166,7 @@ void shoot_evaluation() {
 			       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
 			      + sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
 			                            pow(launch_velocity, 2)));
+			// DBG
 			// printf("x1 %f\tx2 %f\n", x1, x2);
 
 			// evaluate values of t where enemy missile will be intercepted
@@ -165,6 +174,7 @@ void shoot_evaluation() {
 			     tracked_points[tracker_i].vx;
 			t2 = (x2 - tracked_points[tracker_i].x[tracked_points[tracker_i].top]) /
 			     tracked_points[tracker_i].vx;
+			// DBG
 			// printf("t1 %f\tt2 %f\n", t1, t2);
 
 			// and now search for the solution with t positive

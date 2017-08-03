@@ -33,6 +33,7 @@ float launcher_angle_current;
 #define LAUNCHER_DEG0		180			// rocket launcher starts from horizontal
 #define LAUNCHER_POLE		0.5			// rocket launcher motion is a first order system
 #define LAUNCHER_ANGLE_RAD	(LAUNCHER_ANGLE_DEG / 180.0 * PI)
+#define LAUNCHER_T_INTERVAL	1000		// interval between launches (ms)
 //-----------------------------------------------------
 // TEXT MENU CONSTANTS
 //-----------------------------------------------------
