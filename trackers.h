@@ -41,22 +41,29 @@
 #define TRACK_BOX4_Y1		TRACK_D3_Y + TRACKER_RES * TRACK_DSCALE / 2
 
 //-----------------------------------------------------
-// STRUCT
+// STRUCTS
 //-----------------------------------------------------
 struct point {
 	int x;
 	int y;
 };
-struct tracker {	// circular buffer for last TSTORE points acquired + vel and acc measured
+
+struct tracker {
+	// circular buffer for last TSTORE points acquired
 	int top;		// index of the current point element
 	int x[TSTORE];	// array for x coordinates (world coord)
 	int y[TSTORE];	// array for y coordinates (world coord)
 	struct timespec t[TSTORE]; // time of acquisition of coord. Allows more accuracy than just TRACKER_PER
 	int n_samples;	// number of points in this circular buffer (matters only for first steps)
+	// -----------------------------------------------------
+	// estimated velocities and accelerations
 	float vx;		// estimated velecity for x and y
 	float vy;
 	float ax;		// estimated acceleration for x and y
 	float ay;
+	// -----------------------------------------------------
+	// interception time evaluation
+	float time_to_shoot;
 };
 
 //-----------------------------------------------------
