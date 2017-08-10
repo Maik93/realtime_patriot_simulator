@@ -223,6 +223,7 @@ void clear_tracker_struct(int task_i, int tracker_i) {
 	tracked_points[tracker_i].ay = 0;
 	tracked_points[tracker_i].n_samples = 0; // there's no need to clear circular buffer, just n_samples
 	tracker_is_active[tracker_i] = 0;
+	tracked_points[tracker_i].time_to_shoot = -1;
 	tp[task_i].index = -1;
 }
 
@@ -234,6 +235,7 @@ void *tracker_task(void* arg) {
 	tracker_i = task_i - TRACKER_BASE_INDEX;
 
 	tracked_points[tracker_i].n_samples = 0;
+	tracked_points[tracker_i].time_to_shoot = -1;
 	tracker_is_active[tracker_i] = 1;
 	printf("Tracker %d activated.\n", tracker_i);
 
@@ -302,4 +304,14 @@ void tracker_display(int tracker_i) {
 	// border
 	rect(screen_buff, x0 - TRACKER_RES * TRACK_DSCALE / 2, y0 - TRACKER_RES * TRACK_DSCALE / 2,
 	     x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
+
+	// time to shoot
+	char str[8];
+	if (tracked_points[tracker_i].time_to_shoot > 0 &&
+	        tracked_points[tracker_i].time_to_shoot < 100) {
+		sprintf(str, "%.2f s", tracked_points[tracker_i].time_to_shoot);
+		textout_centre_ex(screen_buff, font, str,
+		                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
+		                  TEXT_TITL_COL, -1);
+	}
 }

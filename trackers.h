@@ -63,7 +63,7 @@ struct tracker {
 	float ay;
 	// -----------------------------------------------------
 	// interception time evaluation
-	float time_to_shoot;
+	float time_to_shoot; // in milliseconds
 };
 
 //-----------------------------------------------------
