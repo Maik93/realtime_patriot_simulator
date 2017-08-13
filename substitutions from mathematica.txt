@@ -1,23 +1,8 @@
-Subscript(v,p0)
-LAUNCHER_V0
+Sec(\[Theta])
+sec_theta
 
-Subscript(v,ex)
-tracked_points[tracker_i].vx
-
-Subscript(v,ey)
-tracked_points[tracker_i].vy
-
-Subscript(x,e0)
-tracked_points[tracker_i].x[tracked_points[tracker_i].top]
-
-Subscript(y,e0)
-tracked_points[tracker_i].y[tracked_points[tracker_i].top]
-
-Subscript(x,p0)
-abs2world_x(LAUNCHER_PIVOT_X)
-
-Subscript(y,p0)
-abs2world_y(LAUNCHER_PIVOT_Y)
+Tan(\[Theta])
+t_theta
 
 g
 G0
@@ -28,8 +13,23 @@ sqrt
 Power
 pow
 
-Sec(\[Theta])
-sec_theta
+Vp0
+launch_velocity
 
-Sin(\[Theta])
-s_theta
+Vex
+tracked_points[tracker_i].vx
+
+Vey
+tracked_points[tracker_i].vy
+
+Xe0
+tracked_points[tracker_i].x[tracked_points[tracker_i].top]
+
+Ye0
+tracked_points[tracker_i].y[tracked_points[tracker_i].top]
+
+Xp0
+abs2world_x(LAUNCHER_PIVOT_X)
+
+Yp0
+abs2world_y(LAUNCHER_PIVOT_Y)

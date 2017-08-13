@@ -22,6 +22,9 @@ float pole;					// pole of the first order schematization of launcher movements
 float shoot_timer;			// time to next shoot
 struct timespec last_time_shoot;
 
+// DBG
+int gx1, gx2;
+
 // Draw rochet launcher.
 void draw_launcher() {
 	BITMAP *body; // sprite of rocket launcher's body
@@ -71,6 +74,10 @@ void draw_current_trajectory() {
 			putpixel(screen_buff, world2abs_x(x), world2abs_y(y), TCOL);
 		c--;
 	}
+
+	// DBG
+	/*line(screen_buff, gx1, WORLD_BOX_Y1, gx1, WORLD_BOX_Y2, PREDICTION_COL);
+	line(screen_buff, gx2, WORLD_BOX_Y1, gx2, WORLD_BOX_Y2, PREDICTION_COL);*/
 }
 
 // Textual infos in the bottom right of the window.
@@ -143,45 +150,36 @@ void shoot_evaluation() {
 	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
 	float t_impact, t_tot, t_wait;
 
-	theta = launcher_angle_des / 180.0 * PI;
+	theta = -launcher_angle_des / 180.0 * PI;
 	sec_theta = 1 / cos(theta);
-	s_theta = sin(theta);
-	c_theta = cos(theta);
 	t_theta = tan(theta);
 
 	for (tracker_i = 0; tracker_i < MAX_TRACKERS; tracker_i++) {
 		if (tracker_is_active[tracker_i]) {
 
 			// evaluate x positions where the trajectories collide
-			sqrt_part = sqrt(pow(tracked_points[tracker_i].vx, 2) *
-			                 pow(launch_velocity, 2) *
-			                 (pow(G0, 2) * pow(sec_theta, 2) *
-			                  pow(tracked_points[tracker_i].x[tracked_points[tracker_i].top] - abs2world_x(LAUNCHER_PIVOT_X), 2) -
-			                  pow(sec_theta, 2) * tracked_points[tracker_i].vx * tracked_points[tracker_i].vy *
-			                  (sin(2 * theta) * pow(launch_velocity, 2) +
-			                   2 * G0 * (-tracked_points[tracker_i].x[tracked_points[tracker_i].top] + abs2world_x(LAUNCHER_PIVOT_X))) +
-			                  pow(tracked_points[tracker_i].vx, 2) *
-			                  (2 * G0 * pow(sec_theta, 2) *
-			                   (-tracked_points[tracker_i].y[tracked_points[tracker_i].top] + abs2world_y(LAUNCHER_PIVOT_Y)) +
-			                   pow(launch_velocity, 2) * pow(t_theta, 2)) +
-			                  pow(launch_velocity, 2) *
-			                  (pow(tracked_points[tracker_i].vy, 2) +
-			                   2 * G0 * (tracked_points[tracker_i].y[tracked_points[tracker_i].top] - abs2world_y(LAUNCHER_PIVOT_Y) +
-			                             (-tracked_points[tracker_i].x[tracked_points[tracker_i].top] + abs2world_x(LAUNCHER_PIVOT_X)) * t_theta))));
-			x1 = (G0 * pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) *
-			      abs2world_x(LAUNCHER_PIVOT_X) + pow(launch_velocity, 2) *
-			      (-(tracked_points[tracker_i].vx * tracked_points[tracker_i].vy) -
-			       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
-			      - sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
-			                            pow(launch_velocity, 2)));
-			x2 = (G0 * pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) *
-			      abs2world_x(LAUNCHER_PIVOT_X) + pow(launch_velocity, 2) *
-			      (-(tracked_points[tracker_i].vx * tracked_points[tracker_i].vy) -
-			       G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] + pow(tracked_points[tracker_i].vx, 2) * t_theta)
-			      + sqrt_part) / (G0 * (pow(sec_theta, 2) * pow(tracked_points[tracker_i].vx, 2) -
-			                            pow(launch_velocity, 2)));
+			sqrt_part = pow(tracked_points[tracker_i].vx, 2) * sqrt((G0 *
+			            (2 * tracked_points[tracker_i].vx * tracked_points[tracker_i].vy * (tracked_points[tracker_i].x[tracked_points[tracker_i].top] - abs2world_x(LAUNCHER_PIVOT_X)) + G0 * pow(tracked_points[tracker_i].x[tracked_points[tracker_i].top] - abs2world_x(LAUNCHER_PIVOT_X), 2) -
+			             2 * pow(tracked_points[tracker_i].vx, 2) * (tracked_points[tracker_i].y[tracked_points[tracker_i].top] - abs2world_y(LAUNCHER_PIVOT_Y))) * pow(sec_theta, 2) +
+			            pow(launch_velocity, 2) * (pow(tracked_points[tracker_i].vy, 2) + 2 * G0 * tracked_points[tracker_i].y[tracked_points[tracker_i].top] - 2 * G0 * abs2world_y(LAUNCHER_PIVOT_Y) -
+			                                       2 * (tracked_points[tracker_i].vx * tracked_points[tracker_i].vy + G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - G0 * abs2world_x(LAUNCHER_PIVOT_X)) * t_theta +
+			                                       pow(tracked_points[tracker_i].vx, 2) * pow(t_theta, 2))) /
+			            (pow(tracked_points[tracker_i].vx, 2) * pow(launch_velocity, 2)));
+
+			x1 = (-(G0 * pow(tracked_points[tracker_i].vx, 2) * abs2world_x(LAUNCHER_PIVOT_X) *
+			        pow(sec_theta, 2)) + pow(launch_velocity, 2) * (tracked_points[tracker_i].vx * tracked_points[tracker_i].vy + G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - pow(tracked_points[tracker_i].vx, 2) * t_theta
+			        + sqrt_part
+			     )) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
+
+			x2 = (-(G0 * pow(tracked_points[tracker_i].vx, 2) * abs2world_x(LAUNCHER_PIVOT_X) *
+			        pow(sec_theta, 2)) + pow(launch_velocity, 2) * (tracked_points[tracker_i].vx * tracked_points[tracker_i].vy + G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - pow(tracked_points[tracker_i].vx, 2) * t_theta
+			        - sqrt_part
+			     )) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
+
 			// DBG
-			// printf("x1 %f\tx2 %f\n", x1, x2);
+			gx1 = world2abs_x(x1);
+			gx2 = world2abs_x(x2);
+			// printf("Intercepting coordinates:\tx1 %f\tx2 %f\n", x1, x2);
 
 			// evaluate values of t where enemy missile will be intercepted
 			t1 = (x1 - tracked_points[tracker_i].x[tracked_points[tracker_i].top]) /
@@ -193,11 +191,11 @@ void shoot_evaluation() {
 
 			// and now search for the solution with smaller positive t
 			if (t1 <= 0 && t2 <= 0) { // if both are negative, there's no future interception
-				printf("No point of interception. We're gonna die. Have a nice day!\n");
+			printf("No point of interception. We're gonna die. Have a nice day!\n");
 				// return;
 			}
 			if (t1 > 0 && t2 > 0) { // if both positive, we've to take the smaller one
-				if (t2 > t1) {
+			if (t2 > t1) {
 					t_impact = t1;
 					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
 				} else {
