@@ -113,7 +113,7 @@ void right_menu() {
 // Graphical task. Before the main loop, we can compose a basic scenario,
 // then we can draw on it each time, insead of drawing again everything.
 void *graphic_task(void* arg) {
-	int i, a;
+	int i, a, tracker_i;
 	float delta_t = TSCALE * (float)GRAPH_PER / 1000;
 
 	// initializing screen bitmaps
@@ -165,15 +165,16 @@ void *graphic_task(void* arg) {
 			}
 		}
 
-		// predicted trajectories for enemy missiles
-		for (i = 0; i < MAX_TRACKERS; i++)
-			if (tp[i].index != -1)
-				draw_predictions(i, delta_t / 3);
-
-		// tracker views on right side of the screen
 		for (i = TRACKER_BASE_INDEX; i < TRACKER_TOP_INDEX; i++)
-			if (tp[i].index != -1)
-				tracker_display(i - TRACKER_BASE_INDEX);
+			if (tp[i].index != -1) {
+				tracker_i = i - TRACKER_BASE_INDEX;
+
+				// predicted trajectories for enemy missiles
+				draw_predictions(tracker_i, delta_t / 3);
+
+				// tracker views on right side of the screen
+				tracker_display(tracker_i);
+			}
 
 		// this will hide a green dot in (0, 0) caused by trails
 		putpixel(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y2, BKG);
