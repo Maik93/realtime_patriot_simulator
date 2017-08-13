@@ -43,9 +43,11 @@ int abs2world_y(int y) {
 void draw_world() {
 	rectfill(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BKG);
 	rect(screen_buff, WORLD_BOX_X1, WORLD_BOX_Y1, WORLD_BOX_X2, WORLD_BOX_Y2, BORDER_COL);
-	line(screen_buff, XMINT, WORLD_BOX_Y1, XMAXT, WORLD_BOX_Y1, ENEMY_COL); // top missile spawn
-	line(screen_buff, WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMINL),
-	     WORLD_BOX_X1, SCREEN_W - (WORLD_BOX_Y1 + YMAXL), ENEMY_COL); // left missile spawn
+
+	line(screen_buff, world2abs_x(XMINT), WORLD_BOX_Y1,
+	     world2abs_x(XMAXT), WORLD_BOX_Y1, ENEMY_COL); // top missile spawn
+	line(screen_buff, WORLD_BOX_X1, world2abs_y(YMINL),
+	     WORLD_BOX_X1, world2abs_y(YMAXL), ENEMY_COL); // left missile spawn
 }
 
 // Draw static part of top menu. This function is called only one time.

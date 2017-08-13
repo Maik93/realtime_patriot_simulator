@@ -13,18 +13,20 @@
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
-#define VMINL	15					// min and max initial hor. speed for missiles coming from left (m/s)
-#define VMAXL	60
-#define VMINT	5					// min and max initial hor. speed for missiles coming from top (m/s)
-#define VMAXT	10
-#define AMINL	-PI/4				// min and max initial alpha for missiles coming from left (rad)
-#define AMAXL	0
-#define AMINT	-PI/2 - PI/4		// min and max initial alpha for missiles coming from top (rad)
-#define AMAXT	-PI/2 + PI/4
-#define XMINT	WORLD_BOX_X1 + 100 + ML	// min and max horizontal position for top spawn (world coord.)
-#define XMAXT	WORLD_BOX_WIDTH - 200
+// LEFT SPAWN:
 #define YMINL	WORLD_BOX_HEIGHT - 100	// min and max vertical position for left spawn (world coord.)
 #define YMAXL	WORLD_BOX_HEIGHT - ML
+#define VMINL	40					// min and max initial hor. speed for missiles coming from left (m/s)
+#define VMAXL	80
+#define AMINL	-PI/6				// min and max initial alpha for missiles coming from left (rad)
+#define AMAXL	-PI/8
+// TOP SPAWN:
+#define XMINT	WORLD_BOX_X1 + ML	// min and max horizontal position for top spawn (world coord.)
+#define XMAXT	WORLD_BOX_WIDTH / 2
+#define VMINT	20					// min and max initial hor. speed for missiles coming from top (m/s)
+#define VMAXT	40
+#define AMINT	-PI/4		// min and max initial alpha for missiles coming from top (rad)
+#define AMAXT	-PI/8
 //-----------------------------------------------------
 #define TLEN			30			// circular buffer length (used to store trails)
 

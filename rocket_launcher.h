@@ -24,16 +24,16 @@ float launcher_angle_current;
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
-#define LAUNCHER_V0			120			// velocity (in module) to shoot every missile
+#define LAUNCHER_V0			140			// velocity (in module) to shoot every missile
 #define LAUNCHER_VMIN		20			// min and max velocity to shoot every missile
 #define LAUNCHER_VMAX		200
-#define LAUNCHER_ANGLE_DEG	(180 + 30)	// angle from horizon. Graphic is counterclockwise
+#define LAUNCHER_ANGLE_DEG	(180 + 20)	// angle from horizon. Graphic is counterclockwise
 #define LAUNCHER_ANGLE_MIN	180			// min and max angle
 #define LAUNCHER_ANGLE_MAX	(180 + 90)
 #define LAUNCHER_DEG0		180			// rocket launcher starts from horizontal
 #define LAUNCHER_POLE		0.5			// rocket launcher motion is a first order system
 #define LAUNCHER_ANGLE_RAD	(LAUNCHER_ANGLE_DEG / 180.0 * PI)
-#define LAUNCHER_T_INTERVAL	1000		// interval between launches (ms)
+#define LAUNCHER_T_INTERVAL	100		// interval between launches (ms)
 //-----------------------------------------------------
 // TEXT MENU CONSTANTS
 //-----------------------------------------------------
