@@ -9,8 +9,8 @@
 // TRACKER PARAMETERS
 //-----------------------------------------------------
 #define TRACKER_RES			60		// dimension of square box acquisition
-#define TSTORE				10		// number of points stored by the tracker
-#define TRAJ_MAX_ERROR		50		// max ammount of trajectory error in order to be assumed ballistic
+#define TSTORE				20		// number of points stored by the tracker
+#define TRAJ_MAX_ERROR		100		// max ammount of trajectory error in order to be assumed ballistic
 //-----------------------------------------------------
 // DISPLAY CENTERS AND B0XES POSITIONS
 //-----------------------------------------------------

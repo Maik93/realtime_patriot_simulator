@@ -372,11 +372,19 @@ void tracker_display(int tracker_i) {
 	     x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
 
 	// time to shoot
-	char str[8];
+	/*char str[8];
 	if (tracked_points[tracker_i].time_to_shoot > 0 &&
 	        tracked_points[tracker_i].time_to_shoot < 100 &&
 	        tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
 		sprintf(str, "%.2f s", tracked_points[tracker_i].time_to_shoot);
+		textout_centre_ex(screen_buff, font, str,
+		                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
+		                  TEXT_TITL_COL, -1);*/
+
+	// trajectory Mean Square Error
+	char str[8];
+	if (tracked_points[tracker_i].traj_error > 0) {
+		sprintf(str, "MSE: %.0f", tracked_points[tracker_i].traj_error);
 		textout_centre_ex(screen_buff, font, str,
 		                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
 		                  TEXT_TITL_COL, -1);
