@@ -24,8 +24,8 @@ struct missile	missile[MAX_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_MISSILES];	// trail buffer
 
 // DBG: reset tflag to 0 befor delivery
-int tflag = 1;	// switcher for trail's visibility [0-1]
-int tl = 30;	// actual trail length
+int tflag = 1;		// switcher for trail's visibility [0-1]
+int tl = TLEN / 2;	// actual trail length
 
 // Store position of missile i.
 void store_trail(int i) {
@@ -112,6 +112,7 @@ void check_proximities(int this_index) {
 void draw_missile(int i) {
 	float p1x, p1y, p2x, p2y, p3x, p3y; // world coord.
 	float ca, sa;
+	int anim_step;
 
 	// for explosions
 	BITMAP* explosion_bmp;
@@ -135,7 +136,13 @@ void draw_missile(int i) {
 		         missile[i].c);
 	}
 	else { // missile is in collision, making explosion animation
-		sprintf(explosion_file, "explosion/%d.bmp", missile[i].in_destruction);
+		anim_step = missile[i].in_destruction;
+
+		// check consistency
+		if (anim_step < 0 || anim_step > DESTR_BMP_NUM)
+			return;
+
+		sprintf(explosion_file, "explosion/%d.bmp", anim_step);
 		explosion_bmp = load_bitmap(explosion_file, NULL);
 		draw_sprite(screen_buff, explosion_bmp,
 		            world2abs_x(missile[i].x) - explosion_bmp->w / 2,
@@ -209,8 +216,8 @@ int init_missile(int i) {
 	missile[i].r = ML;
 
 	// DBG
-	if (i == PATRIOT_MISSILES_BASE_INDEX)
-		printf("alpha: %f\tvx: %f\tvy: %f\n", alpha, missile[i].vx, missile[i].vy);
+	/*if (i == PATRIOT_MISSILES_BASE_INDEX)
+		printf("alpha: %f\tvx: %f\tvy: %f\n", alpha, missile[i].vx, missile[i].vy);*/
 
 	return 1;
 }
