@@ -29,6 +29,8 @@ struct cbuf		trail[MAX_MISSILES];	// trail buffer
 int tflag = 1;		// switcher for trail's visibility [0-1]
 int tl = TLEN / 2;	// actual trail length
 
+int enemy_score = 0, patriot_score = 0;
+
 // Store position of missile i.
 void store_trail(int i) {
 	int k;
@@ -85,7 +87,13 @@ void handle_corners(int i) {
 	bottom = (missile[i].y <= missile[i].r);
 
 	if (left || right) missile_vanish(i);
-	if (bottom) missile_explode(i);
+	if (bottom) {
+		missile_explode(i);
+
+		// if an enemy missile can reach the ground, enemy scores a point
+		if (i >= ENEMY_MISSILES_BASE_INDEX && i < ENEMY_MISSILES_TOP_INDEX)
+			enemy_score++;
+	}
 	if (top) missile[i].y = WORLD_BOX_HEIGHT - missile[i].r;
 }
 
@@ -104,6 +112,11 @@ void check_proximities(int this_index) {
 			distance = sqrt(dx * dx + dy * dy);
 			if (distance <= missile[this_index].r) {
 				missile_explode(this_index);
+
+				// if this missile is enemy's, patriot score a point
+				if (this_index >= ENEMY_MISSILES_BASE_INDEX && this_index < ENEMY_MISSILES_TOP_INDEX)
+					patriot_score++;
+
 				return;
 			}
 		}

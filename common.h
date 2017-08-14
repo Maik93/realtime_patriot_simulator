@@ -45,6 +45,17 @@
 #define MENU_ERROR2_Y	MENU_BOX_Y2 - CHAR_HEIGHT - 10
 #define MENU_ERROR1_X	MENU_ERROR2_X
 #define MENU_ERROR1_Y	MENU_ERROR2_Y - 1.5 * CHAR_HEIGHT
+//-----------------------------------------------------
+#define SCORE_X1		LAUNCHER_TITLE_POSX
+#define SCORE_Y1		LAUNCHER_STAT5_Y + 4 * CHAR_HEIGHT
+#define SCORE_X2		SCORE_X1
+#define SCORE_Y2		SCORE_Y1 + 1.5 * CHAR_HEIGHT
+#define SCORE_BOX_X1	LAUNCHER_TITLE_POSX - 80
+#define SCORE_BOX_Y1	SCORE_Y1 - CHAR_HEIGHT
+#define SCORE_BOX_X2	LAUNCHER_TITLE_POSX + 80
+#define SCORE_BOX_Y2	SCORE_Y2 + CHAR_HEIGHT
+#define SCORE_X0		SCORE_X1
+#define SCORE_Y0		SCORE_BOX_Y1 - CHAR_HEIGHT / 4
 
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS

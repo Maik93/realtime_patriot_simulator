@@ -99,6 +99,19 @@ void top_menu_dynamic() {
 	}
 }
 
+void draw_score() {
+	char str[20];
+
+	rect(screen_buff, SCORE_BOX_X1, SCORE_BOX_Y1, SCORE_BOX_X2, SCORE_BOX_Y2, BORDER_COL);
+
+	sprintf(str, " SCORE ");
+	textout_centre_ex(screen_buff, font, str, SCORE_X0, SCORE_Y0, TEXT_ALERT_COL, GND);
+	sprintf(str, "  Enemy - Patriot");
+	textout_centre_ex(screen_buff, font, str, SCORE_X1, SCORE_Y1, TEXT_COL, -1);
+	sprintf(str, "%d - %d", enemy_score, patriot_score);
+	textout_centre_ex(screen_buff, font, str, SCORE_X2, SCORE_Y2, TEXT_TITL_COL, -1);
+}
+
 // Draw tracker boxes and its title on right side. This function is called only one time.
 void right_menu() {
 	int i;
@@ -163,6 +176,7 @@ void *graphic_task(void* arg) {
 		draw_launcher();
 		draw_current_trajectory();
 		print_launcher_status();
+		draw_score();
 
 		// enemy and Patriot missiles
 		for (i = ENEMY_MISSILES_BASE_INDEX; i < PATRIOT_MISSILES_TOP_INDEX; i++) {

@@ -56,8 +56,10 @@ extern struct missile
 extern struct cbuf
 	trail[MAX_MISSILES];	// trail buffer
 
-extern int		tflag;		// switcher for trail's visibility [0-1]
-extern int		tl;			// actual trail length
+extern int	tflag;			// switcher for trail's visibility [0-1]
+extern int	tl;				// actual trail length
+extern int	enemy_score;	// number of enemy missiles that had reaced the ground
+extern int	patriot_score;	// number of enemy missiles destroyed by Patriot
 
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS
