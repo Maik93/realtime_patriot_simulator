@@ -66,12 +66,12 @@ void draw_current_trajectory() {
 	ay = -G0;
 	delta_t = TSCALE * (float)20 / 1000;
 
-	while (y > 0 && c > 0) { // add conditions to fit worldbox
+	while (x > 0 && y > 0 && c > 0) {
 		x += vx * delta_t;
 		y += (0.5 * ay * delta_t + vy) * delta_t;
 		vy += ay * delta_t;
 
-		if (x < WORLD_BOX_WIDTH && y < WORLD_BOX_HEIGHT)
+		if (x > 0 && x < WORLD_BOX_WIDTH && y > 0 && y < WORLD_BOX_HEIGHT)
 			putpixel(screen_buff, world2abs_x(x), world2abs_y(y), TCOL);
 		c--;
 	}
@@ -88,17 +88,29 @@ void print_launcher_status() {
 	sprintf(str, "Patriot status");
 	textout_centre_ex(screen_buff, font, str, LAUNCHER_TITLE_POSX, LAUNCHER_TITLE_POSY, TEXT_TITL_COL, -1);
 
-	sprintf(str, "-> velocity: %d m/s", launch_velocity);
+	if (tflag)
+		sprintf(str, "-> trails:      on");
+	else
+		sprintf(str, "-> trails:      off");
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT1_X, LAUNCHER_STAT1_Y, TEXT_COL, -1);
 
-	sprintf(str, "-> angle:    %d°", launcher_angle_des - 180); // desired angle converted with horizon as baseline
+	if (show_predictions)
+		sprintf(str, "-> predictions: on");
+	else
+		sprintf(str, "-> predictions: off");
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT2_X, LAUNCHER_STAT2_Y, TEXT_COL, -1);
+
+	sprintf(str, "-> velocity: %d m/s", launch_velocity);
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT3_X, LAUNCHER_STAT3_Y, TEXT_COL, -1);
+
+	sprintf(str, "-> angle:    %d°", launcher_angle_des - 180); // desired angle converted with horizon as baseline
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT4_X, LAUNCHER_STAT4_Y, TEXT_COL, -1);
 
 	if (shoot_timer != -1)
 		sprintf(str, "-> shoot in: %.2f s", shoot_timer);
 	else
 		sprintf(str, "-> shoot idle", shoot_timer);
-	textout_ex(screen_buff, font, str, LAUNCHER_STAT3_X, LAUNCHER_STAT3_Y, TEXT_COL, -1);
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT5_X, LAUNCHER_STAT5_Y, TEXT_COL, -1);
 }
 
 // Retrieve smallest time_to_shoot from every tracker.

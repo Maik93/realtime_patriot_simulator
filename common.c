@@ -89,13 +89,13 @@ void top_menu_dynamic() {
 	if (find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX)
 	        == -1) {
 		sprintf(str, "Max number of enemy missiles reached");
-		textout_ex(screen_buff, font, str, MENU_ERROR1_X, MENU_ERROR1_Y, RED, -1);
+		textout_ex(screen_buff, font, str, MENU_ERROR1_X, MENU_ERROR1_Y, TEXT_ALERT_COL, -1);
 	}
 
 	// warning for max trackers reached
 	if (find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX) == -1) {
 		sprintf(str, "Max number of trackers reached");
-		textout_ex(screen_buff, font, str, MENU_ERROR2_X, MENU_ERROR2_Y, RED, -1);
+		textout_ex(screen_buff, font, str, MENU_ERROR2_X, MENU_ERROR2_Y, TEXT_ALERT_COL, -1);
 	}
 }
 

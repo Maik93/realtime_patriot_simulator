@@ -29,6 +29,7 @@
 #ifdef LIGHT_MODE
 	#define TEXT_TITL_COL		LORANGE	// color for text titles
 	#define TEXT_COL			WHITE	// color for all non-warning texts
+	#define TEXT_ALERT_COL		ORANGE	// color for all non-warning texts
 	#define BORDER_COL			ORANGE	// for every box in the window
 	#define ENEMY_COL			RED		// for an enemy missile
 	#define PATMISS_COL			LORANGE	// for a Patriot missile
@@ -49,6 +50,7 @@
 #ifdef DARK_MODE
 	#define TEXT_TITL_COL		LBLU	// color for text titles
 	#define TEXT_COL			WHITE	// color for all non-warning texts
+	#define TEXT_ALERT_COL		RED	// color for all non-warning texts
 	#define BORDER_COL			LBLU	// for every box in the window
 	#define ENEMY_COL			RED		// for an enemy missile
 	#define PATMISS_COL			BLU		// for a Patriot missile
