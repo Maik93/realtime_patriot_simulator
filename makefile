@@ -11,7 +11,7 @@ CC = gcc
 #---------------------------------------------------
 CFLAGS = -Wall -lpthread -lrt -lm
 # CFLAGS = -Wall -lpthread -lrt -lm -ggdb
-DEBUGFLAGS = -ggdb
+DEBUGFLAGS = -g -ggdb
 #---------------------------------------------------
 # OBJS are the object files to be linked
 #---------------------------------------------------
@@ -55,3 +55,8 @@ run: $(MAIN)
 #---------------------------------------------------
 clean:
 	rm -rf *.o $(MAIN)
+#---------------------------------------------------
+# Command that can be specified inline: make rundebug
+#---------------------------------------------------
+rundebug: $(MAIN)
+	sudo gdb main
