@@ -10,6 +10,7 @@
 int launch_velocity;
 int launcher_angle_des;
 float launcher_angle_current;
+extern int show_predictions;
 
 //-----------------------------------------------------
 // GRAPHIC CONSTANTS

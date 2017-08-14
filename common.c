@@ -67,16 +67,18 @@ void top_menu_static() {
 	textout_ex(screen_buff, font, str, MENU_CONTENT1_X, MENU_CONTENT1_Y, TEXT_COL, -1);
 	sprintf(str, "enter:      spawn new distubing object");
 	textout_ex(screen_buff, font, str, MENU_CONTENT2_X, MENU_CONTENT2_Y, TEXT_COL, -1);
-	sprintf(str, "X:          toggle enemy missile trails");
-	textout_ex(screen_buff, font, str, MENU_CONTENT3_X, MENU_CONTENT3_Y, TEXT_COL, -1);
-	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
-	textout_ex(screen_buff, font, str, MENU_CONTENT4_X, MENU_CONTENT4_Y, TEXT_COL, -1);
 	sprintf(str, "left-right: dec./inc. Patriot shoot velocity");
-	textout_ex(screen_buff, font, str, MENU_CONTENT5_X, MENU_CONTENT5_Y, TEXT_COL, -1);
+	textout_ex(screen_buff, font, str, MENU_CONTENT3_X, MENU_CONTENT3_Y, TEXT_COL, -1);
 	sprintf(str, "up-down:    inc./dec. Patriot shoot angle");
+	textout_ex(screen_buff, font, str, MENU_CONTENT4_X, MENU_CONTENT4_Y, TEXT_COL, -1);
+	sprintf(str, "A:          toggle prediction trajectories");
+	textout_ex(screen_buff, font, str, MENU_CONTENT5_X, MENU_CONTENT5_Y, TEXT_COL, -1);
+	sprintf(str, "X:          toggle enemy missile trails");
 	textout_ex(screen_buff, font, str, MENU_CONTENT6_X, MENU_CONTENT6_Y, TEXT_COL, -1);
-	sprintf(str, "Esc:        close program");
+	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
 	textout_ex(screen_buff, font, str, MENU_CONTENT7_X, MENU_CONTENT7_Y, TEXT_COL, -1);
+	sprintf(str, "Esc:        close program");
+	textout_ex(screen_buff, font, str, MENU_CONTENT8_X, MENU_CONTENT8_Y, TEXT_COL, -1);
 }
 
 // Draw dynamic part of top menu. This function is called in every graphic_task cicle.
@@ -179,7 +181,8 @@ void *graphic_task(void* arg) {
 				tracker_i = i - TRACKER_BASE_INDEX;
 
 				// predicted trajectories for enemy missiles
-				draw_predictions(tracker_i, delta_t / 3);
+				if (show_predictions)
+					draw_predictions(tracker_i, delta_t / 3);
 
 				// tracker views on right side of the screen
 				tracker_display(tracker_i);
@@ -233,9 +236,13 @@ void *interp_task(void* arg) {
 		// if (scan != 0) printf("Readed keyscan: %d\n", (int)scan);
 
 		switch (scan) {
-		case 67: // Enter key
+		case 67: // Enter key - spawn disturbing object
 			if (!ball_active)
 				start_task(ball_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, DISTURB_OBJECT_INDEX);
+			break;
+		case 1: // A key - turn on/off predictions on trajectories
+			show_predictions = !show_predictions;
+			printf("show_predictions setted to %d\n", show_predictions);
 			break;
 		case 24: // X key - turn on/off trails for enemy missiles
 			tflag = !tflag;

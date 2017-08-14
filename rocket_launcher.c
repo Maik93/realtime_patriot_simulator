@@ -15,6 +15,7 @@
 int launch_velocity;		// start velocity of missiles produced by rocket launcher
 int launcher_angle_des;		// desired launcher angle in degree
 float launcher_angle_current;// current launcher angle in degree
+int show_predictions = 1; // DBG: switch off for release
 
 // Private variables
 float angle_prev;			// previous launcher angle in degree
@@ -138,10 +139,8 @@ void shoot_now() {
 
 	// produce a new Patriot missile, if there's not too much already present
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
-	if (new_missile_index != -1) {
-		// DBG: printf("Shoot now!!\n");
+	if (new_missile_index != -1)
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
-	}
 }
 
 // Evaluate when Patriot has to shoot.
@@ -189,8 +188,9 @@ void shoot_evaluation() {
 
 			// and now search for the solution with smaller positive t
 			if (t1 <= 0 && t2 <= 0) { // if both are negative, there's no future interception
-				printf("No point of interception. We're gonna die. Have a nice day!\n");
-				// return;
+				// DBG
+				// printf("No point of interception. We're gonna die. Have a nice day!\n");
+				return;
 			}
 			if (t1 > 0 && t2 > 0) { // if both positive, we've to take the smaller one
 				if (t2 > t1) {

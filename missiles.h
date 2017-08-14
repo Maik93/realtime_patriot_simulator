@@ -5,12 +5,6 @@
 #include "common.h"
 
 //-----------------------------------------------------
-// GRAPHICAL CONSTANTS
-//-----------------------------------------------------
-#define ML		15		// length of the missile
-#define MW		6		// width of the missile
-#define DESTR_BMP_NUM 10 // number of bitmaps used in missile destruction animation
-//-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
 // LEFT SPAWN:
@@ -28,7 +22,12 @@
 #define AMINT	-PI/4		// min and max initial alpha for missiles coming from top (rad)
 #define AMAXT	-PI/8
 //-----------------------------------------------------
-#define TLEN			30			// circular buffer length (used to store trails)
+// GRAPHICAL CONSTANTS
+//-----------------------------------------------------
+#define ML		15		// length of the missile
+#define MW		6		// width of the missile
+#define DESTR_BMP_NUM 10 // number of bitmaps used in missile destruction animation
+#define TLEN	50			// circular buffer length (used to store trails)
 
 //-----------------------------------------------------
 // STRUCTS

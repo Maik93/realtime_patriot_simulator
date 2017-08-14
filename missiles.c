@@ -1,7 +1,9 @@
 /**
  * -----------------------------------------------------------------------
- * Enemy missiles. Casually spowned from top or left corner, they fall
+ * Missiles are of two types:
+ * - Enemy missiles: casually spowned from top or left corner, they fall
  * cause of gravity until reached the ground or destroied by Patriot.
+ * - Patriot missiles: shooted by rocket launcher, follow same physics as enemy.
  * -----------------------------------------------------------------------
  */
 #include "missiles.h"
