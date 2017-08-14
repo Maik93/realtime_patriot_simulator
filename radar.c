@@ -35,8 +35,9 @@ void read_sensor(int degree) {
 		y = RPOSY - d * sin(alpha);
 		c = getpixel(screen, x, y);
 		d = d + RSTEP;
-	} while ((d <= RMAX) && (c == BKG || c == PATMISS_COL ||
-	                         c == RSENSOR_COL || c == TCOL)); // radar, launcher and trails are ignored
+	} while ((d <= RMAX) && (c == BKG || c == PATMISS_COL || c == LAUNCHER_COL ||
+	                         c == RSENSOR_COL || c == TCOL || c == PREDICTION_COL));
+	// radar, launcher and trails are ignored
 
 	// store absolute values (i.e. of the screen)
 	radar[degree - RAMIN].x = x;

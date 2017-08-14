@@ -57,6 +57,8 @@ struct point compute_centroid(int tracker_i) {
 			if (tracker_view[tracker_i][i][j] != BKG &&
 			        tracker_view[tracker_i][i][j] != PATMISS_COL &&
 			        tracker_view[tracker_i][i][j] != RSENSOR_COL &&
+			        tracker_view[tracker_i][i][j] != LAUNCHER_COL &&
+			        tracker_view[tracker_i][i][j] != PREDICTION_COL &&
 			        tracker_view[tracker_i][i][j] != TCOL) {
 				c_rel.x += i - TRACKER_RES / 2;
 				c_rel.y += j - TRACKER_RES / 2;
