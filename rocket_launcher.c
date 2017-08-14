@@ -155,7 +155,7 @@ void shoot_evaluation() {
 	t_theta = tan(theta);
 
 	for (tracker_i = 0; tracker_i < MAX_TRACKERS; tracker_i++) {
-		if (tracker_is_active[tracker_i]) {
+		if (tracker_is_active[tracker_i] && tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
 
 			// evaluate x positions where the trajectories collide
 			sqrt_part = pow(tracked_points[tracker_i].vx, 2) * sqrt((G0 *
@@ -168,13 +168,11 @@ void shoot_evaluation() {
 
 			x1 = (-(G0 * pow(tracked_points[tracker_i].vx, 2) * abs2world_x(LAUNCHER_PIVOT_X) *
 			        pow(sec_theta, 2)) + pow(launch_velocity, 2) * (tracked_points[tracker_i].vx * tracked_points[tracker_i].vy + G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - pow(tracked_points[tracker_i].vx, 2) * t_theta
-			        + sqrt_part
-			     )) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
+			                + sqrt_part)) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
 
 			x2 = (-(G0 * pow(tracked_points[tracker_i].vx, 2) * abs2world_x(LAUNCHER_PIVOT_X) *
 			        pow(sec_theta, 2)) + pow(launch_velocity, 2) * (tracked_points[tracker_i].vx * tracked_points[tracker_i].vy + G0 * tracked_points[tracker_i].x[tracked_points[tracker_i].top] - pow(tracked_points[tracker_i].vx, 2) * t_theta
-			        - sqrt_part
-			     )) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
+			                - sqrt_part)) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
 
 			// DBG
 			gx1 = world2abs_x(x1);
@@ -191,11 +189,11 @@ void shoot_evaluation() {
 
 			// and now search for the solution with smaller positive t
 			if (t1 <= 0 && t2 <= 0) { // if both are negative, there's no future interception
-			printf("No point of interception. We're gonna die. Have a nice day!\n");
+				printf("No point of interception. We're gonna die. Have a nice day!\n");
 				// return;
 			}
 			if (t1 > 0 && t2 > 0) { // if both positive, we've to take the smaller one
-			if (t2 > t1) {
+				if (t2 > t1) {
 					t_impact = t1;
 					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
 				} else {

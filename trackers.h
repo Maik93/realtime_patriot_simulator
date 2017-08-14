@@ -10,6 +10,7 @@
 //-----------------------------------------------------
 #define TRACKER_RES			60		// dimension of square box acquisition
 #define TSTORE				10		// number of points stored by the tracker
+#define TRAJ_MAX_ERROR		50		// max ammount of trajectory error in order to be assumed ballistic
 //-----------------------------------------------------
 // DISPLAY CENTERS AND B0XES POSITIONS
 //-----------------------------------------------------
@@ -61,6 +62,9 @@ struct tracker {
 	float vy;
 	float ax;		// estimated acceleration for x and y
 	float ay;
+	// -----------------------------------------------------
+	// evaluated trajectory inaccuracy
+	float traj_error;
 	// -----------------------------------------------------
 	// interception time evaluation
 	float time_to_shoot; // in milliseconds

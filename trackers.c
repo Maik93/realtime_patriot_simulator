@@ -99,6 +99,7 @@ void store_point(int i) {
 	tracked_points[i].n_samples++;
 }
 
+// Draw predicted trajectory for the object tracked by tracker_i.
 void draw_predictions(int tracker_i, float delta_t) {
 	float x, y, vy;
 	int k, prev_k;
@@ -121,8 +122,59 @@ void draw_predictions(int tracker_i, float delta_t) {
 	}
 }
 
-// Cause of ax = 0, vx is constant. Evaluating the best aproximating line for x positions,
-// I can exctract vx as the coefficent of the first-order term. Mean squar error minimization is used.
+// Compute error between acquired points and estimate trajectory for tracker_i and return its value.
+float evaluate_error(int tracker_i) {
+	float x, y, delta_t, supposed_x, supposed_y, real_x, real_y, sumx = 0, sumy = 0;
+	int x0, y0, k, count = 0;
+	struct timespec t0;
+
+	// start from last acquired point
+	k = tracked_points[tracker_i].top;
+
+	// check if there's samples
+	if (tracked_points[tracker_i].n_samples == 0)
+		return TRAJ_MAX_ERROR;
+
+	// actual position is considered as our initial condition
+	t0 = tracked_points[tracker_i].t[k];
+	x0 = tracked_points[tracker_i].x[k];
+	y0 = tracked_points[tracker_i].y[k];
+
+	// we compare each acquired point with evaluated trajectory's output in the given times
+	do {
+		delta_t = -time_diff_ms(t0, tracked_points[tracker_i].t[k]) / 1000;
+
+		supposed_x = x0 + tracked_points[tracker_i].vx * delta_t;
+		supposed_y = y0 + (0.5 * tracked_points[tracker_i].ay * delta_t + tracked_points[tracker_i].vy) * delta_t;
+		// DBG
+		// printf("vx=%2.f\tvy=%2.f\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
+		// printf("ay=%2.f\tvy=%2.f\n", tracked_points[tracker_i].ay, tracked_points[tracker_i].vy);
+		// printf("Pred:\tx=%2.f\ty=%2.f\n", supposed_x, supposed_y);
+
+		real_x = tracked_points[tracker_i].x[k];
+		real_y = tracked_points[tracker_i].y[k];
+		// DBG
+		// printf("Real:\tx=%2.f\ty=%2.f\n", real_x, real_y);
+
+		sumx += pow(real_x - supposed_x, 2);
+		sumy += pow(real_y - supposed_y, 2);
+		// DBG
+		// printf("Differences:\tEx=%2.f\tEy=%2.f\n", real_x - supposed_x, real_y - supposed_y);
+
+		k = (k - 1 + TSTORE) % TSTORE; // previous k
+		count++;
+	} while (k != tracked_points[tracker_i].top && count < tracked_points[tracker_i].n_samples);
+
+	// DBG
+	// printf("Error:\tEx=%2.f\tEy=%2.f\n", sqrt(sumx), sqrt(sumy));
+	// printf("Error:\tE=%2.f\n", sqrt(sumx + sumy));
+
+	return sqrt(sumx + sumy);
+}
+
+// Acceleration ax is zero, therefore vx is constant, so x motion law is of the fist order.
+// Evaluating the best aproximating line for x positions, I can exctract vx
+// as the coefficent of the first-order term. Mean squar error minimization is used.
 float evaluate_vx(int tracker_i) {
 	int i, j, k, first_k; // indexes
 	float a0, a1; // coefficients of the fitting line
@@ -156,6 +208,9 @@ float evaluate_vx(int tracker_i) {
 	return a1;
 }
 
+// Acceleration ay is -G0, constant, therefore vy is linear and y motion law is of the second order.
+// Evaluating the best aproximating parabola for y positions, I can exctract vy
+// as the coefficent of the first-order term. Mean squar error minimization is used.
 float evaluate_vy(int tracker_i) {
 	int i, j, k, first_k; // indexes
 	float a0, a1, a2; // coefficients of the fitting parabole
@@ -193,6 +248,7 @@ float evaluate_vy(int tracker_i) {
 	return a1;
 }
 
+// Compute velocities along x and y for the tracked object.
 void evaluate_v_and_a(int task_i, int tracker_i) {
 	int k, prev_k, prev_prev_k;	// previous index point and its previous
 	float vx_prev, vy_prev;		// previous velocity, needed to evaluate acc
@@ -216,11 +272,13 @@ void evaluate_v_and_a(int task_i, int tracker_i) {
 	// printf("Predicted v = (%f; %f)\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
 }
 
+// Destroy the struct content of tracker_i.
 void clear_tracker_struct(int task_i, int tracker_i) {
 	tracked_points[tracker_i].vx = 0;
 	tracked_points[tracker_i].vy = 0;
 	tracked_points[tracker_i].ax = 0;
 	tracked_points[tracker_i].ay = 0;
+	tracked_points[tracker_i].traj_error = TRAJ_MAX_ERROR;
 	tracked_points[tracker_i].n_samples = 0; // there's no need to clear circular buffer, just n_samples
 	tracker_is_active[tracker_i] = 0;
 	tracked_points[tracker_i].time_to_shoot = -1;
@@ -235,6 +293,7 @@ void *tracker_task(void* arg) {
 	tracker_i = task_i - TRACKER_BASE_INDEX;
 
 	tracked_points[tracker_i].n_samples = 0;
+	tracked_points[tracker_i].traj_error = TRAJ_MAX_ERROR;
 	tracked_points[tracker_i].time_to_shoot = -1;
 	tracker_is_active[tracker_i] = 1;
 	printf("Tracker %d activated.\n", tracker_i);
@@ -247,10 +306,17 @@ void *tracker_task(void* arg) {
 		get_image(tracker_i, current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 
 		struct point c = compute_centroid(tracker_i); // relative from center of tracking box
-		current_points_tracked[tracker_i].x += c.x; // altering the center to follow
+
+		// updating the center point to follow
+		current_points_tracked[tracker_i].x += c.x;
 		current_points_tracked[tracker_i].y += c.y;
 		store_point(tracker_i);
+
+		// try to evaluate velocities of the tracked object assuming it has ballistic motion
 		evaluate_v_and_a(task_i, tracker_i);
+
+		// evaluate error between predicted and real positions
+		tracked_points[tracker_i].traj_error = evaluate_error(tracker_i);
 
 		wait_for_period(task_i);
 	}
@@ -308,7 +374,8 @@ void tracker_display(int tracker_i) {
 	// time to shoot
 	char str[8];
 	if (tracked_points[tracker_i].time_to_shoot > 0 &&
-	        tracked_points[tracker_i].time_to_shoot < 100) {
+	        tracked_points[tracker_i].time_to_shoot < 100 &&
+	        tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
 		sprintf(str, "%.2f s", tracked_points[tracker_i].time_to_shoot);
 		textout_centre_ex(screen_buff, font, str,
 		                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
