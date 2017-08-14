@@ -9,7 +9,7 @@
 
 //-----------------------------------------------------
 // TASKS - Here's how is organized task_param array:
-// | 3x Enemy missiles | 3x Patriot missiles | 4x Trackers | Graphic | Radar | Rocket_launcher | Interpreter |
+// | 3x Enemy missiles | 3x Patriot missiles | disturbing object | 4x Trackers | Graphic | Radar | Rocket_launcher | Interpreter |
 // ^ -> ENEMY_MISSILES_BASE_INDEX
 //                     ^ -> PATRIOT_MISSILES_BASE_INDEX
 //                                           ^ -> TRACKER_BASE_INDEX
@@ -18,13 +18,14 @@
 #define MAX_PATRIOT_MISSILES	3
 #define MAX_MISSILES			(MAX_ENEMY_MISSILES + MAX_PATRIOT_MISSILES)
 #define MAX_TRACKERS			4
-#define MAX_THREADS				(MAX_ENEMY_MISSILES + MAX_PATRIOT_MISSILES + MAX_TRACKERS + 4)
+#define MAX_THREADS				(MAX_ENEMY_MISSILES + MAX_PATRIOT_MISSILES + MAX_TRACKERS + 5)
 //-----------------------------------------------------
 #define ENEMY_MISSILES_BASE_INDEX	0
 #define ENEMY_MISSILES_TOP_INDEX	(ENEMY_MISSILES_BASE_INDEX + MAX_ENEMY_MISSILES)
 #define PATRIOT_MISSILES_BASE_INDEX	ENEMY_MISSILES_TOP_INDEX
 #define PATRIOT_MISSILES_TOP_INDEX	(PATRIOT_MISSILES_BASE_INDEX + MAX_PATRIOT_MISSILES)
-#define TRACKER_BASE_INDEX			PATRIOT_MISSILES_TOP_INDEX
+#define DISTURB_OBJECT_INDEX		PATRIOT_MISSILES_TOP_INDEX
+#define TRACKER_BASE_INDEX			(DISTURB_OBJECT_INDEX + 1)
 #define TRACKER_TOP_INDEX			(TRACKER_BASE_INDEX + MAX_TRACKERS)
 #define GRAPHIC_INDEX				(MAX_THREADS - 4)
 #define RADAR_INDEX					(MAX_THREADS - 3)

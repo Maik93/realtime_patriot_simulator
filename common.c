@@ -20,6 +20,9 @@
 #include "trackers.h"
 #include "rocket_launcher.h"
 
+// DBG
+int ball_x, ball_y, ball_r = 10, ball_active = 0;
+
 // Static part of graphics, a basic scenario in which we draw each time.
 BITMAP	*screen_base;
 
@@ -62,16 +65,18 @@ void top_menu_static() {
 	textout_ex(screen_buff, font, str, MENU_TITLE_X, MENU_TITLE_Y, TEXT_TITL_COL, -1);
 	sprintf(str, "space:      spawn new enemy missile");
 	textout_ex(screen_buff, font, str, MENU_CONTENT1_X, MENU_CONTENT1_Y, TEXT_COL, -1);
-	sprintf(str, "X:          toggle enemy missile trails");
+	sprintf(str, "enter:      spawn new distubing object");
 	textout_ex(screen_buff, font, str, MENU_CONTENT2_X, MENU_CONTENT2_Y, TEXT_COL, -1);
-	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
+	sprintf(str, "X:          toggle enemy missile trails");
 	textout_ex(screen_buff, font, str, MENU_CONTENT3_X, MENU_CONTENT3_Y, TEXT_COL, -1);
-	sprintf(str, "left-rigth: dec./inc. Patriot shoot velocity");
+	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
 	textout_ex(screen_buff, font, str, MENU_CONTENT4_X, MENU_CONTENT4_Y, TEXT_COL, -1);
-	sprintf(str, "up-down:    inc./dec. Patriot shoot angle");
+	sprintf(str, "left-right: dec./inc. Patriot shoot velocity");
 	textout_ex(screen_buff, font, str, MENU_CONTENT5_X, MENU_CONTENT5_Y, TEXT_COL, -1);
-	sprintf(str, "Esc:        close program");
+	sprintf(str, "up-down:    inc./dec. Patriot shoot angle");
 	textout_ex(screen_buff, font, str, MENU_CONTENT6_X, MENU_CONTENT6_Y, TEXT_COL, -1);
+	sprintf(str, "Esc:        close program");
+	textout_ex(screen_buff, font, str, MENU_CONTENT7_X, MENU_CONTENT7_Y, TEXT_COL, -1);
 }
 
 // Draw dynamic part of top menu. This function is called in every graphic_task cicle.
@@ -165,6 +170,10 @@ void *graphic_task(void* arg) {
 			}
 		}
 
+		// DBG: ball
+		if (ball_active)
+			circlefill(screen_buff, ball_x, ball_y, ball_r, ENEMY_COL);
+
 		for (i = TRACKER_BASE_INDEX; i < TRACKER_TOP_INDEX; i++)
 			if (tp[i].index != -1) {
 				tracker_i = i - TRACKER_BASE_INDEX;
@@ -186,6 +195,33 @@ void *graphic_task(void* arg) {
 	}
 }
 
+// DBG
+void *ball_task(void* arg) {
+	int ball_vx, ball_vy, i;
+	float dt;
+
+	ball_active = 1;
+
+	ball_x = WORLD_BOX_X1 + ball_r + 1;
+	ball_y = WORLD_BOX_Y1 + 250;
+	ball_vx = 50;
+	ball_vy = -15;
+
+	i = get_task_index(arg);
+	dt = TSCALE * (float)get_task_period(i) / 1000;
+
+	set_period(i);
+	while (!sigterm_tasks &&
+	        ball_x > WORLD_BOX_X1 + ball_r && ball_x < WORLD_BOX_X2 - ball_r &&
+	        ball_y > WORLD_BOX_Y1 + ball_r && ball_y < WORLD_BOX_Y2 - ball_r) {
+		ball_x += ball_vx * dt;
+		ball_y += ball_vy * dt;
+		wait_for_period(i);
+	}
+
+	ball_active = 0;
+}
+
 // Keyboard interpeter task.
 void *interp_task(void* arg) {
 	int a, scan, new_missile_index;
@@ -197,6 +233,10 @@ void *interp_task(void* arg) {
 		// if (scan != 0) printf("Readed keyscan: %d\n", (int)scan);
 
 		switch (scan) {
+		case 67: // Enter key
+			if (!ball_active)
+				start_task(ball_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, DISTURB_OBJECT_INDEX);
+			break;
 		case 24: // X key - turn on/off trails for enemy missiles
 			tflag = !tflag;
 			printf("tflag setted to %d\n", tflag);
