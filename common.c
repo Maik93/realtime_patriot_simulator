@@ -144,12 +144,6 @@ void *graphic_task(void* arg) {
 	draw_world();
 	draw_radar_symbol();
 
-	// DBG: dots for test
-	/*circlefill(screen_buff, 343, 319, 10, RED);
-	circlefill(screen_buff, 338, 404, 10, GREEN);
-	circlefill(screen_buff, 253, 319, 10, BORDER_COL);
-	circlefill(screen_buff, 190, 404, 10, WHITE);*/
-
 	top_menu_static();
 	right_menu();
 

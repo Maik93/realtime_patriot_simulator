@@ -23,9 +23,6 @@ float pole;					// pole of the first order schematization of launcher movements
 float shoot_timer;			// time to next shoot
 struct timespec last_time_shoot;
 
-// DBG
-int gx1, gx2;
-
 // Draw rochet launcher.
 void draw_launcher() {
 	BITMAP *body; // sprite of rocket launcher's body
@@ -75,10 +72,6 @@ void draw_current_trajectory() {
 			putpixel(screen_buff, world2abs_x(x), world2abs_y(y), TCOL);
 		c--;
 	}
-
-	// DBG
-	/*line(screen_buff, gx1, WORLD_BOX_Y1, gx1, WORLD_BOX_Y2, PREDICTION_COL);
-	line(screen_buff, gx2, WORLD_BOX_Y1, gx2, WORLD_BOX_Y2, PREDICTION_COL);*/
 }
 
 // Textual infos in the bottom right of the window.
@@ -186,8 +179,6 @@ void shoot_evaluation() {
 			                - sqrt_part)) / (G0 * (pow(launch_velocity, 2) - pow(tracked_points[tracker_i].vx, 2) * pow(sec_theta, 2)));
 
 			// DBG
-			gx1 = world2abs_x(x1);
-			gx2 = world2abs_x(x2);
 			// printf("Intercepting coordinates:\tx1 %f\tx2 %f\n", x1, x2);
 
 			// evaluate values of t where enemy missile will be intercepted
@@ -200,7 +191,6 @@ void shoot_evaluation() {
 
 			// and now search for the solution with smaller positive t
 			if (t1 <= 0 && t2 <= 0) { // if both are negative, there's no future interception
-				// DBG
 				// printf("No point of interception. We're gonna die. Have a nice day!\n");
 				return;
 			}

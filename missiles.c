@@ -45,7 +45,7 @@ void store_trail(int i) {
 // Clear trail stack.
 void clear_trail(int i) {
 	int j;
-	if (i >= MAX_ENEMY_MISSILES) return;
+	if (i >= MAX_MISSILES) return;
 	for (j = 0; j < TLEN; j++) {
 		trail[i].x[j] = 0;
 		trail[i].y[j] = 0;
@@ -195,7 +195,6 @@ int init_missile(int i) {
 	case 0: // Enemy missile
 		// An enemy missile can spawn from top or left side, each one with 1/2 of probability.
 		r = frand(0, 2);
-		// if (0) { // DBG
 		if (r < 1) { // left side
 			missile[i].x = ML;
 			missile[i].y = frand(YMINL, YMAXL);

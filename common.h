@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define TSCALE		2			// time scale factor - DBG: best is 5
+#define TSCALE		2
 //-----------------------------------------------------
 // BOX DIMENSIONS
 //-----------------------------------------------------

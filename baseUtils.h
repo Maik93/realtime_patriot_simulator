@@ -15,7 +15,7 @@
 //                                           ^ -> TRACKER_BASE_INDEX
 //-----------------------------------------------------
 #define MAX_ENEMY_MISSILES		3
-#define MAX_PATRIOT_MISSILES	3
+#define MAX_PATRIOT_MISSILES	5
 #define MAX_MISSILES			(MAX_ENEMY_MISSILES + MAX_PATRIOT_MISSILES)
 #define MAX_TRACKERS			4
 #define MAX_THREADS				(MAX_ENEMY_MISSILES + MAX_PATRIOT_MISSILES + MAX_TRACKERS + 5)
