@@ -250,7 +250,32 @@
 		Summarizing briefly, \emph{Cartesian equations} are extracted from time-dependent trajectory equations in order to identify \emph{interception coordinates}; time is reintroduced and enemy and Patriot \emph{time-to-fly} (from actual position to interception coordinates) is evaluated; a \emph{wait time} is identified, as the difference between enemy's and Patriot's TTF. As long as wait time is positive, the rocket launcher waits, and when it reach zero, it shoot.
 
 \section{Design choices}
+
+	Now let's talk about the choices made in the development of the program, both graphic and structural.
+
 	\subsection{Graphics}
+% WINDOW_ENUMERATED_DRAW
+		The window ($800 \times 600$ px) is subdivided in many parts:
+		\begin{enumerate}
+			\item the largest box is \emph{world box}, cointaining the simulation of Patriot's rocket launcher, and the sky where enemy missile will fall;
+			\item on top-left there's a \emph{quick brief} of avaiable commands;
+			\item on top-right there's the \emph{radar display}, where what is seen by the radar is reproduced;
+			\item below that, there are \emph{4 tracker displays}, where each tracker view is replicated, magnified by a scale factor (currently x3);
+			\item on center-right there are Patriot current parameters;
+			\item on bottom-right there's a \emph{scoring board}.
+		\end{enumerate}
+		Avaiable commands are:
+		\begin{itemize}
+			\item \emph{space bar}: spawn new enemy missile;
+			\item \emph{enter}: spawn new distubing object;
+			\item \emph{left-right}: decrement/increment Patriot shoot velocity;
+			\item \emph{up-down}: increment/decrement Patriot shoot angle;
+			\item \emph{A}: toggle prediction trajectories;
+			\item \emph{X}: toggle enemy missile trails;
+			\item \emph{Z-C}: decrement/increment enemy missile trails;
+			\item \emph{Esc}: close program.
+		\end{itemize}
+
 	\subsection{Task and resources}
 \section{Results}
 
