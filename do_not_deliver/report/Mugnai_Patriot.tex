@@ -35,7 +35,7 @@
 \title{Patriot Project \\
 	\large Real Time Systems A.A. 2016/17}
 \author{Michael~Mugnai\\n\textdegree 556448\\m.mugnai@ymail.com \\ \\ \\
-	\includegraphics[width=\textwidth]{cover.png}}
+	\includegraphics[width=\textwidth]{cover}}
 \date{Delivery date: not today}
 
 \begin{document}
@@ -43,10 +43,10 @@
 \maketitle
 
 \begin{abstract} % Quick summary of the document.
-	A report must be produced (8-10 pages) to explain the project details. The delivery date.
-	The report must include a general description of the project, the design choices, the user interface,
+	The delivery date.
+	The report must include:
 	the shared data structures, the tasks involved, a taskresource diagram, a discussion on the task
-	parameters (how they were defined), and a set of experimental results. Figures and screenshots are welcome.
+	parameters (how they were defined), and a set of experimental results.
 	Task code must not be included in the report.
 \end{abstract}
 
@@ -85,7 +85,6 @@
 
 \section{Problem definition}
 
-	% ``coolApex"
 	Assuming a two-dimensional space, the ground is represented as the baseline of the so-called \emph{world box}. Let's suppose that the right side is a \emph{safe zone}: no missile can come from here. In this way, the Patriot rocket launcher can be placed on the bottom right of our world box.
 
 	The problem can be subdivided in this parts:
@@ -99,12 +98,18 @@
 
 	In this way, we can build up the program following a modular approach.
 
+\newpage
 \section{Realization concepts}
 
 	What will follow summarizes the concepts behind each element of the program.
 
 	\subsection{Missiles}
-% MISSILE_DRAW
+
+		\begin{figure}[ht]
+		\centering \includegraphics[width=0.5\textwidth]{missile}
+			\caption{Missile geometry.}
+		\end{figure}
+
 		Missiles are central object of this program. They are caracterized by ballistic motion:
 		the only force applied is $m\bm{g} = \begin{bmatrix} 0 & 0 & -mg \end{bmatrix} ^T$.
 		Missiles can be categorized as \emph{enemy missiles} or \emph{Patriot missiles}.
@@ -143,7 +148,12 @@
 			\end{enumerate}
 
 	\subsection{Radar}
-% RARAR_DRAW
+
+		\begin{figure}[htb]
+		\centering \includegraphics[width=0.5\textwidth]{radar}
+			\caption{Radar geometry.}
+		\end{figure}
+
 		The radar is a device located ahead of the rocket launcher, in our world box is in the \emph{mid point} of the ground. From radar's origin, a beam plumbs the sky radially, until a \emph{max distance} is reached.
 
 		The purpose of the radar is to detect presence of flying objects, and communicate it to the trackers. When an object is already tracked, there's no benefit in scanning it anymore, therefore points too near to radar (thus to the ground) are useless to monitor: a \emph{minimum distance} from radar's origin can be defined, and the beam starts only from there.
@@ -173,7 +183,12 @@
 		Since we can presume that tracker's detected positions are afflicted by error, what we're looking for is a trajectory that \emph{minimize} its distance from any given point, instead of trying to evaluate an exact interpolation of them.
 
 		\subsubsection{Horizontal velocity}
-% VX_DRAW
+
+		\begin{figure}[htb]
+		\centering \includegraphics[width=0.5\textwidth]{vx}
+			\caption{$v_x$ evaluation.}
+		\end{figure}
+
 			As previously said, there's no acceleration along $x$'s axis, thus a $(x,t)$ plot will exibit a line, with inclination $v_x$.
 			What we do now is to find the equation of the rect $f(t) = \alpha_0 + \alpha_1 t$ that has the minimum distance with each collected point.
 			This leads to look for $\alpha_0$ and $\alpha_1$ that minimize $ S_{(\alpha_0, \alpha_1)} := \sum_{i=1}^n | x_i - f_{(t_i)} |^2 $.
@@ -209,6 +224,11 @@
 
 		\subsubsection{Vertical velocity}
 
+		\begin{figure}[htb]
+		\centering \includegraphics[width=0.5\textwidth]{vy}
+			\caption{$v_y$ evaluation.}
+		\end{figure}
+
 			In a similar way we can proceed to estimate $v_y$. Since vertical acceleration is constant (equals to $-g$), the $(y,t)$ plot is parabolic, therefore $f_{(t)} = \alpha_0 + \alpha_1 t + \alpha_2 t^2$, where $\alpha_2 = -g$.
 
 			Equation \eqref{partder} changes as follows ($\frac{\partial S}{\partial \alpha_2} = 0$ is omitted because redundant):
@@ -237,7 +257,12 @@
 			As before, we're looking for $\alpha_1$, so only equation \eqref{yvel} is needed.
 
 	\subsection{Rocket launcher}
-% LAUNCHER_DRAW
+
+		\begin{figure}[htb]
+		\centering \includegraphics[width=0.5\textwidth]{launcher}
+			\caption{Rocket launcher geometry.}
+		\end{figure}
+
 		Patriot's launcher is setted in bottom left corner of world box, giving its back to the safe zone.
 		Its orientation, combined with Patriot initial velocity, determines the path that every launched missile 
 		 will follow.
@@ -249,18 +274,24 @@
 
 		Summarizing briefly, \emph{Cartesian equations} are extracted from time-dependent trajectory equations in order to identify \emph{interception coordinates}; time is reintroduced and enemy and Patriot \emph{time-to-fly} (from actual position to interception coordinates) is evaluated; a \emph{wait time} is identified, as the difference between enemy's and Patriot's TTF. As long as wait time is positive, the rocket launcher waits, and when it reach zero, it shoot.
 
+\newpage
 \section{Design choices}
 
 	Now let's talk about the choices made in the development of the program, both graphic and structural.
 
 	\subsection{Graphics}
-% WINDOW_ENUMERATED_DRAW
-		The window ($800 \times 600$ px) is subdivided in many parts:
+
+		\begin{figure}[hb]
+			\includegraphics[width=\textwidth]{window_enumerated}
+			\caption{User interface.}
+		\end{figure}
+
+		The window ($800\times600$ px) is subdivided in many parts:
 		\begin{enumerate}
 			\item the largest box is \emph{world box}, cointaining the simulation of Patriot's rocket launcher, and the sky where enemy missile will fall;
 			\item on top-left there's a \emph{quick brief} of avaiable commands;
 			\item on top-right there's the \emph{radar display}, where what is seen by the radar is reproduced;
-			\item below that, there are \emph{4 tracker displays}, where each tracker view is replicated, magnified by a scale factor (currently x3);
+			\item below that, there are \emph{4 tracker displays}, where each tracker view is replicated, magnified by a scale factor (currently $\times3$), and its trajectory \emph{MSE} (Mean Square Error) si reported;
 			\item on center-right there are Patriot current parameters;
 			\item on bottom-right there's a \emph{scoring board}.
 		\end{enumerate}
@@ -275,13 +306,14 @@
 			\item \emph{Z-C}: decrement/increment enemy missile trails;
 			\item \emph{Esc}: close program.
 		\end{itemize}
+		Task logs like \emph{deadline misses} and \emph{utilization percentages} are printed in cosole window.
 
 	\subsection{Task and resources}
 \section{Results}
 
-% \newpage
+\newpage
 \hypersetup{linkcolor=black}
-\listoffigures % list all figures in the document, like a sort of index of images. Writes text caption contained in []
+\listoffigures
 \hypersetup{linkcolor=blue}
 
 \end{document}
