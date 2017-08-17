@@ -289,7 +289,7 @@ void clear_tracker_struct(int task_i, int tracker_i) {
 
 void *tracker_task(void* arg) {
 	int task_i, tracker_i; // indexes
-	float comp_perc; // percentual of computation time, in relation to its period
+	float util_perc; // percentage of utilization, given by task response time and its period
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
@@ -323,9 +323,9 @@ void *tracker_task(void* arg) {
 		wait_for_period(task_i);
 	}
 
-	comp_perc = tp[task_i].comp_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
+	util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
 	printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
-	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(comp_perc));
+	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(util_perc));
 
 	clear_tracker_struct(task_i, tracker_i);
 }

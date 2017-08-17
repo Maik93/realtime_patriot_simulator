@@ -124,11 +124,11 @@ void set_period(int index) {
 	time_add_ms(&(tp[index].dl), tp[index].deadline);
 }
 
-// Sum actual computational time in tp[index].comp_time_sum.
+// Sum actual response time in tp[index].response_time_sum.
 void update_conputational_time(int index) {
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
-	tp[index].comp_time_sum += tp[index].period - time_diff_ms(tp[index].at, now);
+	tp[index].response_time_sum += tp[index].period - time_diff_ms(tp[index].at, now);
 }
 
 /**
@@ -191,7 +191,7 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
 	tp[index].priority = priority;
 	tp[index].dmiss = 0;
 	tp[index].counts = 0;
-	tp[index].comp_time_sum = 0;
+	tp[index].response_time_sum = 0;
 
 	pthread_attr_init(&att[index]);
 	pthread_attr_setinheritsched(&att[index], PTHREAD_EXPLICIT_SCHED);
@@ -210,31 +210,31 @@ pthread_t start_task(void *task_fun, int period, int deadline, int priority, int
  */
 void kill_all_task() {
 	int i;
-	float comp_perc; // percentual of computation time, in relation to its period
+	float util_perc; // percentage of utilization, given by task response time and its period
 
 	sigterm_tasks = 1; // sends to all tasks a request to close
 	for (i = 0; i <= MAX_THREADS - 1; i++) { // Don't kill interpreter task
 		if (tp[i].index != -1) {
 			pthread_join(tid[i], NULL);
 
-			comp_perc = tp[i].comp_time_sum / (tp[i].period * tp[i].counts) * 100.0;
+			util_perc = tp[i].response_time_sum / (tp[i].period * tp[i].counts) * 100.0;
 
 			switch (i) {
 			case GRAPHIC_INDEX:
 				printf("Display task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
-				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
+				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
 				break;
 			case RADAR_INDEX:
 				printf("Radar task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
-				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
+				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
 				break;
 			case ROCKET_LAUNCHER_INDEX:
 				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
-				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
+				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
 				break;
 			case INTERPRETER_INDEX:
 				printf("Interp task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
-				       tp[i].counts, tp[i].dmiss, (int)round(comp_perc));
+				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
 				break;
 			default: break;
 			}

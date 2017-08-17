@@ -51,7 +51,7 @@
 struct task_param {
 	int		index;			// task index. Equals to -1 for inactive tasks.
 	// long	wcet;			// in microseconds
-	double	comp_time_sum;	// sum of computational times (ms)
+	double	response_time_sum; // sum of response times (ms)
 	int		period;			// relative (ms)
 	int		deadline;		// relative (ms)
 	int		priority;		// in [0-99]
