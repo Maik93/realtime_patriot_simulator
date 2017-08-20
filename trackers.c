@@ -288,8 +288,9 @@ void clear_tracker_struct(int task_i, int tracker_i) {
 }
 
 void *tracker_task(void* arg) {
-	int task_i, tracker_i; // indexes
-	float util_perc; // percentage of utilization, given by task response time and its period
+	int task_i, tracker_i, other_i; // indexes
+	float util_perc;	// percentage of utilization, given by task response time and its period
+	struct point c;		// current relative centroid
 
 	task_i = get_task_index(arg);
 	tracker_i = task_i - TRACKER_BASE_INDEX;
@@ -307,20 +308,32 @@ void *tracker_task(void* arg) {
 	while (!sigterm_tasks && tracker_is_active[tracker_i]) {
 		get_image(tracker_i, current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
 
-		struct point c = compute_centroid(tracker_i); // relative from center of tracking box
+		c = compute_centroid(tracker_i); // relative from center of tracking box
 
 		// updating the center point to follow
 		current_points_tracked[tracker_i].x += c.x;
 		current_points_tracked[tracker_i].y += c.y;
-		store_point(tracker_i);
 
-		// try to evaluate velocities of the tracked object assuming it has ballistic motion
-		evaluate_v_and_a(task_i, tracker_i);
+		// if inside a rectangle of any other active tracker, then I'm overlapped with someone else
+		for (other_i = 0; other_i < MAX_TRACKERS; other_i++) {
+			if (other_i != tracker_i && tracker_is_active[other_i] &&
+			        abs(current_points_tracked[other_i].x - current_points_tracked[tracker_i].x) <= TRACKER_RES / 2 &&
+			        abs(current_points_tracked[other_i].y - current_points_tracked[tracker_i].y) <= TRACKER_RES / 2) {
+				tracker_is_active[tracker_i] = 0;
+			}
+		}
 
-		// evaluate error between predicted and real positions
-		tracked_points[tracker_i].traj_error = evaluate_error(tracker_i);
+		if (tracker_is_active[tracker_i]) {
+			store_point(tracker_i);
 
-		wait_for_period(task_i);
+			// try to evaluate velocities of the tracked object assuming it has ballistic motion
+			evaluate_v_and_a(task_i, tracker_i);
+
+			// evaluate error between predicted and real positions
+			tracked_points[tracker_i].traj_error = evaluate_error(tracker_i);
+
+			wait_for_period(task_i);
+		}
 	}
 
 	util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
