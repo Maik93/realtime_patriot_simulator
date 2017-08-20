@@ -78,6 +78,8 @@ extern struct point
 extern int tracker_is_active[MAX_TRACKERS];
 struct tracker
 	tracked_points[MAX_TRACKERS];
+int already_shooted[MAX_TRACKERS];
+int shooted_missile_id[MAX_TRACKERS];
 
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS

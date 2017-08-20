@@ -26,7 +26,7 @@ extern int show_predictions;
 #define LAUNCHER_ANGLE_RAD	(LAUNCHER_ANGLE_DEG / 180.0 * PI)
 #define LAUNCHER_T_INTERVAL	300			// interval between launches (ms)
 #define LAUNCHER_MIN_SAMPLE	15			// minimum number of samples to start working on trajectory evaluation
-#define LAUNCHER_SHOOT_THRESHOLD 0.01	// time window to shoot
+#define LAUNCHER_SHOOT_THRESHOLD 0.005	// time window to shoot
 //-----------------------------------------------------
 // GRAPHIC CONSTANTS
 //-----------------------------------------------------

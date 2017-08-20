@@ -22,6 +22,7 @@ float angle_prev;			// previous launcher angle in degree
 float pole;					// pole of the first order schematization of launcher movements
 float shoot_timer;			// time to next shoot
 struct timespec last_time_shoot;
+double stored_x[MAX_TRACKERS]; // x coordinate of interception for each Patriot when launched
 
 // Draw rochet launcher.
 void draw_launcher() {
@@ -132,14 +133,14 @@ void move_launcher() {
 }
 
 // Shoot a new Patriot and return its index.
-void shoot_now() {
+int shoot_now() {
 	struct timespec now;
 	int new_missile_index;
 
 	// if a missile is tried to launch earlier then LAUNCHER_T_INTERVAL don't do nothing
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	if (time_diff_ms(now, last_time_shoot) < LAUNCHER_T_INTERVAL)
-		return;
+		return -1;
 	// otherwise store actual time as last_time_shoot
 	time_copy(&last_time_shoot, now);
 
@@ -147,12 +148,14 @@ void shoot_now() {
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
 	if (new_missile_index != -1)
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
+
+	return new_missile_index;
 }
 
 // Evaluate when Patriot has to shoot.
 void shoot_evaluation() {
 	int tracker_i;
-	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
+	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, choosen_x, delta_x, t1, t2;
 	float t_impact, t_tot, t_wait;
 
 	theta = -launcher_angle_des / 180.0 * PI;
@@ -200,27 +203,52 @@ void shoot_evaluation() {
 				if (t2 > t1) {
 					t_impact = t1;
 					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x1;
 				} else {
 					t_impact = t2;
 					t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x2;
 				}
 			} else { // otherwise we take the only one positive
 				if (t1 > 0) {
 					t_impact = t1;
 					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x1;
 				} else {
 					t_impact = t2;
 					t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x2;
 				}
 			}
 
-			t_wait = t_impact - t_tot;
-			tracked_points[tracker_i].time_to_shoot = t_wait;
-			// printf("Shoot in %f\n", t_wait);
+			// if there's already a Patriot going to destroy this missile
+			if (already_shooted[tracker_i] && shooted_missile_id[tracker_i] != -1) {
+				// check consistency
+				if (shooted_missile_id[tracker_i] < PATRIOT_MISSILES_BASE_INDEX ||
+				        shooted_missile_id[tracker_i] >= PATRIOT_MISSILES_TOP_INDEX)
+					return;
 
-			if (abs(t_wait) < LAUNCHER_SHOOT_THRESHOLD) {
-				shoot_now();
-				return;
+				delta_x = choosen_x - stored_x[tracker_i];
+				if (delta_x > 1) {
+					missile[shooted_missile_id[tracker_i]].vy -= 1.2 * delta_x;
+					missile[shooted_missile_id[tracker_i]].vx += 2.2 * delta_x;
+				}
+				else if (delta_x < 1) {
+					missile[shooted_missile_id[tracker_i]].vy += 1.2 * delta_x;
+					missile[shooted_missile_id[tracker_i]].vx -= 2.2 * delta_x;
+				}
+				stored_x[tracker_i] = choosen_x;
+
+			} else { // if there's no Patriot already launched
+				t_wait = t_impact - t_tot;
+				tracked_points[tracker_i].time_to_shoot = t_wait;
+
+				if (abs(t_wait) < LAUNCHER_SHOOT_THRESHOLD) {
+					stored_x[tracker_i] = choosen_x;
+					shooted_missile_id[tracker_i] = shoot_now();
+					already_shooted[tracker_i] = 1;
+					return;
+				}
 			}
 		}
 	}
