@@ -131,11 +131,12 @@ void move_launcher() {
 		launcher_angle_current = launcher_angle_des;
 }
 
+// Shoot a new Patriot and return its index.
 void shoot_now() {
 	struct timespec now;
 	int new_missile_index;
 
-	// if a missile is launched earlier then LAUNCHER_T_INTERVAL don't do nothing
+	// if a missile is tried to launch earlier then LAUNCHER_T_INTERVAL don't do nothing
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	if (time_diff_ms(now, last_time_shoot) < LAUNCHER_T_INTERVAL)
 		return;
@@ -159,7 +160,8 @@ void shoot_evaluation() {
 	t_theta = tan(theta);
 
 	for (tracker_i = 0; tracker_i < MAX_TRACKERS; tracker_i++) {
-		if (tracker_is_active[tracker_i] && tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
+		if (tracker_is_active[tracker_i] && tracked_points[tracker_i].n_samples > LAUNCHER_MIN_SAMPLE &&
+		        tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
 
 			// evaluate x positions where the trajectories collide
 			sqrt_part = pow(tracked_points[tracker_i].vx, 2) * sqrt((G0 *
@@ -216,7 +218,7 @@ void shoot_evaluation() {
 			tracked_points[tracker_i].time_to_shoot = t_wait;
 			// printf("Shoot in %f\n", t_wait);
 
-			if (abs(t_wait) < 0.01) {
+			if (abs(t_wait) < LAUNCHER_SHOOT_THRESHOLD) {
 				shoot_now();
 				return;
 			}
