@@ -33,22 +33,23 @@
 \newcommand{\ud}{\,\mathrm{d}} % "d" to put at end of integrals
 
 \title{Patriot Project \\
-	\large Real Time Systems A.A. 2016/17}
+	\large Real Time Systems A.A. 2016/17 \\
+	\normalsize prof. Giorgio Buttazzo}
 \author{Michael~Mugnai\\n\textdegree 556448\\m.mugnai@ymail.com \\ \\ \\
 	\includegraphics[width=\textwidth]{cover}}
-\date{Delivery date: not today}
+\date{Delivery date: August 22, 2017}
 
 \begin{document}
 
 \maketitle
 
-\begin{abstract} % Quick summary of the document.
-	The delivery date.
-	The report must include:
-	the shared data structures, the tasks involved, a taskresource diagram, a discussion on the task
-	parameters (how they were defined), and a set of experimental results.
-	Task code must not be included in the report.
-\end{abstract}
+% \begin{abstract} % Quick summary of the document.
+% 	The delivery date.
+% 	The report must include:
+% 	the shared data structures, the tasks involved, a taskresource diagram, a discussion on the task
+% 	parameters (how they were defined), and a set of experimental results.
+% 	Task code must not be included in the report.
+% \end{abstract}
 
 \newpage
 \hypersetup{linkcolor=black}
@@ -72,6 +73,7 @@
 % 	\subsection{Graphics}
 % 	\subsection{Task and resources}
 % \section{Results}
+% \section{Project files}
 
 \section{Assignment}
 
@@ -177,7 +179,7 @@
 
 	\subsection{Parameters evaluation}
 
-		Caracterizing a ballistic trajectory leads to identify two main parameters: \emph{horizontal velocity}, constant but unknown, and \emph{vertical velocity}, that increase at every time-instant with a slope of of $g$.
+		Caracterizing a ballistic trajectory leads to identify two main parameters: \emph{horizontal velocity}, constant but unknown, and \emph{vertical velocity}, that increase at every time-instant with a slope of $g$.
 		% Assuming that every ostile object has a ballistic trajectory, the only force applyed to them is gravity $\bm{g}$ (vertical), therefore horizontal velocity is constant, and vertical is linear, with slope equals to $\bm{g}$.
 
 		Since we can presume that tracker's detected positions are afflicted by error, what we're looking for is a trajectory that \emph{minimize} its distance from any given point, instead of trying to evaluate an exact interpolation of them.
@@ -256,6 +258,7 @@
 
 			As before, we're looking for $\alpha_1$, so only equation \eqref{yvel} is needed.
 
+	\newpage
 	\subsection{Rocket launcher}
 
 		\begin{figure}[htb]
@@ -302,6 +305,7 @@
 			\item \emph{left-right}: decrement/increment Patriot shoot velocity;
 			\item \emph{up-down}: increment/decrement Patriot shoot angle;
 			\item \emph{A}: toggle prediction trajectories;
+			\item \emph{S}: switch between tracker display parameters;
 			\item \emph{X}: toggle enemy missile trails;
 			\item \emph{Z-C}: decrement/increment enemy missile trails;
 			\item \emph{Esc}: close program.
@@ -309,7 +313,56 @@
 		Task logs like \emph{deadline misses} and \emph{utilization percentages} are printed in cosole window.
 
 	\subsection{Task and resources}
+
+		\begin{figure}[hb]
+			\includegraphics[width=\textwidth]{task_scheme}
+			\caption{Tasks and resources scheme.}
+			\label{fig:task_scheme}
+		\end{figure}
+
+		The progam contain six different types of task, each one periodic, whose relations are expressed in Figure \ref{fig:task_scheme}. Here's a detailed list, ordered by task priority:
+		\begin{enumerate}
+			\item \emph{missile task} $\tau_m$: it could be enemy's or Patriot's (depending on its initialization), it follows the physics laws imposed by ballistic trajectory; it has period of 20 ms;
+			\item \emph{distubing object task} $\tau_d$: a flying object that has not ballistic trajectory; it has period of 20 ms;
+			\item \emph{graphic task} $\tau_g$: handles all graphic related functions; a double buffer is implemented in order to minimize screen flickering; it has period of 20 ms (50 fps);
+			\item \emph{radar task} $\tau_r$: scan a portion of world box in search of objects; it has period of 2 ms (in each iteration perform only a scan on one line), it can starts many tracker tasks;
+			\item \emph{tracker task} $\tau_t$: a camera that follows the object suggested by the radar and tries to estimate its trajectory; it has period of 20 ms;
+			\item \emph{launcher task} $\tau_l$: using the collected data from trackers, it tries to intercept enemy missiles, procucing its own missiles; it has period of 50 ms;
+			\item \emph{interpeter task} $\tau_i$: keyboard listener, it can change launcher state variables and start new enemy missiles; it has period of 40 ms.
+		\end{enumerate}
+		Each task has its relative deadline equals to its period. The program is able to detect deadline misses and average utilization percentages (assumed as the sum of response times over its period).
+
+		Since multiple istances of missile and tracker tasks are necessaries, a max value for each one is defined, and the task parameters array is structured as follows in Figure \ref{fig:task_param}.
+
+		\begin{figure}[hb]
+			\includegraphics[width=\textwidth]{task_param}
+			\caption{Task parameters array implementation.}
+			\label{fig:task_param}
+		\end{figure}
+
+\section{Project files}
+
+	Here's a description of the files contained in the project:
+	\begin{itemize}
+		\item \emph{baseUtils.c/h}: general popruse utility functions, aimed to handle time, base task commands and Allegro library;
+		\item \emph{colors.h}: color definitions for every object; can be choosen between DARK\_MODE and LIGHT\_MODE;
+		\item \emph{common.c/h}: functions and tasks related to graphics and keyboard controls;
+		\item \emph{main.c}: 
+		\item \emph{makefile}: gcc compiler istructions; avaiable commands are \emph{clean} (to clean all *.o files), \emph{run} (to compile and run the program) and \emph{rundebug} (to compile and start gdb debugger);
+		\item \emph{missiles.c/h}: functions and task reguarding enemy's and Patriot's missiles behavior;
+		\item \emph{radar.c/h}: functions and task reguarding radar behavior;
+		\item \emph{rocket\_launcher.c/h}: functions and task reguarding rocket launcher behavior and missile interception evaluation;
+		\item \emph{task\_constants.c/h}: periods, relative deadlines and priorities for all tasks;
+		\item \emph{trackers.c/h}: functions and task reguarding trackers behavior and trajectories evaluations.
+	\end{itemize}
+
 \section{Results}
+
+	Even a Mean Square approximation on the sampled points seems unable to produce trajectory parameters sufficiently accurated to destroy enemy target with a single Patriot shoot. In fact, the oscillation of the error, presumably caused by a too low resolution of the world box ($600\times400$ px, each pixel is 1 meter), makes the Patriot shoot up to a maximum of three times per target (once imposed a minimum delay bethween shoot of 300 ms).
+
+	Furthermore, objects with rectilinear trajectories (no accelerations) seems to be interpreted as ballistic trajectories where the parabola is almost collapsed in a rect. However this type of objects doesn't cause accidental shoots, due to their supposed collision time allways positive.
+
+	Nevertheless, Patriot is capable of intercept and destroy enemy targets in many situations, once the objects are tracked for a suitable ammount of time (usually at least one second). From that, a further improvement could be made by improving the radar, in order to achieve earlier target aquisitions.
 
 \newpage
 \hypersetup{linkcolor=black}
