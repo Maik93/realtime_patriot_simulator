@@ -295,7 +295,7 @@ void *tracker_task(void* arg) {
 	tracked_points[tracker_i].traj_error = TRAJ_MAX_ERROR;
 	tracked_points[tracker_i].time_to_shoot = -1;
 	tracker_is_active[tracker_i] = 1;
-	printf("Tracker %d activated.\n", tracker_i);
+	// printf("Tracker %d activated.\n", tracker_i);
 
 	// DBG
 	// printf("Start tracking (%d, %d)\n", current_points_tracked[tracker_i].x, current_points_tracked[tracker_i].y);
@@ -332,9 +332,11 @@ void *tracker_task(void* arg) {
 		}
 	}
 
-	util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
-	printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
-	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(util_perc));
+	if (tp[task_i].counts > 0) {
+		util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
+		printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
+		       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(util_perc));
+	}
 
 	clear_tracker_struct(task_i, tracker_i);
 }
