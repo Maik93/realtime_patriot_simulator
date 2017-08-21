@@ -1,0 +1,56 @@
+diff --git a/baseUtils.c b/baseUtils.c
+index 46d4f4c..aeb4773 100644
+--- a/baseUtils.c
++++ b/baseUtils.c
+@@ -217,24 +217,25 @@ void kill_all_task() {
+ 		if (tp[i].index != -1) {
+ 			pthread_join(tid[i], NULL);
+ 
+-			util_perc = tp[i].response_time_sum / (tp[i].period * tp[i].counts) * 100.0;
++			// util_perc = tp[i].response_time_sum / (tp[i].period * tp[i].counts) * 100.0;
++			util_perc = tp[i].response_time_sum / ((float)tp[i].counts);
+ 
+ 			switch (i) {
+ 			case GRAPHIC_INDEX:
+-				printf("Display task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+-				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
++				printf("Display task:\tRunned %d times.\t%d deadline misses. %2.f ms of average respose time.\n",
++				       tp[i].counts, tp[i].dmiss, util_perc);
+ 				break;
+ 			case RADAR_INDEX:
+-				printf("Radar task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+-				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
++				printf("Radar task:\tRunned %d times.\t%d deadline misses. %2.f ms of average respose time.\n",
++				       tp[i].counts, tp[i].dmiss, util_perc);
+ 				break;
+ 			case ROCKET_LAUNCHER_INDEX:
+-				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+-				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
++				printf("Rckt_lncr task:\tRunned %d times.\t%d deadline misses. %2.f ms of average respose time.\n",
++				       tp[i].counts, tp[i].dmiss, util_perc);
+ 				break;
+ 			case INTERPRETER_INDEX:
+-				printf("Interp task:\tRunned %d times.\t%d deadline misses. %d%% of utilization.\n",
+-				       tp[i].counts, tp[i].dmiss, (int)round(util_perc));
++				printf("Interp task:\tRunned %d times.\t%d deadline misses. %2.f ms of average respose time.\n",
++				       tp[i].counts, tp[i].dmiss, util_perc);
+ 				break;
+ 			default: break;
+ 			}
+diff --git a/trackers.c b/trackers.c
+index 3477708..42a3b24 100644
+--- a/trackers.c
++++ b/trackers.c
+@@ -336,9 +336,9 @@ void *tracker_task(void* arg) {
+ 		}
+ 	}
+ 
+-	util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
+-	printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
+-	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(util_perc));
++	util_perc = tp[task_i].response_time_sum / tp[task_i].counts;
++	printf("Tracker %d detached. Missed %d deadlines on %d runs. %2.f ms of average respose time.\n",
++	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, util_perc);
+ 
+ 	clear_tracker_struct(task_i, tracker_i);
+ }
