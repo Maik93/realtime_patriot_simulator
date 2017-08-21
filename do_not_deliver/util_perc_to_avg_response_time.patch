@@ -38,19 +38,19 @@ index 46d4f4c..aeb4773 100644
  			default: break;
  			}
 diff --git a/trackers.c b/trackers.c
-index 3477708..42a3b24 100644
+index e290c3f..f829b5d 100644
 --- a/trackers.c
 +++ b/trackers.c
-@@ -336,9 +336,9 @@ void *tracker_task(void* arg) {
- 		}
+@@ -333,9 +333,9 @@ void *tracker_task(void* arg) {
  	}
  
--	util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
--	printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
--	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(util_perc));
-+	util_perc = tp[task_i].response_time_sum / tp[task_i].counts;
-+	printf("Tracker %d detached. Missed %d deadlines on %d runs. %2.f ms of average respose time.\n",
-+	       tracker_i, tp[task_i].dmiss, tp[task_i].counts, util_perc);
+ 	if (tp[task_i].counts > 0) {
+-		util_perc = tp[task_i].response_time_sum / (tp[task_i].period * tp[task_i].counts) * 100.0;
+-		printf("Tracker %d detached. Missed %d deadlines on %d runs. %d%% of utilization.\n",
+-		       tracker_i, tp[task_i].dmiss, tp[task_i].counts, (int)round(util_perc));
++		util_perc = tp[task_i].response_time_sum / tp[task_i].counts;
++		printf("Tracker %d detached. Missed %d deadlines on %d runs. %2.f ms of average respose time.\n",
++		       tracker_i, tp[task_i].dmiss, tp[task_i].counts, util_perc);
+ 	}
  
  	clear_tracker_struct(task_i, tracker_i);
- }
