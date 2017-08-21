@@ -1,16 +1,13 @@
 /**
  * -----------------------------------------------------------------------
- * Radar. A laser that scan the sky searching for objects.
+ * Radar: a laser that scan the sky searching for objects.
  * When detected, it will attach a tracker on them.
  * -----------------------------------------------------------------------
  */
 #include "radar.h"
 
-// #include <stddef.h>
 #include <stdio.h>
-// #include <time.h>
 #include <math.h>
-// #include <pthread.h>
 #include <allegro.h>
 
 #include "baseUtils.h"
@@ -33,7 +30,7 @@ void read_sensor(int degree) {
 	do {
 		x = RPOSX + d * cos(alpha);
 		y = RPOSY - d * sin(alpha);
-		c = getpixel(screen, x, y);
+		c = getpixel(screen_buff, x, y);
 		d = d + RSTEP;
 	} while ((d <= RMAX) && (c == BKG || c == PATMISS_COL || c == LAUNCHER_COL ||
 	                         c == RSENSOR_COL || c == TCOL || c == PREDICTION_COL));
@@ -114,8 +111,8 @@ void draw_radar_symbol() {
 // Draws output of the radar in top right of window's corner.
 void draw_radar_display() {
 	int i;
-	int rx, ry, ax, ay; // relative and absolute positions of points
-	char str[14];
+	int rx, ry, ax, ay;	// relative and absolute positions of points
+	char str[14];		// for text outputs
 
 	// label
 	sprintf(str, "Radar display");

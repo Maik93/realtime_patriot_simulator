@@ -12,6 +12,8 @@ int launcher_angle_des;
 float launcher_angle_current;
 extern int show_predictions;
 
+#define PRED_INIT_VAL		0			// initial visibility value for predictions
+#define PREDICT_PAST		1			// choose to show prediction of past values or not [0-1]
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
@@ -41,7 +43,7 @@ extern int show_predictions;
 // TEXT MENU CONSTANTS
 //-----------------------------------------------------
 #define LAUNCHER_TITLE_POSX	TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2
-#define LAUNCHER_TITLE_POSY	TRACK_D2_Y + TRACKER_RES * TRACK_DSCALE / 2 + 5 * CHAR_HEIGHT
+#define LAUNCHER_TITLE_POSY	TRACK_D2_Y + TRACKER_RES * TRACK_DSCALE / 2 + 3 * CHAR_HEIGHT
 #define LAUNCHER_STAT1_X	TRACK_D0_X - TRACKER_RES * TRACK_DSCALE / 2 + CHAR_WIDTH
 #define LAUNCHER_STAT1_Y	LAUNCHER_TITLE_POSY + 2 * CHAR_HEIGHT
 #define LAUNCHER_STAT2_X	LAUNCHER_STAT1_X

@@ -1,14 +1,11 @@
 /**
  * Trackers: they're attached by the radar on every object seen in the sky.
- * Following this object, they try to evaluate velocities and accelerations.
+ * Following these objects, they try to evaluate velocities and accelerations.
  */
 #include "trackers.h"
 
-// #include <stddef.h>
 #include <stdio.h>
-// #include <time.h>
 #include <math.h>
-// #include <pthread.h>
 #include <allegro.h>
 
 #include "baseUtils.h"
@@ -18,6 +15,7 @@
 #include "radar.h"
 
 // public variables
+int				tracker_disp_mode = 0; // what parameter is currently shown by tracker display [0-2]
 struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tracked points (abs. coord)
 int				tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
 struct tracker
@@ -142,15 +140,13 @@ float evaluate_error(int tracker_i) {
 	x0 = tracked_points[tracker_i].x[k];
 	y0 = tracked_points[tracker_i].y[k];
 
-	// we compare each acquired point with evaluated trajectory's output in the given times
+	// compare each acquired point with evaluated trajectory's output in the corresponding times
 	do {
 		delta_t = -time_diff_ms(t0, tracked_points[tracker_i].t[k]) / 1000;
 
 		supposed_x = x0 + tracked_points[tracker_i].vx * delta_t;
 		supposed_y = y0 + (0.5 * tracked_points[tracker_i].ay * delta_t + tracked_points[tracker_i].vy) * delta_t;
 		// DBG
-		// printf("vx=%2.f\tvy=%2.f\n", tracked_points[tracker_i].vx, tracked_points[tracker_i].vy);
-		// printf("ay=%2.f\tvy=%2.f\n", tracked_points[tracker_i].ay, tracked_points[tracker_i].vy);
 		// printf("Pred:\tx=%2.f\ty=%2.f\n", supposed_x, supposed_y);
 
 		real_x = tracked_points[tracker_i].x[k];
@@ -348,6 +344,7 @@ void tracker_display(int tracker_i) {
 	int i, j;	// image matrix indexes
 	int x0, y0;	// center to draw display
 	int x, y;	// graphical coordinates
+	char str[8];// for text outputs
 
 	// find out where to draw this display
 	switch (tracker_i) {
@@ -386,22 +383,33 @@ void tracker_display(int tracker_i) {
 	rect(screen_buff, x0 - TRACKER_RES * TRACK_DSCALE / 2, y0 - TRACKER_RES * TRACK_DSCALE / 2,
 	     x0 + TRACKER_RES * TRACK_DSCALE / 2, y0 + TRACKER_RES * TRACK_DSCALE / 2, BORDER_COL);
 
-	// time to shoot
-	/*char str[8];
-	if (tracked_points[tracker_i].time_to_shoot > 0 &&
-	        tracked_points[tracker_i].time_to_shoot < 100 &&
-	        tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
-		sprintf(str, "%.2f s", tracked_points[tracker_i].time_to_shoot);
-		textout_centre_ex(screen_buff, font, str,
-		                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
-		                  TEXT_TITL_COL, -1);*/
-
-	// trajectory Mean Square Error
-	char str[8];
-	if (tracked_points[tracker_i].traj_error > 0) {
-		sprintf(str, "MSE: %.0f", tracked_points[tracker_i].traj_error);
-		textout_centre_ex(screen_buff, font, str,
-		                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
-		                  TEXT_TITL_COL, -1);
+	switch (tracker_disp_mode) {
+	case 0: // prints trajectory's Mean Square Error
+		if (tracked_points[tracker_i].traj_error > 0) {
+			sprintf(str, "MSE: %.0f", tracked_points[tracker_i].traj_error);
+			textout_centre_ex(screen_buff, font, str,
+			                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
+			                  TEXT_TITL_COL, -1);
+		}
+		break;
+	case 1: // prints trajectory's Relative Mean Square Error
+		if (tracked_points[tracker_i].traj_error > 0 && tracked_points[tracker_i].n_samples > 0) {
+			sprintf(str, "RMSE: %.2f", tracked_points[tracker_i].traj_error / tracked_points[tracker_i].n_samples);
+			textout_centre_ex(screen_buff, font, str,
+			                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
+			                  TEXT_TITL_COL, -1);
+		}
+		break;
+	case 2: // prints time to shoot
+		if (tracked_points[tracker_i].time_to_shoot > 0 &&
+		        tracked_points[tracker_i].time_to_shoot < 100 &&
+		        tracked_points[tracker_i].traj_error < TRAJ_MAX_ERROR) {
+			sprintf(str, "%.2f s", tracked_points[tracker_i].time_to_shoot);
+			textout_centre_ex(screen_buff, font, str,
+			                  x0, y0 + TRACKER_RES * TRACK_DSCALE / 2 - CHAR_HEIGHT,
+			                  TEXT_TITL_COL, -1);
+		}
+		break;
+	default: return;
 	}
 }

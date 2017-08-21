@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]) {
 	pthread_t interp_id;
 	int i;
 
-	init(0);			// without mouse integration
+	init(0);			// initialize Allegro without mouse integration
 	srand(time(NULL));	// initialize random generator
 
 	// start graphic task. It will take care of other tasks too.

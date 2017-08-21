@@ -1,3 +1,9 @@
+/**
+ * -----------------------------------------------------------------------
+ * Rocket launcher: Patriot missile generator.
+ * Missiles are produced given current launcher angle and initial velocity.
+ * -----------------------------------------------------------------------
+ */
 #include "rocket_launcher.h"
 
 #include <stdio.h>
@@ -15,7 +21,7 @@
 int launch_velocity;		// start velocity of missiles produced by rocket launcher
 int launcher_angle_des;		// desired launcher angle in degree
 float launcher_angle_current;// current launcher angle in degree
-int show_predictions = 1; // DBG: switch off for release
+int show_predictions = PRED_INIT_VAL;
 
 // Private variables
 float angle_prev;			// previous launcher angle in degree
@@ -76,12 +82,12 @@ void draw_current_trajectory() {
 
 // Textual infos in the bottom right of the window.
 void print_launcher_status() {
-	char str[20];
+	char str[20]; // for text outputs
 
 	sprintf(str, "Patriot status");
 	textout_centre_ex(screen_buff, font, str, LAUNCHER_TITLE_POSX, LAUNCHER_TITLE_POSY, TEXT_TITL_COL, -1);
 
-	if (tflag)
+	if (trail_flag)
 		sprintf(str, "-> trails:      on");
 	else
 		sprintf(str, "-> trails:      off");
@@ -189,7 +195,7 @@ void shoot_evaluation() {
 			t2 = (x2 - tracked_points[tracker_i].x[tracked_points[tracker_i].top]) /
 			     tracked_points[tracker_i].vx;
 			// DBG
-			// printf("t1 %f\tt2 %f\n", t1, t2);
+			// printf("Intercepting times:\tt1 %f\tt2 %f\n", t1, t2);
 
 			// and now search for the solution with smaller positive t
 			if (t1 <= 0 && t2 <= 0) { // if both are negative, there's no future interception

@@ -73,6 +73,7 @@ struct tracker {
 //-----------------------------------------------------
 // PUBLIC VARIABLES
 //-----------------------------------------------------
+int tracker_disp_mode;
 extern struct point
 	current_points_tracked[MAX_TRACKERS];
 extern int tracker_is_active[MAX_TRACKERS];

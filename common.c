@@ -21,7 +21,7 @@
 #include "rocket_launcher.h"
 
 // DBG
-int ball_x, ball_y, ball_r = 10, ball_active = 0;
+int disturb_obj_x, disturb_obj_y, disturb_obj_r = 10, disturb_obj_active = 0;
 
 // Static part of graphics, a basic scenario in which we draw each time.
 BITMAP	*screen_base;
@@ -55,7 +55,7 @@ void draw_world() {
 
 // Draw static part of top menu. This function is called only one time.
 void top_menu_static() {
-	char str[50];
+	char str[50]; // for text outputs
 
 	// border
 	rect(screen_buff, MENU_BOX_X1, MENU_BOX_Y1, MENU_BOX_X2, MENU_BOX_Y2, BORDER_COL);
@@ -73,61 +73,93 @@ void top_menu_static() {
 	textout_ex(screen_buff, font, str, MENU_CONTENT4_X, MENU_CONTENT4_Y, TEXT_COL, -1);
 	sprintf(str, "A:          toggle prediction trajectories");
 	textout_ex(screen_buff, font, str, MENU_CONTENT5_X, MENU_CONTENT5_Y, TEXT_COL, -1);
-	sprintf(str, "X:          toggle enemy missile trails");
+	sprintf(str, "S:          switch between tracker display parameters");
 	textout_ex(screen_buff, font, str, MENU_CONTENT6_X, MENU_CONTENT6_Y, TEXT_COL, -1);
-	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
+	sprintf(str, "X:          toggle enemy missile trails");
 	textout_ex(screen_buff, font, str, MENU_CONTENT7_X, MENU_CONTENT7_Y, TEXT_COL, -1);
-	sprintf(str, "Esc:        close program");
+	sprintf(str, "Z-C:        dec./inc. enemy missile trails");
 	textout_ex(screen_buff, font, str, MENU_CONTENT8_X, MENU_CONTENT8_Y, TEXT_COL, -1);
+	sprintf(str, "Esc:        close program");
+	textout_ex(screen_buff, font, str, MENU_CONTENT9_X, MENU_CONTENT9_Y, TEXT_COL, -1);
+
+	// divisor
+	line(screen_buff, MENU_DIVISOR_X1, MENU_DIVISOR_Y1,
+	     MENU_DIVISOR_X2, MENU_DIVISOR_Y2, BORDER_COL);
 }
 
 // Draw dynamic part of top menu. This function is called in every graphic_task cicle.
 void top_menu_dynamic() {
-	char str[50];
+	char str[50]; // for text outputs
+	int no_warnings = 1;
 
 	// warning for max enemy missiles reached
 	if (find_free_slot(ENEMY_MISSILES_BASE_INDEX, ENEMY_MISSILES_TOP_INDEX)
 	        == -1) {
 		sprintf(str, "Max number of enemy missiles reached");
-		textout_ex(screen_buff, font, str, MENU_ERROR1_X, MENU_ERROR1_Y, TEXT_ALERT_COL, -1);
+		textout_centre_ex(screen_buff, font, str, MENU_ERROR1_X, MENU_ERROR1_Y, TEXT_ALERT_COL, -1);
+		no_warnings = 0;
 	}
 
 	// warning for max trackers reached
 	if (find_free_slot(TRACKER_BASE_INDEX, TRACKER_TOP_INDEX) == -1) {
 		sprintf(str, "Max number of trackers reached");
-		textout_ex(screen_buff, font, str, MENU_ERROR2_X, MENU_ERROR2_Y, TEXT_ALERT_COL, -1);
+		textout_centre_ex(screen_buff, font, str, MENU_ERROR2_X, MENU_ERROR2_Y, TEXT_ALERT_COL, -1);
+		no_warnings = 0;
+	}
+
+	if (no_warnings) {
+		sprintf(str, "Warnings will be printed here");
+		textout_centre_ex(screen_buff, font, str, MENU_ERROR1_X, MENU_ERROR1_Y, 29, -1);
 	}
 }
 
-void draw_score() {
-	char str[20];
-
-	rect(screen_buff, SCORE_BOX_X1, SCORE_BOX_Y1, SCORE_BOX_X2, SCORE_BOX_Y2, BORDER_COL);
-
-	sprintf(str, " SCORE ");
-	textout_centre_ex(screen_buff, font, str, SCORE_X0, SCORE_Y0, TEXT_ALERT_COL, GND);
-	sprintf(str, "  Enemy - Patriot");
-	textout_centre_ex(screen_buff, font, str, SCORE_X1, SCORE_Y1, TEXT_COL, -1);
-	sprintf(str, "%d - %d", enemy_score, patriot_score);
-	textout_centre_ex(screen_buff, font, str, SCORE_X2, SCORE_Y2, TEXT_TITL_COL, -1);
-}
-
 // Draw tracker boxes and its title on right side. This function is called only one time.
-void right_menu() {
-	int i;
-	char str[8];
-
-	// trackers label
-	sprintf(str, "Trackers");
-	textout_centre_ex(screen_buff, font, str,
-	                  TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2,
-	                  TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2 - 2 * CHAR_HEIGHT, TEXT_TITL_COL, -1);
-
+void right_menu_static() {
 	// tracker empty boxes
 	rect(screen_buff, TRACK_BOX1_X0, TRACK_BOX1_Y0, TRACK_BOX1_X1, TRACK_BOX1_Y1, BORDER_COL);
 	rect(screen_buff, TRACK_BOX2_X0, TRACK_BOX2_Y0, TRACK_BOX2_X1, TRACK_BOX2_Y1, BORDER_COL);
 	rect(screen_buff, TRACK_BOX3_X0, TRACK_BOX3_Y0, TRACK_BOX3_X1, TRACK_BOX3_Y1, BORDER_COL);
 	rect(screen_buff, TRACK_BOX4_X0, TRACK_BOX4_Y0, TRACK_BOX4_X1, TRACK_BOX4_Y1, BORDER_COL);
+}
+
+// Print tracker display title according to current tracker_disp_mode
+void right_menu_dynamic() {
+	char str[8], mode_str[8]; // for text outputs
+
+	// tracker display mode
+	switch (tracker_disp_mode) {
+	case 0:
+		sprintf(mode_str, " - MSE");
+		break;
+	case 1:
+		sprintf(mode_str, " - RMSE");
+		break;
+	case 2:
+		sprintf(mode_str, " - TTS");
+		break;
+	default:
+		sprintf(mode_str, "");
+		break;
+	}
+
+	// trackers label
+	sprintf(str, "Trackers%s", mode_str);
+	textout_centre_ex(screen_buff, font, str,
+	                  TRACK_D0_X + TRACKER_RES * TRACK_DSCALE / 2,
+	                  TRACK_D0_Y - TRACKER_RES * TRACK_DSCALE / 2 - 2 * CHAR_HEIGHT, TEXT_TITL_COL, -1);
+}
+
+void draw_score() {
+	char str[20]; // for text outputs
+
+	rect(screen_buff, SCORE_BOX_X1, SCORE_BOX_Y1, SCORE_BOX_X2, SCORE_BOX_Y2, BORDER_COL);
+
+	sprintf(str, " SCORE ");
+	textout_centre_ex(screen_buff, font, str, SCORE_X0, SCORE_Y0, BORDER_COL, GND);
+	sprintf(str, "  Enemy - Patriot");
+	textout_centre_ex(screen_buff, font, str, SCORE_X1, SCORE_Y1, TEXT_COL, -1);
+	sprintf(str, "%d - %d", enemy_score, patriot_score);
+	textout_centre_ex(screen_buff, font, str, SCORE_X2, SCORE_Y2, TEXT_TITL_COL, -1);
 }
 
 // Graphical task. Before the main loop, we can compose a basic scenario,
@@ -145,7 +177,7 @@ void *graphic_task(void* arg) {
 	draw_radar_symbol();
 
 	top_menu_static();
-	right_menu();
+	right_menu_static();
 
 	// store this basic scenario
 	blit(screen_buff, screen_base, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
@@ -163,6 +195,7 @@ void *graphic_task(void* arg) {
 		blit(screen_base, screen_buff, 0, 0, 0, 0, screen_buff->w, screen_buff->h);
 
 		top_menu_dynamic();
+		right_menu_dynamic();
 
 		draw_radar_display();
 
@@ -176,21 +209,24 @@ void *graphic_task(void* arg) {
 		for (i = ENEMY_MISSILES_BASE_INDEX; i < PATRIOT_MISSILES_TOP_INDEX; i++) {
 			if (tp[i].index != -1) {
 				draw_missile(i);
-				if (tflag) draw_trail(i, tl);
+				if (trail_flag) draw_trail(i, trail_lenght);
 			}
 		}
 
 		// DBG: ball
-		if (ball_active)
-			circlefill(screen_buff, ball_x, ball_y, ball_r, ENEMY_COL);
+		if (disturb_obj_active)
+			circlefill(screen_buff, disturb_obj_x, disturb_obj_y, disturb_obj_r, ENEMY_COL);
 
 		for (i = TRACKER_BASE_INDEX; i < TRACKER_TOP_INDEX; i++)
 			if (tp[i].index != -1) {
 				tracker_i = i - TRACKER_BASE_INDEX;
 
 				// predicted trajectories for enemy missiles
-				if (show_predictions)
+				if (show_predictions) {
 					draw_predictions(tracker_i, delta_t / 3);
+					if (PREDICT_PAST)
+						draw_predictions(tracker_i, -delta_t / 3);
+				}
 
 				// tracker views on right side of the screen
 				tracker_display(tracker_i);
@@ -206,31 +242,31 @@ void *graphic_task(void* arg) {
 	}
 }
 
-// DBG
-void *ball_task(void* arg) {
-	int ball_vx, ball_vy, i;
+// Disturbing object that transitate on the sky. It has no accelerations.
+void *disturb_obj_task(void* arg) {
+	int disturb_obj_vx, disturb_obj_vy, i;
 	float dt;
 
-	ball_active = 1;
+	disturb_obj_active = 1;
 
-	ball_x = WORLD_BOX_X1 + ball_r + 1;
-	ball_y = WORLD_BOX_Y1 + 250;
-	ball_vx = 50;
-	ball_vy = -15;
+	disturb_obj_x = WORLD_BOX_X1 + disturb_obj_r + 1;
+	disturb_obj_y = WORLD_BOX_Y1 + frand(150, 250);
+	disturb_obj_vx = 50;
+	disturb_obj_vy = -frand(5, 15);
 
 	i = get_task_index(arg);
 	dt = TSCALE * (float)get_task_period(i) / 1000;
 
 	set_period(i);
 	while (!sigterm_tasks &&
-	        ball_x > WORLD_BOX_X1 + ball_r && ball_x < WORLD_BOX_X2 - ball_r &&
-	        ball_y > WORLD_BOX_Y1 + ball_r && ball_y < WORLD_BOX_Y2 - ball_r) {
-		ball_x += ball_vx * dt;
-		ball_y += ball_vy * dt;
+	        disturb_obj_x > WORLD_BOX_X1 + disturb_obj_r && disturb_obj_x < WORLD_BOX_X2 - disturb_obj_r &&
+	        disturb_obj_y > WORLD_BOX_Y1 + disturb_obj_r && disturb_obj_y < WORLD_BOX_Y2 - disturb_obj_r) {
+		disturb_obj_x += disturb_obj_vx * dt;
+		disturb_obj_y += disturb_obj_vy * dt;
 		wait_for_period(i);
 	}
 
-	ball_active = 0;
+	disturb_obj_active = 0;
 }
 
 // Keyboard interpeter task.
@@ -245,23 +281,29 @@ void *interp_task(void* arg) {
 
 		switch (scan) {
 		case 67: // Enter key - spawn disturbing object
-			if (!ball_active)
-				start_task(ball_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, DISTURB_OBJECT_INDEX);
+			if (!disturb_obj_active)
+				start_task(disturb_obj_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, DISTURB_OBJECT_INDEX);
 			break;
 		case 1: // A key - turn on/off predictions on trajectories
 			show_predictions = !show_predictions;
 			printf("show_predictions setted to %d\n", show_predictions);
 			break;
+		case 19: // S key - switch tracker displays parameter
+			tracker_disp_mode++;
+			if (tracker_disp_mode >= 3)
+				tracker_disp_mode = 0;
+			// printf("Tracker displays mode switched to %d\n", tracker_disp_mode);
+			break;
 		case 24: // X key - turn on/off trails for enemy missiles
-			tflag = !tflag;
-			printf("tflag setted to %d\n", tflag);
+			trail_flag = !trail_flag;
+			printf("trail_flag setted to %d\n", trail_flag);
 			break;
 
 		case 26: // Z key - reduce trail length
-			if (tl > 10) tl--;
+			if (trail_lenght > 10) trail_lenght--;
 			break;
 		case 3: // C key - increment trail length
-			if (tl < TLEN) tl++;
+			if (trail_lenght < TRAIL_LEN) trail_lenght++;
 			break;
 
 		case KEY_SPACE: // spawn a new enemy missile

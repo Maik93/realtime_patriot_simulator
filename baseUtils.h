@@ -12,7 +12,7 @@
 // | 3x Enemy missiles | 3x Patriot missiles | disturbing object | 4x Trackers | Graphic | Radar | Rocket_launcher | Interpreter |
 // ^ -> ENEMY_MISSILES_BASE_INDEX
 //                     ^ -> PATRIOT_MISSILES_BASE_INDEX
-//                                           ^ -> TRACKER_BASE_INDEX
+//                                                               ^ -> TRACKER_BASE_INDEX
 //-----------------------------------------------------
 #define MAX_ENEMY_MISSILES		3
 #define MAX_PATRIOT_MISSILES	5

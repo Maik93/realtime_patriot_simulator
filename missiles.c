@@ -19,15 +19,13 @@
 #include "common.h"
 #include "colors.h"
 #include "rocket_launcher.h"
-// #include "radar_and_trackers.h"
 
 
 struct missile	missile[MAX_MISSILES];	// missile buffer
 struct cbuf		trail[MAX_MISSILES];	// trail buffer
 
-// DBG: reset tflag to 0 befor delivery
-int tflag = 1;		// switcher for trail's visibility [0-1]
-int tl = TLEN / 2;	// actual trail length
+int trail_flag = TRAIL_INIT_VAL;		// switcher for trail's visibility [0-1]
+int trail_lenght = TRAIL_LEN / 2;		// actual trail length
 
 int enemy_score = 0, patriot_score = 0;
 
@@ -36,7 +34,7 @@ void store_trail(int i) {
 	int k;
 	if (i >= MAX_MISSILES) return;
 	k = trail[i].top;
-	k = (k + 1) % TLEN;
+	k = (k + 1) % TRAIL_LEN;
 	trail[i].x[k] = missile[i].x;
 	trail[i].y[k] = missile[i].y;
 	trail[i].top = k;
@@ -46,7 +44,7 @@ void store_trail(int i) {
 void clear_trail(int i) {
 	int j;
 	if (i >= MAX_MISSILES) return;
-	for (j = 0; j < TLEN; j++) {
+	for (j = 0; j < TRAIL_LEN; j++) {
 		trail[i].x[j] = 0;
 		trail[i].y[j] = 0;
 	}
@@ -58,7 +56,7 @@ void draw_trail(int i, int w) {
 	int j, k; // indexes
 	int x, y; // positions
 	for (j = 0; j < w; j++) {
-		k = (trail[i].top + TLEN - j) % TLEN;
+		k = (trail[i].top + TRAIL_LEN - j) % TRAIL_LEN;
 		x = world2abs_x(trail[i].x[k]);
 		y = world2abs_y(trail[i].y[k]);
 		putpixel(screen_buff, x, y, TCOL);
@@ -228,10 +226,6 @@ int init_missile(int i) {
 	missile[i].vy = v * sin(missile[i].alpha);
 	missile[i].in_destruction = 0;
 	missile[i].r = ML;
-
-	// DBG
-	/*if (i == PATRIOT_MISSILES_BASE_INDEX)
-		printf("alpha: %f\tvx: %f\tvy: %f\n", alpha, missile[i].vx, missile[i].vy);*/
 
 	return 1;
 }

@@ -19,15 +19,16 @@
 #define XMAXT	WORLD_BOX_WIDTH / 2
 #define VMINT	20					// min and max initial hor. speed for missiles coming from top (m/s)
 #define VMAXT	40
-#define AMINT	-PI/4		// min and max initial alpha for missiles coming from top (rad)
+#define AMINT	-PI/4				// min and max initial alpha for missiles coming from top (rad)
 #define AMAXT	-PI/8
 //-----------------------------------------------------
 // GRAPHICAL CONSTANTS
 //-----------------------------------------------------
-#define ML		15		// length of the missile
-#define MW		6		// width of the missile
-#define DESTR_BMP_NUM 10 // number of bitmaps used in missile destruction animation
-#define TLEN	50			// circular buffer length (used to store trails)
+#define ML		15			// length of the missile
+#define MW		6			// width of the missile
+#define DESTR_BMP_NUM 10	// number of bitmaps used in missile destruction animation
+#define TRAIL_LEN	50		// circular buffer length (used to store trails)
+#define TRAIL_INIT_VAL 1	// initial visibility value for trail lengths
 
 //-----------------------------------------------------
 // STRUCTS
@@ -44,8 +45,8 @@ struct missile {	// missile structure
 };
 struct cbuf {		// circular buffer structure
 	int top;		// index of the last element inserted
-	int x[TLEN];	// array for x coordinates
-	int y[TLEN];	// array for y coordinates
+	int x[TRAIL_LEN]; // array for x coordinates
+	int y[TRAIL_LEN]; // array for y coordinates
 };
 
 //-----------------------------------------------------
@@ -56,8 +57,8 @@ extern struct missile
 extern struct cbuf
 	trail[MAX_MISSILES];	// trail buffer
 
-extern int	tflag;			// switcher for trail's visibility [0-1]
-extern int	tl;				// actual trail length
+extern int	trail_flag;		// switcher for trail's visibility [0-1]
+extern int	trail_lenght;	// actual trail length
 extern int	enemy_score;	// number of enemy missiles that had reaced the ground
 extern int	patriot_score;	// number of enemy missiles destroyed by Patriot
 

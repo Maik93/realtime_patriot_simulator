@@ -1,9 +1,21 @@
+/**
+ * -----------------------------------------------------------------------
+ * Color definitions for every object.
+ * You can choose between DARK_MODE and LIGHT_MODE.
+ * -----------------------------------------------------------------------
+ */
 #ifndef COLORS_H
 #define COLORS_H
 
 // CHOOSE ONE OF THIS:
-// #define DARK_MODE
 #define LIGHT_MODE
+// #define DARK_MODE
+
+#ifndef LIGHT_MODE
+	#ifndef DARK_MODE
+		#error "You have to choose between LIGHT_MODE or DARK_MODE"
+	#endif
+#endif
 
 //-----------------------------------------------------
 // BASIC COLORS DEFINITIONS
@@ -50,7 +62,7 @@
 #ifdef DARK_MODE
 	#define TEXT_TITL_COL		LBLU	// color for text titles
 	#define TEXT_COL			WHITE	// color for all non-warning texts
-	#define TEXT_ALERT_COL		RED	// color for all non-warning texts
+	#define TEXT_ALERT_COL		RED		// color for all non-warning texts
 	#define BORDER_COL			LBLU	// for every box in the window
 	#define ENEMY_COL			RED		// for an enemy missile
 	#define PATMISS_COL			BLU		// for a Patriot missile
