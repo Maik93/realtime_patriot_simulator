@@ -54,7 +54,7 @@
 #define MENU_ERROR1_Y	MENU_ERROR2_Y - 1.2 * CHAR_HEIGHT
 //-----------------------------------------------------
 #define SCORE_X1		LAUNCHER_TITLE_POSX
-#define SCORE_Y1		LAUNCHER_STAT5_Y + 5 * CHAR_HEIGHT
+#define SCORE_Y1		LAUNCHER_STAT5_Y + 6 * CHAR_HEIGHT
 #define SCORE_X2		SCORE_X1
 #define SCORE_Y2		SCORE_Y1 + 1.5 * CHAR_HEIGHT
 #define SCORE_BOX_X1	LAUNCHER_TITLE_POSX - 80

@@ -20,6 +20,8 @@ struct point	current_points_tracked[MAX_TRACKERS];	// array of all currently tra
 int				tracker_is_active[MAX_TRACKERS];		// flag activity for trackers
 struct tracker
 	tracked_points[MAX_TRACKERS]; // memory for trackers, containing points acquired and vel and acc evaluated
+int already_shooted[MAX_TRACKERS];
+int shooted_missile_id[MAX_TRACKERS];
 
 // private variables
 int tracker_view[MAX_TRACKERS][TRACKER_RES][TRACKER_RES]; // image buffer for trackers
@@ -280,6 +282,8 @@ void clear_tracker_struct(int task_i, int tracker_i) {
 	tracked_points[tracker_i].n_samples = 0; // there's no need to clear circular buffer, just n_samples
 	tracker_is_active[tracker_i] = 0;
 	tracked_points[tracker_i].time_to_shoot = -1;
+	already_shooted[tracker_i] = 0;
+	shooted_missile_id[tracker_i] = -1;
 	tp[task_i].index = -1;
 }
 
@@ -295,6 +299,8 @@ void *tracker_task(void* arg) {
 	tracked_points[tracker_i].traj_error = TRAJ_MAX_ERROR;
 	tracked_points[tracker_i].time_to_shoot = -1;
 	tracker_is_active[tracker_i] = 1;
+	already_shooted[tracker_i] = 0;
+	shooted_missile_id[tracker_i] = -1;
 	// printf("Tracker %d activated.\n", tracker_i);
 
 	// DBG

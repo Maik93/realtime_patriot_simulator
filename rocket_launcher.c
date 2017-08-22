@@ -22,12 +22,14 @@ int launch_velocity;		// start velocity of missiles produced by rocket launcher
 int launcher_angle_des;		// desired launcher angle in degree
 float launcher_angle_current;// current launcher angle in degree
 int show_predictions = PRED_INIT_VAL;
+int patriot_guidance = GUIDANCE_INIT_VAL; // allows Patriot to edit velocities of its missile when they're flying
 
 // Private variables
 float angle_prev;			// previous launcher angle in degree
 float pole;					// pole of the first order schematization of launcher movements
 float shoot_timer;			// time to next shoot
 struct timespec last_time_shoot;
+double stored_x[MAX_TRACKERS]; // x coordinate of interception for each Patriot when launched
 
 // Draw rochet launcher.
 void draw_launcher() {
@@ -87,29 +89,35 @@ void print_launcher_status() {
 	sprintf(str, "Patriot status");
 	textout_centre_ex(screen_buff, font, str, LAUNCHER_TITLE_POSX, LAUNCHER_TITLE_POSY, TEXT_TITL_COL, -1);
 
+	if (patriot_guidance)
+		sprintf(str, "assisted (D key): on");
+	else
+		sprintf(str, "assisted (D key): off");
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT1_X, LAUNCHER_STAT1_Y, TEXT_COL, -1);
+
 	if (trail_flag)
 		sprintf(str, "-> trails:      on");
 	else
 		sprintf(str, "-> trails:      off");
-	textout_ex(screen_buff, font, str, LAUNCHER_STAT1_X, LAUNCHER_STAT1_Y, TEXT_COL, -1);
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT2_X, LAUNCHER_STAT2_Y, TEXT_COL, -1);
 
 	if (show_predictions)
 		sprintf(str, "-> predictions: on");
 	else
 		sprintf(str, "-> predictions: off");
-	textout_ex(screen_buff, font, str, LAUNCHER_STAT2_X, LAUNCHER_STAT2_Y, TEXT_COL, -1);
-
-	sprintf(str, "-> velocity: %d m/s", launch_velocity);
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT3_X, LAUNCHER_STAT3_Y, TEXT_COL, -1);
 
-	sprintf(str, "-> angle:    %d°", launcher_angle_des - 180); // desired angle converted with horizon as baseline
+	sprintf(str, "-> velocity: %d m/s", launch_velocity);
 	textout_ex(screen_buff, font, str, LAUNCHER_STAT4_X, LAUNCHER_STAT4_Y, TEXT_COL, -1);
+
+	sprintf(str, "-> angle:    %d°", launcher_angle_des - 180); // desired angle converted with horizon as baseline
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT5_X, LAUNCHER_STAT5_Y, TEXT_COL, -1);
 
 	if (shoot_timer != -1)
 		sprintf(str, "-> shoot in: %.2f s", shoot_timer);
 	else
 		sprintf(str, "-> shoot idle", shoot_timer);
-	textout_ex(screen_buff, font, str, LAUNCHER_STAT5_X, LAUNCHER_STAT5_Y, TEXT_COL, -1);
+	textout_ex(screen_buff, font, str, LAUNCHER_STAT6_X, LAUNCHER_STAT6_Y, TEXT_COL, -1);
 }
 
 // Retrieve smallest time_to_shoot from every tracker.
@@ -138,14 +146,14 @@ void move_launcher() {
 }
 
 // Shoot a new Patriot and return its index.
-void shoot_now() {
+int shoot_now() {
 	struct timespec now;
 	int new_missile_index;
 
 	// if a missile is tried to launch earlier then LAUNCHER_T_INTERVAL don't do nothing
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	if (time_diff_ms(now, last_time_shoot) < LAUNCHER_T_INTERVAL)
-		return;
+		return -1;
 	// otherwise store actual time as last_time_shoot
 	time_copy(&last_time_shoot, now);
 
@@ -153,12 +161,14 @@ void shoot_now() {
 	new_missile_index = find_free_slot(PATRIOT_MISSILES_BASE_INDEX, PATRIOT_MISSILES_TOP_INDEX);
 	if (new_missile_index != -1)
 		start_task(missile_task, MISSILE_PER, MISSILE_DREL, MISSILE_PRI, new_missile_index);
+
+	return new_missile_index;
 }
 
 // Evaluate when Patriot has to shoot.
 void shoot_evaluation() {
 	int tracker_i;
-	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, t1, t2;
+	double theta, sec_theta, s_theta, c_theta, t_theta, sqrt_part, x1, x2, choosen_x, delta_x, t1, t2;
 	float t_impact, t_tot, t_wait;
 
 	theta = -launcher_angle_des / 180.0 * PI;
@@ -206,27 +216,52 @@ void shoot_evaluation() {
 				if (t2 > t1) {
 					t_impact = t1;
 					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x1;
 				} else {
 					t_impact = t2;
 					t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x2;
 				}
 			} else { // otherwise we take the only one positive
 				if (t1 > 0) {
 					t_impact = t1;
 					t_tot = sec_theta * (x1 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x1;
 				} else {
 					t_impact = t2;
 					t_tot = sec_theta * (x2 - abs2world_x(LAUNCHER_PIVOT_X)) / launch_velocity;
+					choosen_x = x2;
 				}
 			}
 
-			t_wait = t_impact - t_tot;
-			tracked_points[tracker_i].time_to_shoot = t_wait;
-			// printf("Shoot in %f\n", t_wait);
+			// if there's already a Patriot going to destroy this missile
+			if (patriot_guidance && already_shooted[tracker_i] && shooted_missile_id[tracker_i] != -1) {
+				// check consistency
+				if (shooted_missile_id[tracker_i] < PATRIOT_MISSILES_BASE_INDEX ||
+				        shooted_missile_id[tracker_i] >= PATRIOT_MISSILES_TOP_INDEX)
+					return;
 
-			if (abs(t_wait) < LAUNCHER_SHOOT_THRESHOLD) {
-				shoot_now();
-				return;
+				delta_x = choosen_x - stored_x[tracker_i];
+				if (delta_x > 1) { // working with an offset makes missile variations smoother
+					missile[shooted_missile_id[tracker_i]].vy -= GUIDANCE_VX_COEFF * delta_x;
+					missile[shooted_missile_id[tracker_i]].vx += GUIDANCE_VY_COEFF * delta_x;
+				}
+				else if (delta_x < 1) {
+					missile[shooted_missile_id[tracker_i]].vy += GUIDANCE_VX_COEFF * delta_x;
+					missile[shooted_missile_id[tracker_i]].vx -= GUIDANCE_VY_COEFF * delta_x;
+				}
+				stored_x[tracker_i] = choosen_x;
+
+			} else { // if there's no Patriot already launched or patriot_guidance disabled
+				t_wait = t_impact - t_tot;
+				tracked_points[tracker_i].time_to_shoot = t_wait;
+
+				if (abs(t_wait) < LAUNCHER_SHOOT_THRESHOLD) {
+					stored_x[tracker_i] = choosen_x;
+					shooted_missile_id[tracker_i] = shoot_now();
+					already_shooted[tracker_i] = 1;
+					return;
+				}
 			}
 		}
 	}

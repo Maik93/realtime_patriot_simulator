@@ -11,9 +11,18 @@ int launch_velocity;
 int launcher_angle_des;
 float launcher_angle_current;
 extern int show_predictions;
+int patriot_guidance;
+//-----------------------------------------------------
 
-#define PRED_INIT_VAL		0			// initial visibility value for predictions
+#define PRED_INIT_VAL		0			// initial visibility value for predictions [0-1]
 #define PREDICT_PAST		1			// choose to show prediction of past values or not [0-1]
+//-----------------------------------------------------
+// MISSILE GUIDANCE CONSTANTS:
+// allows Patriot to edit velocities of its missiles when they're flying.
+//-----------------------------------------------------
+#define GUIDANCE_INIT_VAL	0			// enable-state initial value [0-1]
+#define GUIDANCE_VX_COEFF	1.2			// influence of interception variations on vx variations
+#define GUIDANCE_VY_COEFF	2.2			// influence of interception variations on vy variations
 //-----------------------------------------------------
 // PHYSICS CONSTANTS
 //-----------------------------------------------------
@@ -54,6 +63,8 @@ extern int show_predictions;
 #define LAUNCHER_STAT4_Y	LAUNCHER_STAT3_Y + 1.5 * CHAR_HEIGHT
 #define LAUNCHER_STAT5_X	LAUNCHER_STAT4_X
 #define LAUNCHER_STAT5_Y	LAUNCHER_STAT4_Y + 1.5 * CHAR_HEIGHT
+#define LAUNCHER_STAT6_X	LAUNCHER_STAT5_X
+#define LAUNCHER_STAT6_Y	LAUNCHER_STAT5_Y + 1.5 * CHAR_HEIGHT
 
 //-----------------------------------------------------
 // PUBLIC FUNCTIONS

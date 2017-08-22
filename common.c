@@ -286,7 +286,7 @@ void *interp_task(void* arg) {
 			break;
 		case 1: // A key - turn on/off predictions on trajectories
 			show_predictions = !show_predictions;
-			printf("show_predictions setted to %d\n", show_predictions);
+			// printf("show_predictions setted to %d\n", show_predictions);
 			break;
 		case 19: // S key - switch tracker displays parameter
 			tracker_disp_mode++;
@@ -294,9 +294,13 @@ void *interp_task(void* arg) {
 				tracker_disp_mode = 0;
 			// printf("Tracker displays mode switched to %d\n", tracker_disp_mode);
 			break;
+		case 4: // D key - turn on/off assisted guidance of Patriot
+			patriot_guidance = !patriot_guidance;
+			// printf("patriot_guidance setted to %d\n", patriot_guidance);
+			break;
 		case 24: // X key - turn on/off trails for enemy missiles
 			trail_flag = !trail_flag;
-			printf("trail_flag setted to %d\n", trail_flag);
+			// printf("trail_flag setted to %d\n", trail_flag);
 			break;
 
 		case 26: // Z key - reduce trail length
